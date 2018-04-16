@@ -5,7 +5,7 @@ sensorfusion\delay.o: ../Inc/main.h
 sensorfusion\delay.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h
 sensorfusion\delay.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h
 sensorfusion\delay.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
-sensorfusion\delay.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h
+sensorfusion\delay.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f413xx.h
 sensorfusion\delay.o: ../Drivers/CMSIS/Include/core_cm4.h
 sensorfusion\delay.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 sensorfusion\delay.o: ../Drivers/CMSIS/Include/core_cmInstr.h

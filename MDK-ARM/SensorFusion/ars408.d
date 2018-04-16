@@ -6,7 +6,7 @@ sensorfusion\ars408.o: ../Inc/main.h
 sensorfusion\ars408.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h
 sensorfusion\ars408.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h
 sensorfusion\ars408.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
-sensorfusion\ars408.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h
+sensorfusion\ars408.o: ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f413xx.h
 sensorfusion\ars408.o: ../Drivers/CMSIS/Include/core_cm4.h
 sensorfusion\ars408.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 sensorfusion\ars408.o: ../Drivers/CMSIS/Include/core_cmInstr.h
