@@ -1,0 +1,15 @@
+sensorfusion\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/croutine.c
+sensorfusion\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+sensorfusion\croutine.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+sensorfusion\croutine.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+sensorfusion\croutine.o: ../Inc/FreeRTOSConfig.h
+sensorfusion\croutine.o: ../Inc/main.h
+sensorfusion\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+sensorfusion\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+sensorfusion\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+sensorfusion\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+sensorfusion\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+sensorfusion\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+sensorfusion\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+sensorfusion\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/croutine.h
+sensorfusion\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
