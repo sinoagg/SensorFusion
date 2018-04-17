@@ -5,7 +5,7 @@ CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_R
 
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 {
-	CAN_FilterTypeDef MW_RadarCANFilter={};
+	CAN_FilterTypeDef MW_RadarCANFilter;//={};
 
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
 	HAL_CAN_Start(hcan);
@@ -15,6 +15,7 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 	#ifdef CONFIG_ARS408_FILTER
 		ARS_ConfigFilter(hcan);
 	#endif
+	return 0;
 }
 
 uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan)
