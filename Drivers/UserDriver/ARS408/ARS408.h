@@ -71,8 +71,8 @@ typedef struct
 	uint8_t SensorID;					//传感器ID从0到7
 	uint8_t OutputType;					//输出内容 0x01 目标；0x02 反射集群
 	uint8_t RadarPower;					//雷达发射功率 0x00 标准；0x01 -3dB; 0x02 -6dB; 0x03 -9dB;
-	uint8_t CtrlRelay_valid;			//
-	uint8_t CtrlRelay;					//
+	uint8_t CtrlRelay_valid;			//允许继电器控制
+	uint8_t CtrlRelay;					//继电器控制
 	uint8_t SendQuality;				//集群或目标质量信息发送使能
 	uint8_t SendExtInfo;				//扩展信息输出使能，仅在目标信息输出时有效
 	uint8_t SortIndex;					//选择目标排序顺序，仅在目标信息输出时有效，集群输出时总是按距离排序
@@ -104,12 +104,12 @@ typedef struct
 
 typedef struct
 {
-	uint8_t FilterCfg_Valid;							//是否允许修改FilterCfg
-	uint8_t FilterCfg_Active;							//使能或者禁止相应的标准（FilterCfg）和种类
-	uint8_t FilterCfg_Index;							//调整15项设置的目录
-	uint8_t FilterCfg_Type;								//调整设置目标或者反射集群
-	uint16_t FilterCfg_Min_XXX;							//设置目录项内容最小值
-	uint8_t FilterCfg_Max_XXX;							//设置目录项内容最大值
+	uint8_t FilterCfg_Valid;				//是否允许修改FilterCfg
+	uint8_t FilterCfg_Active;				//使能或者禁止相应的标准（FilterCfg）和种类
+	uint8_t FilterCfg_Index;				//调整15项设置的目录
+	uint8_t FilterCfg_Type;					//调整设置目标或者反射集群
+	uint16_t FilterCfg_Min_XXX;				//设置目录项内容最小值
+	uint8_t FilterCfg_Max_XXX;				//设置目录项内容最大值
 }MW_RadarFilterConfig;
 
 
@@ -141,23 +141,23 @@ typedef struct
 	
 typedef struct
 {
-	uint8_t RadarState_NVMReadStatus;
-	uint8_t RadarState_NVMwriteStatus;
-	uint16_t RadarState_MaxDistanceCfg;
-	uint8_t RadarState_Persistent_Error;
-	uint8_t RadarState_Interference;
-	uint8_t RadarState_Temperature_Error;
-	uint8_t RadarState_Temporary_Error;
-	uint8_t RadarState_Voltage_Error;
-	uint8_t RadarState_SensorID;
-	uint8_t RadarState_SortIndex;
-	uint8_t RadarState_RadarPowerCfg;
-	uint8_t RadarState_CtrlRelayCfg;
-	uint8_t RadarState_OutputTypeCfg;
-	uint8_t RadarState_SendQualityCfg;
-	uint8_t RadarState_SendExtInfoCfg;
-	uint8_t RadarState_MotionRxState;
-	uint8_t RadarState_RCS_Threshold;
+	uint8_t RadarState_NVMReadStatus;		//启动时从不变内存读配置参数状态
+	uint8_t RadarState_NVMwriteStatus;		//成功存储的配置参数数目
+	uint16_t RadarState_MaxDistanceCfg;		//当前最远距离扫描配置
+	uint8_t RadarState_Persistent_Error;	//持续误差
+	uint8_t RadarState_Interference;		//多个雷达的干扰
+	uint8_t RadarState_Temperature_Error;	//温度误差
+	uint8_t RadarState_Temporary_Error;		//临时误差，重新设置时消失的误差
+	uint8_t RadarState_Voltage_Error;		//电压误差超过范围时为1
+	uint8_t RadarState_SensorID;			//传感器ID 0-7
+	uint8_t RadarState_SortIndex;			//排列顺序，对象列表的
+	uint8_t RadarState_RadarPowerCfg;		//发送信号的增益
+	uint8_t RadarState_CtrlRelayCfg;		//控制继电器
+	uint8_t RadarState_OutputTypeCfg;		//输出类型，集群或对象
+	uint8_t RadarState_SendQualityCfg;		//发送质量
+	uint8_t RadarState_SendExtInfoCfg;		//发送额外信息
+	uint8_t RadarState_MotionRxState;		//速度、偏航角度输入信号的状态
+	uint8_t RadarState_RCS_Threshold;		//为真时传感器开启高敏感模式
 }MW_RadarState;
 
 typedef struct

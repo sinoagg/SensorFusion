@@ -1,4 +1,5 @@
 #include "ARS408.h"
+#include "math.h"
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};	
@@ -33,6 +34,11 @@ uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan)
 	return 0;
 }
 
+/**
+ * [config Radar Filter]
+ * @param  hcan [hcan index]
+ * @return      []
+ */
 uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
 {
 	uint32_t CAN_TxMailBox=CAN_TX_MAILBOX0;
@@ -58,11 +64,26 @@ void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_Radar_General *pRadarGeneral)
 	(pRadarGeneral+(*pCANRxBuf))->Obj_ID=*pCANRxBuf;	//OBJ_ID
 	(pRadarGeneral+(*pCANRxBuf))->Obj_DistLong= (((uint16_t)*(pCANRxBuf+1))<<8|(*(pCANRxBuf+2)<<3))>>3;
 	(pRadarGeneral+(*pCANRxBuf))->Obj_DistLat= ((uint16_t)*(pCANRxBuf+2)&0x07)<<8|(*(pCANRxBuf+3));
-	(pRadarGeneral+(*pCANRxBuf))->Obj_VrelLong= (((uint16_t)*(pCANRxBuf+4))<<8|(*(pCANRxBuf+5)<<5))>>5;
-	(pRadarGeneral+(*pCANRxBuf))->Obj_VrelLat= (((uint16_t)*(pCANRxBuf+5)&0x3F)<<8|(*(pCANRxBuf+6)&0xE0))>>5;;
-	(pRadarGeneral+(*pCANRxBuf))->Obj_DynProp= *(pCANRxBuf+6)&0x07;
+	(pRadarGeneral+(*pCANRxBuf))->Obj_VrelLong= (((uint16_t)*(pCANRxBuf+4))<<8|(*(pCANRxBuf+5)<<5))>>5;//纵向相对速度
+	(pRadarGeneral+(*pCANRxBuf))->Obj_VrelLat= (((uint16_t)*(pCANRxBuf+5)&0x3F)<<8|(*(pCANRxBuf+6)&0xE0))>>5;;//横向相对速度
+	(pRadarGeneral+(*pCANRxBuf))->Obj_DynProp= *(pCANRxBuf+6)&0x07;		//目标动态特性（运动还是静止）
 	(pRadarGeneral+(*pCANRxBuf))->Obj_RCS= *(pCANRxBuf+7);
 }
 
-
+/**
+ * [ARS_CalcCollTime]
+ * @param  id            [nearest obj id]
+ * @param  pRadarGeneral [RadarGeneral pointer]
+ * @return               [Collision time predict]
+ */
+uint16_t ARS_CalcCollTime(uint8_t id, MW_Radar_General *pRadarGeneral)
+{
+	uint16_t DistLong = 0;
+	uint16_t VrelLong = 0;
+	uint16_t CollTime = 0;
+	DistLong = (pRadarGeneral + id)->Obj_DistLong;
+	VrelLong = (pRadarGeneral + id)->Obj_VrelLong;
+	CollTime = (-VrelLong + sqrt(VrelLong * VrelLong + 8 * DistLong)) / 8;
+	return CollTime;
+}
 
