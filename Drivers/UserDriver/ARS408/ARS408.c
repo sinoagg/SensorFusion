@@ -1,5 +1,4 @@
 #include "ARS408.h"
-#include "math.h"
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};	
@@ -70,20 +69,77 @@ void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_Radar_General *pRadarGeneral)
 	(pRadarGeneral+(*pCANRxBuf))->Obj_RCS= *(pCANRxBuf+7);
 }
 
-/**
- * [ARS_CalcCollTime]
- * @param  id            [nearest obj id]
- * @param  pRadarGeneral [RadarGeneral pointer]
- * @return               [Collision time predict]
- */
-uint16_t ARS_CalcCollTime(uint8_t id, MW_Radar_General *pRadarGeneral)
+/*
+--> Find mostImportantObject  <--
+ # Safe (green): There is no car in the ego lane (no MIO), the MIO is
+   moving away from the car, or the distance is maintained constant.
+ # Caution (yellow): The MIO is moving closer to the car, but is still at
+   a distance above the FCW distance. FCW distance is calculated using the
+   Euro NCAP AEB Test Protocol. Note that this distance varies with the
+   relative speed between the MIO and the car, and is greater when the
+   closing speed is higher.
+ # Warn (red): The MIO is moving closer to the car, and its distance is
+   less than the FCW distance.
+*/
+uint8_t FindMIObj(struct Task *taskMsg)
 {
-	uint16_t DistLong = 0;
-	uint16_t VrelLong = 0;
-	uint16_t CollTime = 0;
-	DistLong = (pRadarGeneral + id)->Obj_DistLong;
-	VrelLong = (pRadarGeneral + id)->Obj_VrelLong;
-	CollTime = (-VrelLong + sqrt(VrelLong * VrelLong + 8 * DistLong)) / 8;
-	return CollTime;
+	uint8_t FCW = 0;
+	uint8_t Find0x60B = 0;
+	uint16_t i = 0;
+    float MinRange = 0.0;
+    float MaxRange = MAX_RANGE;
+    float gAccel = 9.8;
+    float maxDeceleration = 0.4 * gAccel;		//假设车辆最大减速度是0.4g
+    float delayTime = 1.2;
+    float relSpeed = 0.0;
+
+    //struct ObjList ARS_ObjList;
+    //ARS_GetRadarObjStatus(CANRxBuf);
+    //ARS_GetRadarObjGeneral(CANRxBuf, RadarGeneral);
+    
+    for(i = 0; i < taskMsg->TaskMsgNum.Index[isRead] ; i++) //    for(i = 0; i < taskMsg->TaskMsgNum.Index[isRead] + 1; i++)
+    {
+        if(taskMsg->RxMessage[isRead][i].StdId == 0x60B)
+        {
+        	ARS_GetRadarObjGeneral(CANRxBuf, RadarGeneral);
+            //ARS_ObjList = ARS_Obj_Handle(&ARSCANmsg.RxMessage[isRead][i]);
+            //if(RadarGeneral.Obj_DynProp == 0x2)//0x2 means oncoming
+            if( ARS_ObjList.Obj_LongDispl != 0 &&((ABS((ARS_ObjList.Obj_LatDispl) * 2.0)) < LANEWIDTH ) &&//是否在车道内
+                    ARS_ObjList.Obj_LongDispl < MaxRange)//
+            {
+                MinRange = RadarGeneral.Obj_LongDispl;						//MaxRange赋值纵向最小距离
+                MaxRange = MinRange;
+                relSpeed = RadarGeneral.Obj_VrelLong;
+            }
+        }
+    }
+
+    Segment_Num = MinRange;
+    if(MinRange == 0)
+    {
+        return FCW = 0;			//如果这个距离为0，则没有FCW报警
+    }
+    else if(MinRange > 0)		//如果此距离大于0，说明有可能有报警
+    {
+        if(relSpeed < 0)		//如果距离在靠近
+        {
+        	//计算刹车距离
+            float distance = relSpeed * (-1)  * delayTime +  relSpeed * relSpeed / 2 / maxDeceleration;//物理公式-vt+v*v/2/a 计算距离
+
+            if(MinRange <= distance)
+            {
+                return  FCW = 2; //red			//如果太近，红色警报		
+            }
+            else
+            {
+                return  FCW = 1; //yellow		//否则以最大减速度能刹住，但也是在报警距离范围之内了
+            }
+        }
+        else
+        {
+            //there is a stationary object in front of the vehilce .//如果远离或者静止的障碍物
+            return FCW = 0;
+        }
+    }
 }
 

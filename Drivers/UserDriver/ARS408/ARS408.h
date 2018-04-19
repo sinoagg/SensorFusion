@@ -187,6 +187,7 @@ typedef struct
 extern MW_RadarConfig RadarConfig;
 extern MW_RadarFilterConfig RadarFilterConfig;
 extern MW_RadarObjStatus RadarObjStatus;
+extern MW_Radar_General RadarGeneral[64];
 
 uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan);

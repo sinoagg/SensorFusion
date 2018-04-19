@@ -610,6 +610,15 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+/* CAN RxCpltCallback function */
+void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
+{
+	if(hcan->Instance == hcan1.Instance)
+    {
+        ARS_GetRadarObjStatus()
+    }
+}
+
 /* USER CODE END 4 */
 
 /* StartDefaultTask function */
@@ -620,7 +629,9 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-		osDelay(1);
+    HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0);          //接收CAN1线雷达信息
+    HAL_UART_Receive_DMA(&huart3, ADASRxBuf, 32);   //接收ADAS信息
+    osDelay(1);
   }
   /* USER CODE END 5 */ 
 }
@@ -633,11 +644,14 @@ void StartRadarCommTask(void const * argument)
   for(;;)
   {
     if(MW_RadarRxComplete==1)
-		{
-			HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
-		}
-		
-		osDelay(1);
+	{
+		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
+        MW_RadarRxComplete = 0;
+        //ARS_GetRadarObjStatus(CANRxBuf);
+        //ARS_FindMIObj()
+	}
+	
+	osDelay(1);
   }
   /* USER CODE END StartRadarCommTask */
 }

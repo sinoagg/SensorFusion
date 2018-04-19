@@ -28,10 +28,52 @@ Project File Date:  04/16/2018
 *** Using Compiler 'V5.06 update 1 (build 61)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'SensorFusion'
 compiling ARS408.c...
+..\Drivers\UserDriver\ARS408\ARS408.c(85): warning:  #231-D: declaration is not visible outside of function
+  uint8_t FindMIObj(struct Task *taskMsg)
+..\Drivers\UserDriver\ARS408\ARS408.c(91): error:  #20: identifier "MAX_RANGE" is undefined
+      float MaxRange = MAX_RANGE;
+..\Drivers\UserDriver\ARS408\ARS408.c(93): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      float maxDeceleration = 0.4 * gAccel;		//???è³?Á¾?î´ó¼??Ù¶???0.4g
+..\Drivers\UserDriver\ARS408\ARS408.c(100): error:  #393: pointer to incomplete class type is not allowed
+      for(i = 0; i < taskMsg->TaskMsgNum.Index[isRead] ; i++) //    for(i = 0; i < taskMsg->TaskMsgNum.Index[isRead] + 1; i++)
+..\Drivers\UserDriver\ARS408\ARS408.c(100): error:  #20: identifier "isRead" is undefined
+      for(i = 0; i < taskMsg->TaskMsgNum.Index[isRead] ; i++) //    for(i = 0; i < taskMsg->TaskMsgNum.Index[isRead] + 1; i++)
+..\Drivers\UserDriver\ARS408\ARS408.c(102): error:  #393: pointer to incomplete class type is not allowed
+          if(taskMsg->RxMessage[isRead][i].StdId == 0x60B)
+..\Drivers\UserDriver\ARS408\ARS408.c(104): error:  #165: too few arguments in function call
+          	ARS_GetRadarObjGeneral()
+..\Drivers\UserDriver\ARS408\ARS408.c(105): error:  #65: expected a ";"
+              ARS_ObjList = ARS_Obj_Handle(&ARSCANmsg.RxMessage[isRead][i]);
+..\Drivers\UserDriver\ARS408\ARS408.c(107): error:  #20: identifier "ARS_ObjList" is undefined
+              if( ARS_ObjList.Obj_LongDispl != 0 &&((ABS((ARS_ObjList.Obj_LatDispl) * 2.0)) < LANEWIDTH ) &&//?Ç·??Ú³µµ???
+..\Drivers\UserDriver\ARS408\ARS408.c(107): warning:  #223-D: function "ABS" declared implicitly
+              if( ARS_ObjList.Obj_LongDispl != 0 &&((ABS((ARS_ObjList.Obj_LatDispl) * 2.0)) < LANEWIDTH ) &&//?Ç·??Ú³µµ???
+..\Drivers\UserDriver\ARS408\ARS408.c(107): error:  #20: identifier "LANEWIDTH" is undefined
+              if( ARS_ObjList.Obj_LongDispl != 0 &&((ABS((ARS_ObjList.Obj_LatDispl) * 2.0)) < LANEWIDTH ) &&//?Ç·??Ú³µµ???
+..\Drivers\UserDriver\ARS408\ARS408.c(110): error:  #154: expression must have struct or union type
+                  MinRange = RadarGeneral.Obj_LongDispl;						//MaxRange¸³Öµ??????Ð¡????
+..\Drivers\UserDriver\ARS408\ARS408.c(112): error:  #154: expression must have struct or union type
+                  relSpeed = RadarGeneral.Obj_VrelLong;
+..\Drivers\UserDriver\ARS408\ARS408.c(117): error:  #20: identifier "Segment_Num" is undefined
+      Segment_Num = MinRange;
+..\Drivers\UserDriver\ARS408\ARS408.c(144): warning:  #940-D: missing return statement at end of non-void function "FindMIObj"
+  }
+..\Drivers\UserDriver\ARS408\ARS408.c(87): warning:  #550-D: variable "FCW" was set but never used
+  	uint8_t FCW = 0;
+..\Drivers\UserDriver\ARS408\ARS408.c(88): warning:  #177-D: variable "Find0x60B" was declared but never referenced
+  	uint8_t Find0x60B = 0;
+..\Drivers\UserDriver\ARS408\ARS408.c: 6 warnings, 11 errors
 compiling main.c...
-linking...
-Program Size: Code=13260 RO-data=740 RW-data=148 ZI-data=20692  
-"SensorFusion\SensorFusion.axf" - 0 Error(s), 0 Warning(s).
+../Src/main.c(618): warning:  #223-D: function "ARS_GetRadarObjStatus" declared implicitly
+          ARS_GetRadarObjStatus()
+../Src/main.c(619): error:  #65: expected a ";"
+      }
+../Src/main.c(632): warning:  #223-D: function "HAL_CAN_Receive_IT" declared implicitly
+      HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0);          //????CAN1???×´???Ï¢
+../Src/main.c(632): error:  #20: identifier "CAN_FIFO0" is undefined
+      HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0);          //????CAN1???×´???Ï¢
+../Src/main.c: 2 warnings, 2 errors
+"SensorFusion\SensorFusion.axf" - 13 Error(s), 8 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -49,6 +91,7 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.1.1
+Target not created.
 Build Time Elapsed:  00:00:04
 </pre>
 </body>
