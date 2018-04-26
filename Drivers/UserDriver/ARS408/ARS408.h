@@ -182,15 +182,16 @@ typedef struct
 	uint8_t Obj_DynProp;
 	uint16_t Obj_VrelLat;
 	uint8_t Obj_RCS;
-}MW_Radar_General;
+}MW_RadarGeneral;
 
 extern MW_RadarConfig RadarConfig;
 extern MW_RadarFilterConfig RadarFilterConfig;
 extern MW_RadarObjStatus RadarObjStatus;
-extern MW_Radar_General RadarGeneral[64];
 
+uint8_t ARS_Init(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan);
+void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral);
 
 #endif
 

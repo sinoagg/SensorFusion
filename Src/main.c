@@ -85,13 +85,14 @@ osThreadId ADASCommHandle;
 osThreadId SoundWarningHandle;
 osThreadId LightWarningHandle;
 osThreadId CANSpeedReadHandle;
+osSemaphoreId bSemCANRxSigHandle;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 MW_RadarConfig RadarConfig;
 MW_RadarFilterConfig RadarFilterConfig;
 MW_RadarObjStatus RadarObjStatus;
-MW_Radar_General RadarGeneral[64];
+MW_RadarGeneral RadarGeneral[16];
 
 ADAS_HandleTypeDef ADAS_dev;
 uint8_t MW_RadarRxComplete=0;
@@ -183,6 +184,8 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
+  osSemaphoreDef(bSemCANRxSig);
+  bSemCANRxSigHandle = osSemaphoreCreate(osSemaphore(bSemCANRxSig), 1);
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -611,12 +614,9 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* CAN RxCpltCallback function */
-void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
+void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef* hcan)
 {
-	if(hcan->Instance == hcan1.Instance)
-    {
-        ARS_GetRadarObjStatus()
-    }
+	osSemaphoreRelease(bSemCANRxSigHandle);
 }
 
 /* USER CODE END 4 */
@@ -629,9 +629,7 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0);          //接收CAN1线雷达信息
-    HAL_UART_Receive_DMA(&huart3, ADASRxBuf, 32);   //接收ADAS信息
-    osDelay(1);
+    osDelay(100);
   }
   /* USER CODE END 5 */ 
 }
