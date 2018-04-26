@@ -641,14 +641,9 @@ void StartRadarCommTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    if(MW_RadarRxComplete==1)
-	{
-		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
-        MW_RadarRxComplete = 0;
-        //ARS_GetRadarObjStatus(CANRxBuf);
-        //ARS_FindMIObj()
-	}
-	
+	osSemaphoreWait(bSemCANRxSigHandle, osWaitForever);
+    ARS_GetRadarObjGeneral();
+    HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
 	osDelay(1);
   }
   /* USER CODE END StartRadarCommTask */

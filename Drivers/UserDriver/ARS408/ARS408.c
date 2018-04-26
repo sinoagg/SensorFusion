@@ -82,7 +82,7 @@ void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral)
  # Warn (red): The MIO is moving closer to the car, and its distance is
    less than the FCW distance.
 */
-/*
+
 uint8_t FindMIObj(struct Task *taskMsg)
 {
 	uint8_t FCW = 0;
@@ -95,7 +95,6 @@ uint8_t FindMIObj(struct Task *taskMsg)
     float delayTime = 1.2;
     float relSpeed = 0.0;
 
-    //struct ObjList ARS_ObjList;
     //ARS_GetRadarObjStatus(CANRxBuf);
     //ARS_GetRadarObjGeneral(CANRxBuf, RadarGeneral);
     
@@ -144,5 +143,5 @@ uint8_t FindMIObj(struct Task *taskMsg)
         }
     }
 }
-*/
+
 
