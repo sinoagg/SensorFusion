@@ -88,6 +88,7 @@ osThreadId ADASCommHandle;
 osThreadId SoundWarningHandle;
 osThreadId LightWarningHandle;
 osThreadId CANSpeedReadHandle;
+osThreadId StartCalculateHandle;
 osSemaphoreId bSemRadarCANRxSigHandle;
 osSemaphoreId bSemADASRxSigHandle;
 osSemaphoreId bSemSoundWarningSigHandle;
@@ -138,6 +139,7 @@ void StartADASCommTask(void const * argument);
 void StartSoundWarningTask(void const * argument);
 void StartLightWarningTask(void const * argument);
 void StartCANSpeedReadTask(void const * argument);
+void StartCalculateTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -191,7 +193,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
-	ARS_Init(&hcan1);
+	ARS_Init(&hcan2);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -200,6 +202,9 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
+  osSemaphoreDef(bSemRadarCANRxSig);
+  bSemRadarCANRxSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarCANRxSig), 1);
+
   osSemaphoreDef(bSemADASRxSig);
   bSemADASRxSigHandle = osSemaphoreCreate(osSemaphore(bSemADASRxSig), 1);
 	osSemaphoreDef(bSemSoundWarningSig);
@@ -247,6 +252,9 @@ int main(void)
   /* definition and creation of CANSpeedRead */
   osThreadDef(CANSpeedRead, StartCANSpeedReadTask, osPriorityIdle, 0, 128);
   CANSpeedReadHandle = osThreadCreate(osThread(CANSpeedRead), NULL);
+
+	osThreadDef(CalculateTask, StartCalculateTask, osPriorityNormal, 0, 128);
+  StartCalculateHandle = osThreadCreate(osThread(CalculateTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -738,7 +746,8 @@ void StartLightWarningTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);
+		osDelay(10);
   }
   /* USER CODE END StartLightWarningTask */
 }
@@ -750,9 +759,47 @@ void StartCANSpeedReadTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);
+		osDelay(10);
   }
   /* USER CODE END StartCANSpeedReadTask */
+}
+
+void StartCalculateTask(void const * argument)
+{
+	for(;;)
+	{
+		osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);
+		uint8_t i;
+		uint8_t MinRange=255;									//初始化为最大距离
+		uint32_t relSpeed=0;
+		for(i=0;i<MAX_OBJ_NUM;i++)						//获取可能碰撞的最小距离和相对速度
+		{
+			if(( 0.2*(RadarGeneral[i].Obj_DistLat-500) * 2.0) < LANEWIDTH && RadarGeneral[i].Obj_DistLong < MinRange) 
+      {
+				MinRange = RadarGeneral[i].Obj_DistLong;				//此处仍然保留着整数原始状态
+				relSpeed = RadarGeneral[i].Obj_VrelLong;				//以减小计算量
+      }
+		}
+		if(MinRange<100)											//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
+		{
+			float VrelLong = 0.25* (relSpeed - 128);	//获取真实车速
+			float TimetoCrash = (float)MinRange/VrelLong;
+			if(TimetoCrash<0.8)
+			{
+				CrashWarningLv=WARNING_HIGH;
+			}
+			else if(TimetoCrash<1)
+			{
+				CrashWarningLv=WARNING_LOW;
+			}
+			else
+				CrashWarningLv=WARNING_NONE;
+		}
+		CrashWarningLv=WARNING_NONE;
+		osSemaphoreRelease(bSemSoundWarningSigHandle);
+		osDelay(1);
+	}
 }
 
 /**
