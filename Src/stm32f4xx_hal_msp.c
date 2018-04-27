@@ -119,11 +119,8 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* CAN1 interrupt Init */
-<<<<<<< HEAD
-    HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 5, 0);
-=======
+
     HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 8, 0);
->>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
     HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
   /* USER CODE BEGIN CAN1_MspInit 1 */
 
@@ -149,11 +146,8 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* CAN2 interrupt Init */
-<<<<<<< HEAD
-    HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 5, 0);
-=======
+
     HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 7, 0);
->>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
     HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
   /* USER CODE BEGIN CAN2_MspInit 1 */
 
@@ -179,11 +173,7 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* CAN3 interrupt Init */
-<<<<<<< HEAD
-    HAL_NVIC_SetPriority(CAN3_RX0_IRQn, 5, 0);
-=======
     HAL_NVIC_SetPriority(CAN3_RX0_IRQn, 15, 0);
->>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
     HAL_NVIC_EnableIRQ(CAN3_RX0_IRQn);
   /* USER CODE BEGIN CAN3_MspInit 1 */
 

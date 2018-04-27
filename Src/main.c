@@ -98,18 +98,11 @@ osSemaphoreId bSemCalculateSigHandle;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-<<<<<<< HEAD
-=======
 
->>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
 #define	WARNING_NONE 0
 #define	WARNING_LOW 1
 #define	WARNING_HIGH 2
 
-<<<<<<< HEAD
-=======
-
->>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
 MW_RadarConfig RadarConfig;
 MW_RadarFilterConfig RadarFilterConfig;
 MW_RadarObjStatus RadarObjStatus;
@@ -147,18 +140,15 @@ void StartADASCommTask(void const * argument);
 void StartSoundWarningTask(void const * argument);
 void StartLightWarningTask(void const * argument);
 void StartCANSpeedReadTask(void const * argument);
-<<<<<<< HEAD
 void StartCalculateTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
-=======
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-void StartCalculateTask(void const * argument);
->>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
+
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
