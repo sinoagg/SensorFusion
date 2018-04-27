@@ -1,0 +1,17 @@
+sensorfusion\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c
+sensorfusion\tasks.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+sensorfusion\tasks.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+sensorfusion\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+sensorfusion\tasks.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+sensorfusion\tasks.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+sensorfusion\tasks.o: ../Inc/FreeRTOSConfig.h
+sensorfusion\tasks.o: ../Inc/main.h
+sensorfusion\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+sensorfusion\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+sensorfusion\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+sensorfusion\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+sensorfusion\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+sensorfusion\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+sensorfusion\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+sensorfusion\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
+sensorfusion\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/StackMacros.h

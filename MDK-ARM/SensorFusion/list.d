@@ -1,0 +1,13 @@
+sensorfusion\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/list.c
+sensorfusion\list.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+sensorfusion\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+sensorfusion\list.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+sensorfusion\list.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+sensorfusion\list.o: ../Inc/FreeRTOSConfig.h
+sensorfusion\list.o: ../Inc/main.h
+sensorfusion\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+sensorfusion\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+sensorfusion\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+sensorfusion\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+sensorfusion\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+sensorfusion\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
