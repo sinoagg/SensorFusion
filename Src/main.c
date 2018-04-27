@@ -98,10 +98,18 @@ osSemaphoreId bSemCalculateSigHandle;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+<<<<<<< HEAD
+=======
+
+>>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
 #define	WARNING_NONE 0
 #define	WARNING_LOW 1
 #define	WARNING_HIGH 2
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
 MW_RadarConfig RadarConfig;
 MW_RadarFilterConfig RadarFilterConfig;
 MW_RadarObjStatus RadarObjStatus;
@@ -139,11 +147,18 @@ void StartADASCommTask(void const * argument);
 void StartSoundWarningTask(void const * argument);
 void StartLightWarningTask(void const * argument);
 void StartCANSpeedReadTask(void const * argument);
+<<<<<<< HEAD
 void StartCalculateTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
+=======
+
+/* USER CODE BEGIN PFP */
+/* Private function prototypes -----------------------------------------------*/
+void StartCalculateTask(void const * argument);
+>>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -182,7 +197,7 @@ int main(void)
   MX_DMA_Init();
   MX_CAN1_Init();
   MX_CAN2_Init();
-  MX_CAN3_Init();
+  //MX_CAN3_Init();
   MX_CRC_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
@@ -206,6 +221,7 @@ int main(void)
   bSemRadarCANRxSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarCANRxSig), 1);
 
   osSemaphoreDef(bSemADASRxSig);
+
   bSemADASRxSigHandle = osSemaphoreCreate(osSemaphore(bSemADASRxSig), 1);
 	osSemaphoreDef(bSemSoundWarningSig);
   bSemSoundWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemSoundWarningSig), 1);
@@ -222,7 +238,9 @@ int main(void)
   osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  /* USER CODE END RTOS_SEMAPHORES */
+
+	
+	/* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -253,11 +271,11 @@ int main(void)
   osThreadDef(CANSpeedRead, StartCANSpeedReadTask, osPriorityIdle, 0, 128);
   CANSpeedReadHandle = osThreadCreate(osThread(CANSpeedRead), NULL);
 
-	osThreadDef(CalculateTask, StartCalculateTask, osPriorityNormal, 0, 128);
-  StartCalculateHandle = osThreadCreate(osThread(CalculateTask), NULL);
-
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+	osThreadDef(CalculateTask, StartCalculateTask, osPriorityNormal, 0, 128);
+  StartCalculateHandle = osThreadCreate(osThread(CalculateTask), NULL);
+	
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -651,14 +669,12 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-/* CAN RxCpltCallback function */
-void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef* hcan)
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
 	osSemaphoreRelease(bSemRadarCANRxSigHandle);
+	//__HAL_CAN_CLEAR_FLAG(hcan, CAN_FLAG_FF0);
 }
-
 /* USER CODE END 4 */
 
 /* StartDefaultTask function */
@@ -669,7 +685,7 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(100);
+		osDelay(100);
   }
   /* USER CODE END 5 */ 
 }
@@ -698,15 +714,12 @@ void StartADASCommTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-		if(ADASRxComplete==1)						//如果ADAS端收到信号
-		{
-			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
-			ADASRxComplete=0;
-			CalADASData(&ADAS_dev, ADASRxBuf);
-			if(ADAS_dev.crash_level==0x03)//严重报警
-			{}
-		}
-    osDelay(1);
+		osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);
+		HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
+		CalADASData(&ADAS_dev, ADASRxBuf);
+		if(ADAS_dev.crash_level==0x03)//严重报警
+		{}
+    osDelay(10);
   }
   /* USER CODE END StartADASCommTask */
 }

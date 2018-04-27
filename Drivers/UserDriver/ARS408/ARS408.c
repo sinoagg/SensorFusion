@@ -2,7 +2,7 @@
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};	
-uint8_t CANRxBuf[32] = {0};
+
 
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 {
@@ -21,7 +21,7 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 		ARS_ConfigFilter(hcan);
 		HAL_Delay(100);
 	#endif
-    
+
 	return 0;
 }
 
@@ -40,11 +40,6 @@ uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan)
 	return 0;
 }
 
-/**
- * [config Radar Filter]
- * @param  hcan [hcan index]
- * @return      []
- */
 uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
 {
 	uint32_t CAN_TxMailBox=CAN_TX_MAILBOX0;
@@ -149,5 +144,6 @@ uint8_t FindMIObj(MW_RadarGeneral *pRadarGeneral)
         }
     }
 }*/
+
 
 

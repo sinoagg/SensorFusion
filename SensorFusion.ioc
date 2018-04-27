@@ -1,7 +1,14 @@
 #MicroXplorer Configuration settings - do not modify
+<<<<<<< HEAD
 CAN1.BS1=CAN_BS1_4TQ
 CAN1.CalculateTimeQuantum=200.0
 CAN1.IPParameters=CalculateTimeQuantum,Prescaler,BS1
+=======
+CAN1.BS1=CAN_BS1_5TQ
+CAN1.BS2=CAN_BS2_4TQ
+CAN1.CalculateTimeQuantum=200.0
+CAN1.IPParameters=CalculateTimeQuantum,Prescaler,BS2,BS1
+>>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
 CAN1.Prescaler=10
 CAN2.BS1=CAN_BS1_5TQ
 CAN2.BS2=CAN_BS2_4TQ
@@ -58,8 +65,14 @@ Dma.USART3_RX.1.PeriphDataAlignment=DMA_PDATAALIGN_BYTE
 Dma.USART3_RX.1.PeriphInc=DMA_PINC_DISABLE
 Dma.USART3_RX.1.Priority=DMA_PRIORITY_LOW
 Dma.USART3_RX.1.RequestParameters=Instance,Direction,PeriphInc,MemInc,PeriphDataAlignment,MemDataAlignment,Mode,Priority,FIFOMode
+<<<<<<< HEAD
 FREERTOS.FootprintOK=true
 FREERTOS.IPParameters=Tasks01,FootprintOK
+=======
+FREERTOS.BinarySemaphores01=bSemCANRxSig,Dynamic,NULL
+FREERTOS.FootprintOK=true
+FREERTOS.IPParameters=Tasks01,FootprintOK,BinarySemaphores01
+>>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
 FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;RadarComm,0,128,StartRadarCommTask,Default,NULL,Dynamic,NULL,NULL;ADASComm,-1,128,StartADASCommTask,Default,NULL,Dynamic,NULL,NULL;SoundWarning,-3,128,StartSoundWarningTask,Default,NULL,Dynamic,NULL,NULL;LightWarning,-3,128,StartLightWarningTask,Default,NULL,Dynamic,NULL,NULL;CANSpeedRead,-3,128,StartCANSpeedReadTask,Default,NULL,Dynamic,NULL,NULL
 File.Version=6
 KeepUserPlacement=false
@@ -121,8 +134,13 @@ Mcu.UserName=STM32F413VHTx
 MxCube.Version=4.25.0
 MxDb.Version=DB.4.0.250
 NVIC.BusFault_IRQn=true\:0\:0\:false\:false\:true\:false\:false
+<<<<<<< HEAD
 NVIC.CAN1_RX0_IRQn=true\:5\:0\:false\:false\:true\:true\:true
 NVIC.CAN2_RX0_IRQn=true\:5\:0\:false\:false\:true\:true\:true
+=======
+NVIC.CAN1_RX0_IRQn=true\:13\:0\:true\:false\:true\:false\:true
+NVIC.CAN2_RX0_IRQn=true\:14\:0\:true\:false\:true\:false\:true
+>>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
 NVIC.CAN3_RX0_IRQn=true\:5\:0\:false\:false\:true\:true\:true
 NVIC.DMA1_Stream0_IRQn=true\:5\:0\:false\:false\:true\:true\:false
 NVIC.DMA1_Stream1_IRQn=true\:5\:0\:false\:false\:true\:true\:false
