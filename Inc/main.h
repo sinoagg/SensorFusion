@@ -77,6 +77,8 @@
 #define LED5_GPIO_Port GPIOE
 #define LED6_Pin GPIO_PIN_10
 #define LED6_GPIO_Port GPIOE
+#define BUZZER_GPIO_Port GPIOE
+#define BUZZER_Pin GPIO_PIN_2
 
 /* ########################## Assert Selection ############################## */
 /**

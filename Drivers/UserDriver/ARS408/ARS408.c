@@ -2,20 +2,26 @@
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};	
-//CAN_RxHeaderTypeDef CAN_RxConfigRadarHeader = {OBJ_STA_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,0,};
+uint8_t CANRxBuf[32] = {0};
 
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 {
+	//配置CAN滤波器接收Objct_General信息，即相对目标的距离、速度等
+	CAN_FilterTypeDef MW_RadarCANFilter={OBJ_GENERAL_ADDR<<5,0,0xEFF<<5,0,CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};
+    //CAN_FilterTypeDef MW_RadarCANFilter = {0,OBJ_GENERAL_ADDR,0,0xEFF,CAN_FILTER_FIFO0,CAN_FILTERMODE_IDLIST,CAN_FILTERSCALE_32BIT,ENABLE,0};
+    HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
+    HAL_CAN_Start(hcan);
+	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+	
 	#ifdef CONFIG_ARS408_RADAR
 		ARS_ConfigRadar(hcan);
+		HAL_Delay(100);
 	#endif
 	#ifdef CONFIG_ARS408_FILTER
 		ARS_ConfigFilter(hcan);
+		HAL_Delay(100);
 	#endif
-    //配置CAN滤波器接收Objct_General信息，即相对目标的距离、速度等
-    CAN_FilterTypeDef MW_RadarCANFilter = {0,OBJ_GENERAL_ADDR,0,0xEFF,CAN_FILTER_FIFO0,CAN_FILTERMODE_IDLIST,CAN_FILTERSCALE_32BIT,ENABLE,0};
-    HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
-    HAL_CAN_Start(hcan);
+    
 	return 0;
 }
 
@@ -82,8 +88,8 @@ void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral)
  # Warn (red): The MIO is moving closer to the car, and its distance is
    less than the FCW distance.
 */
-
-uint8_t FindMIObj(struct Task *taskMsg)
+/*
+uint8_t FindMIObj(MW_RadarGeneral *pRadarGeneral)
 {
 	uint8_t FCW = 0;
 	uint8_t Find0x60B = 0;
@@ -142,6 +148,6 @@ uint8_t FindMIObj(struct Task *taskMsg)
             return FCW = 0;
         }
     }
-}
+}*/
 
 

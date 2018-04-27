@@ -57,7 +57,10 @@
 #include "WTN6040.h"
 #include "ARS408.h"
 
-#define MAX_OBJ_NUM	64
+#define MAX_OBJ_NUM	4										//最大目标识别数量
+#define LANEWIDTH 2											//车道线宽度
+#define MAX_DECELARATION 0.4*9.8				//制动系统最大减速度
+#define DELAY_TIME	0.4									//系统延迟时间
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -85,20 +88,33 @@ osThreadId ADASCommHandle;
 osThreadId SoundWarningHandle;
 osThreadId LightWarningHandle;
 osThreadId CANSpeedReadHandle;
-osSemaphoreId bSemCANRxSigHandle;
+osSemaphoreId bSemRadarCANRxSigHandle;
+osSemaphoreId bSemADASRxSigHandle;
+osSemaphoreId bSemSoundWarningSigHandle;
+osSemaphoreId bSemLightWarningSigHandle;
+osSemaphoreId bSemSpeedRxSigHandle;
+osSemaphoreId bSemCalculateSigHandle;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+#define	WARNING_NONE 0
+#define	WARNING_LOW 1
+#define	WARNING_HIGH 2
+
 MW_RadarConfig RadarConfig;
 MW_RadarFilterConfig RadarFilterConfig;
 MW_RadarObjStatus RadarObjStatus;
 MW_RadarGeneral RadarGeneral[16];
+
+CAN_RxHeaderTypeDef RadarCANRxHeader;
 
 ADAS_HandleTypeDef ADAS_dev;
 uint8_t MW_RadarRxComplete=0;
 uint8_t ADASRxComplete=0;
 uint8_t SpeedRxComplete=0;
 uint8_t ADASRxBuf[32]={0};
+uint8_t RadarCANRxBuf[8]={0};
+uint8_t CrashWarningLv=WARNING_NONE;
 
 /* USER CODE END PV */
 
@@ -175,7 +191,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
-	
+	ARS_Init(&hcan1);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -184,8 +200,23 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
-  osSemaphoreDef(bSemCANRxSig);
-  bSemCANRxSigHandle = osSemaphoreCreate(osSemaphore(bSemCANRxSig), 1);
+  osSemaphoreDef(bSemADASRxSig);
+  bSemADASRxSigHandle = osSemaphoreCreate(osSemaphore(bSemADASRxSig), 1);
+	osSemaphoreDef(bSemSoundWarningSig);
+  bSemSoundWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemSoundWarningSig), 1);
+	osSemaphoreDef(bSemLightWarningSig);
+  bSemLightWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemLightWarningSig), 1);
+	osSemaphoreDef(bSemSpeedRxSig);
+  bSemSpeedRxSigHandle = osSemaphoreCreate(osSemaphore(bSemSpeedRxSig), 1);
+	osSemaphoreDef(bSemCalculateSig);
+	bSemCalculateSigHandle = osSemaphoreCreate(osSemaphore(bSemCalculateSig), 1);
+	
+	osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+	osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -616,7 +647,8 @@ static void MX_GPIO_Init(void)
 /* CAN RxCpltCallback function */
 void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef* hcan)
 {
-	osSemaphoreRelease(bSemCANRxSigHandle);
+	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
+	osSemaphoreRelease(bSemRadarCANRxSigHandle);
 }
 
 /* USER CODE END 4 */
@@ -641,10 +673,12 @@ void StartRadarCommTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	osSemaphoreWait(bSemCANRxSigHandle, osWaitForever);
-    ARS_GetRadarObjGeneral();
-    HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
-	osDelay(1);
+		osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);
+		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
+		ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);
+		if(RadarCANRxBuf[0]==0x03)	//一组4个读取完毕
+			osSemaphoreRelease(bSemCalculateSigHandle);
+		osDelay(1);
   }
   /* USER CODE END StartRadarCommTask */
 }
@@ -676,7 +710,23 @@ void StartSoundWarningTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);
+		if(CrashWarningLv==WARNING_HIGH)
+		{
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
+		}
+		else if(CrashWarningLv==WARNING_LOW)
+		{
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
+		}
+		else
+		{
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(LED2_GPIO_Port,LED2_Pin,GPIO_PIN_SET);
+		}
+		osDelay(10);
   }
   /* USER CODE END StartSoundWarningTask */
 }
