@@ -8,9 +8,9 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 {
 	//配置CAN滤波器接收Objct_General信息，即相对目标的距离、速度等
 	CAN_FilterTypeDef MW_RadarCANFilter={OBJ_GENERAL_ADDR<<5,0,0xEFF<<5,0,CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};
-    //CAN_FilterTypeDef MW_RadarCANFilter = {0,OBJ_GENERAL_ADDR,0,0xEFF,CAN_FILTER_FIFO0,CAN_FILTERMODE_IDLIST,CAN_FILTERSCALE_32BIT,ENABLE,0};
-    HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
-    HAL_CAN_Start(hcan);
+	//CAN_FilterTypeDef MW_RadarCANFilter = {0,OBJ_GENERAL_ADDR,0,0xEFF,CAN_FILTER_FIFO0,CAN_FILTERMODE_IDLIST,CAN_FILTERSCALE_32BIT,ENABLE,0};
+	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
+	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 	
 	#ifdef CONFIG_ARS408_RADAR

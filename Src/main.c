@@ -223,11 +223,11 @@ int main(void)
 	bSemCalculateSigHandle = osSemaphoreCreate(osSemaphore(bSemCalculateSig), 1);
 	
 	osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-	osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+	osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
 
 	
 	/* USER CODE END RTOS_SEMAPHORES */
@@ -778,7 +778,8 @@ void StartCalculateTask(void const * argument)
 		uint32_t relSpeed=0;
 		for(i=0;i<MAX_OBJ_NUM;i++)						//获取可能碰撞的最小距离和相对速度
 		{
-			if(( 0.2*(RadarGeneral[i].Obj_DistLat-500) * 2.0) < LANEWIDTH && RadarGeneral[i].Obj_DistLong < MinRange) 
+			if(( 0.2*(RadarGeneral[i].Obj_DistLat - 204.6) * 2.0) < LANEWIDTH && RadarGeneral[i].Obj_DistLong < MinRange && RadarGeneral[i].Obj_DistLong != 0) 
+			//if(( 0.2*(RadarGeneral[i].Obj_DistLat-500) * 2.0) < LANEWIDTH && RadarGeneral[i].Obj_DistLong < MinRange) 
       {
 				MinRange = RadarGeneral[i].Obj_DistLong;				//此处仍然保留着整数原始状态
 				relSpeed = RadarGeneral[i].Obj_VrelLong;				//以减小计算量
