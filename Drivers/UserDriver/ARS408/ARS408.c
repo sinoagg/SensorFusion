@@ -25,16 +25,39 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 	return 0;
 }
 
+void deRadarConfig()
+{
+	RadarConfig.MaxDistance_valid = RADARCFG_MAXDISTANCE_VALID;
+  RadarConfig.SensorID_valid = RADARCFG_SENSORID_VALID;
+  RadarConfig.RadarPower_valid = RADARCFG_RADARPOWER_VALID;
+  RadarConfig.OutputType_valid = RADARCFG_OUTPUTTYPE_VALID;
+  RadarConfig.SendQuality_valid = RADARCFG_SENDQUALITY_VALID;
+  RadarConfig.SendExtInfo_valid = RADARCFG_SENDEXTINFO_VALID;
+  RadarConfig.SortIndex_valid = RADARCFG_SORTINDEX_VALID;
+  RadarConfig.StoreInNVM_valid = RADARCFG_STOREINNVM_VALID;
+  RadarConfig.MaxDistance = RADARCFG_MAXDISTANCE;
+  RadarConfig.SensorID = RADARCFG_SENSORID;
+  RadarConfig.OutputType = RADARCFG_OUTPUTTYPE_OBJ;
+  RadarConfig.RadarPower = RADARCFG_RADARPOWER_3dB;
+  RadarConfig.CtrlRelay_valid = RADARCFG_CTRLRELEY_VALID;
+  RadarConfig.CtrlRelay = RADARCFG_CTRLRELEY;
+  RadarConfig.SendQuality = RADARCFG_SENDQUALITY;
+  RadarConfig.SendExtInfo = RADARCFG_SENDEXTINFO;
+  RadarConfig.SortIndex = RADARCFG_SORTINDEX_RANGE;
+  RadarConfig.StoreInNVM = RADARCFG_STOREINNVM;
+  RadarConfig.RCS_Threshold_valid = RADARCFG_RCS_THRES_VALID;
+  RadarConfig.RCS_Threshold = RADARCFG_RCSTHRES_HIGHSENSE;
+}
 uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan)
 {
 	uint32_t CAN_TxMailBox=CAN_TX_MAILBOX0;
 	uint8_t CANTxBuf[8]={0};
-	CANTxBuf[0]=RadarConfig.StoreInNVM_valid|RadarConfig.SortIndex_valid|RadarConfig.OutputType_valid|RadarConfig.RadarPower_valid|RadarConfig.MaxDistance_valid;
+	CANTxBuf[0]=RadarConfig.StoreInNVM_valid|RadarConfig.SortIndex_valid|RadarConfig.SendExtInfo_valid|RadarConfig.SendQuality_valid|RadarConfig.OutputType_valid|RadarConfig.RadarPower_valid|RadarConfig.SensorID_valid|RadarConfig.MaxDistance_valid;
 	CANTxBuf[1]=RadarConfig.MaxDistance>>2;
-	CANTxBuf[2]=RadarConfig.MaxDistance<<6&0xFF;
-	CANTxBuf[3]=RadarConfig.RadarPower|RadarConfig.OutputType;
-	CANTxBuf[4]=RadarConfig.StoreInNVM|RadarConfig.SortIndex;
-	CANTxBuf[5]=RadarConfig.RCS_Threshold|RadarConfig.RCS_Threshold_valid;
+	CANTxBuf[2]=RadarConfig.MaxDistance<<6 & 0xC0;
+	CANTxBuf[4]=RadarConfig.RadarPower|RadarConfig.OutputType|RadarConfig.SensorID;
+	CANTxBuf[5]=RadarConfig.StoreInNVM|RadarConfig.SortIndex|RadarConfig.SendExtInfo|RadarConfig.SendQuality|RadarConfig.CtrlRelay|RadarConfig.CtrlRelay_valid;
+	CANTxBuf[6]=RadarConfig.RCS_Threshold|RadarConfig.RCS_Threshold_valid;
 	//CAN×ÜÏß·¢ËÍÅäÖÃ
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxConfigRadarHeader, CANTxBuf, &CAN_TxMailBox);
 	return 0;

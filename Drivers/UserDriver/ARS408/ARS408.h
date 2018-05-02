@@ -38,29 +38,38 @@
 #define VALID		0x01
 
 #define RADARCFG_MAXDISTANCE_VALID	(VALID<<0)
+#define RADARCFG_SENSORID_VALID			(VALID<<1)
 #define RADARCFG_RADARPOWER_VALID		(VALID<<2)
 #define RADARCFG_OUTPUTTYPE_VALID		(VALID<<3)
+#define RADARCFG_SENDQUALITY_VALID 	(VALID<<4)
+#define RADARCFG_SENDEXTINFO_VALID	(VALID<<5)
 #define RADARCFG_SORTINDEX_VALID		(VALID<<6)
 #define RADARCFG_STOREINNVM_VALID		(VALID<<7)
-#define RADARCFG_RCS_THRES_VALID		(VALID<<0)
+#define RADARCFG_MAXDISTANCE 				(2)
+#define RADARCFG_SENSORID 					(1)
+#define RADARCFG_OUTPUTTYPE_NONE		(0<<3)
+#define RADARCFG_OUTPUTTYPE_OBJ			(1<<3)
+#define RADARCFG_OUTPUTTYPE_CLUSTER	(2<<3)
 #define RADARCFG_RADARPOWER_STD			(0<<5)
 #define RADARCFG_RADARPOWER_3dB			(1<<5)
 #define RADARCFG_RADARPOWER_6dB			(2<<5)
 #define RADARCFG_RADARPOWER_9dB			(3<<5)
-#define RADARCFG_OUTPUTTYPE_NONE		(0<<3)
-#define RADARCFG_OUTPUTTYPE_OBJ			(1<<5)
-#define RADARCFG_OUTPUTTYPE_CLUSTER	(2<<5)
-#define RADARCFG_STOREINNVM					(1<<7)
+#define RADARCFG_CTRLRELEY_VALID		(VALID<<0)
+#define RADARCFG_CTRLRELEY 					(VALID<<1)
+#define RADARCFG_SENDQUALITY 				(VALID<<2)
+#define RADARCFG_SENDEXTINFO 				(VALID<<3)
 #define RADARCFG_SORTINDEX_NONE			(0<<4)
 #define RADARCFG_SORTINDEX_RANGE		(1<<4)
 #define RADARCFG_SORTINDEX_RCS			(2<<4)
+#define RADARCFG_STOREINNVM					(VALID<<7)
+#define RADARCFG_RCS_THRES_VALID		(VALID<<0)
 #define RADARCFG_RCSTHRES_STD				(0<<1)
 #define RADARCFG_RCSTHRES_HIGHSENSE	(1<<1)
 
 typedef struct
 {
 	uint8_t MaxDistance_valid;		//是否允许远端扫描距离变化
-	uint8_t SenSorID_valid;				//是否允许传感器ID变化
+	uint8_t SensorID_valid;				//是否允许传感器ID变化
 	uint8_t RadarPower_valid;			//是否允许发射功率变化
 	uint8_t OutputType_valid;			//是否允许输出内容变化
 	uint8_t SendQuality_valid;		//是否允许输出目标或集群质量信息
@@ -71,8 +80,8 @@ typedef struct
 	uint8_t SensorID;							//传感器ID从0到7
 	uint8_t OutputType;						//输出内容 0x01 目标；0x02 反射集群
 	uint8_t RadarPower;						//雷达发射功率 0x00 标准；0x01 -3dB; 0x02 -6dB; 0x03 -9dB;
-	uint8_t CtrlRelay_valid;			//
-	uint8_t CtrlRelay;						//
+	uint8_t CtrlRelay_valid;			//是否允许继电器控制
+	uint8_t CtrlRelay;						//继电器控制
 	uint8_t SendQuality;					//集群或目标质量信息发送使能
 	uint8_t SendExtInfo;					//扩展信息输出使能，仅在目标信息输出时有效
 	uint8_t SortIndex;						//选择目标排序顺序，仅在目标信息输出时有效，集群输出时总是按距离排序
@@ -104,12 +113,12 @@ typedef struct
 
 typedef struct
 {
-	uint8_t FilterCfg_Valid;								//是否允许修改FilterCfg
-	uint8_t FilterCfg_Active;								//使能或者禁止相应的标准（FilterCfg）和种类
-	uint8_t FilterCfg_Index;								//调整15项设置的目录
-	uint8_t FilterCfg_Type;									//调整设置目标或者反射集群
-	uint16_t FilterCfg_Min_XXX;							//设置目录项内容最小值
-	uint8_t FilterCfg_Max_XXX;							//设置目录项内容最大值
+	uint8_t FilterCfg_Valid;						//是否允许修改FilterCfg
+	uint8_t FilterCfg_Active;						//使能或者禁止相应的标准（FilterCfg）和种类
+	uint8_t FilterCfg_Index;						//调整15项设置的目录
+	uint8_t FilterCfg_Type;							//调整设置目标或者反射集群
+	uint16_t FilterCfg_Min_XXX;					//设置目录项内容最小值
+	uint8_t FilterCfg_Max_XXX;					//设置目录项内容最大值
 }MW_RadarFilterConfig;
 
 
