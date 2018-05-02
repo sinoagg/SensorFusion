@@ -47,6 +47,7 @@ Section Cross References
     ars408.o(i.ARS_ConfigFilter) refers to stm32f4xx_hal_can.o(i.HAL_CAN_AddTxMessage) for HAL_CAN_AddTxMessage
     ars408.o(i.ARS_ConfigFilter) refers to main.o(.data) for RadarFilterConfig
     ars408.o(i.ARS_ConfigFilter) refers to ars408.o(.data) for .data
+    ars408.o(i.ARS_ConfigRadar) refers to ars408.o(i.deRadarConfig) for deRadarConfig
     ars408.o(i.ARS_ConfigRadar) refers to stm32f4xx_hal_can.o(i.HAL_CAN_AddTxMessage) for HAL_CAN_AddTxMessage
     ars408.o(i.ARS_ConfigRadar) refers to main.o(.bss) for RadarConfig
     ars408.o(i.ARS_ConfigRadar) refers to ars408.o(.data) for .data
@@ -949,7 +950,7 @@ Removing Unused input sections from the image.
     Removing ars408.o(.revsh_text), (4 bytes).
     Removing ars408.o(.rrx_text), (6 bytes).
     Removing ars408.o(i.ARS_ConfigFilter), (76 bytes).
-    Removing ars408.o(i.ARS_ConfigRadar), (136 bytes).
+    Removing ars408.o(i.ARS_ConfigRadar), (144 bytes).
     Removing ars408.o(i.ARS_GetRadarObjStatus), (20 bytes).
     Removing ars408.o(i.deRadarConfig), (68 bytes).
     Removing ars408.o(.data), (48 bytes).
@@ -1448,7 +1449,7 @@ Removing Unused input sections from the image.
     Removing system_stm32f4xx.o(.rrx_text), (6 bytes).
     Removing system_stm32f4xx.o(i.SystemCoreClockUpdate), (120 bytes).
 
-525 unused section(s) (total 32063 bytes) removed from the image.
+525 unused section(s) (total 32071 bytes) removed from the image.
 
 ==============================================================================
 
@@ -2478,7 +2479,7 @@ Image component sizes
          0          0          0          0          0      10192   freertos.o
        460         24          0         24      15360       8787   heap_4.o
        136          0          0          0          0       3522   list.o
-      1958        220        238         73       1188      19238   main.o
+      1958        220        238         73       1188      19258   main.o
        758         84          0         12          0      11857   port.o
       1514         14          0          0          0      21625   queue.o
         36          8        472          0       4096        832   startup_stm32f413xx.o
@@ -2500,7 +2501,7 @@ Image component sizes
       2060        172          0         60        240      22305   tasks.o
 
     ----------------------------------------------------------------------
-     16258       1038        816        188      20948     922522   Object Totals
+     16258       1038        816        188      20948     922542   Object Totals
          0          0         32          0          0          0   (incl. Generated)
         48          0          2          3          4          0   (incl. Padding)
 
@@ -2553,8 +2554,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     17568       1054        816        188      20948     906306   Grand Totals
-     17568       1054        816        188      20948     906306   ELF Image Totals
+     17568       1054        816        188      20948     906326   Grand Totals
+     17568       1054        816        188      20948     906326   ELF Image Totals
      17568       1054        816        188          0          0   ROM Totals
 
 ==============================================================================

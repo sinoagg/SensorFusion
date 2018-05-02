@@ -61,6 +61,7 @@
 #define LANEWIDTH 2											//车道线宽度
 #define MAX_DECELARATION 0.4*9.8				//制动系统最大减速度
 #define DELAY_TIME	0.4									//系统延迟时间
+#define CONFIG_ARS408_RADAR
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
