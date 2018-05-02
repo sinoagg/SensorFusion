@@ -690,7 +690,8 @@ void StartRadarCommTask(void const * argument)
 		osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);
 		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
 		ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);
-		if(RadarCANRxBuf[0]==0x03)	//一组4个读取完毕
+		if(RadarCANRxBuf[0] != 0)
+		//if(RadarCANRxBuf[0]==0x03)	//一组4个读取完毕
 			osSemaphoreRelease(bSemCalculateSigHandle);
 		osDelay(1);
   }
