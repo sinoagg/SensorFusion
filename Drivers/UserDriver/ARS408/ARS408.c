@@ -48,6 +48,14 @@ void deRadarConfig()
   RadarConfig.RCS_Threshold_valid = RADARCFG_RCS_THRES_VALID;
   RadarConfig.RCS_Threshold = RADARCFG_RCSTHRES_HIGHSENSE;
 }
+
+void deRadarFilterConfig()
+{
+  RadarFilterConfig.FilterCfg_Valid = FILTERCFG_VALID;
+  RadarFilterConfig.FilterCfg_Active = FILTERCFG_FILTERACTIVE_VALID;
+  RadarFilterConfig.FilterCfg_Index = FILTERCFG_INDEX_DISTANCE;
+  RadarFilterConfig.FilterCfg_Type = FILTERCFG_TYPE_OBJ;
+}
 uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan)
 {
 	uint32_t CAN_TxMailBox=CAN_TX_MAILBOX0;
@@ -69,10 +77,12 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
 {
 	uint32_t CAN_TxMailBox=CAN_TX_MAILBOX0;
 	uint8_t CANTxBuf[8]={0};
+  deRadarFilterConfig();
+  //if change FilterConfig struct, add RadarFilterConfig.*** = someValue here
 	CANTxBuf[0]=RadarFilterConfig.FilterCfg_Type|RadarFilterConfig.FilterCfg_Index|RadarFilterConfig.FilterCfg_Active|RadarFilterConfig.FilterCfg_Valid;
-	CANTxBuf[1]=RadarFilterConfig.FilterCfg_Min_XXX>>8;
+	CANTxBuf[1]=RadarFilterConfig.FilterCfg_Min_XXX>>8 & 0x1F;
 	CANTxBuf[2]=RadarFilterConfig.FilterCfg_Min_XXX&0xFF;
-	CANTxBuf[3]=RadarFilterConfig.FilterCfg_Max_XXX>>8;
+	CANTxBuf[3]=RadarFilterConfig.FilterCfg_Max_XXX>>8 & 0x1F;
 	CANTxBuf[4]=RadarFilterConfig.FilterCfg_Max_XXX&0xFF;
 	//CAN◊‹œﬂ∑¢ÀÕ≈‰÷√
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxConfigFilterHeader, CANTxBuf, &CAN_TxMailBox);

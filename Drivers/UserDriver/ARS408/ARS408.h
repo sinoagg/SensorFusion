@@ -118,7 +118,7 @@ typedef struct
 	uint8_t FilterCfg_Index;						//调整15项设置的目录
 	uint8_t FilterCfg_Type;							//调整设置目标或者反射集群
 	uint16_t FilterCfg_Min_XXX;					//设置目录项内容最小值
-	uint8_t FilterCfg_Max_XXX;					//设置目录项内容最大值
+	uint16_t FilterCfg_Max_XXX;					//设置目录项内容最大值
 }MW_RadarFilterConfig;
 
 
