@@ -46,7 +46,7 @@ void WTN6040_Send(uint8_t WTN6040_DATA)
 {
 	uint8_t i=0;
 	uint8_t	bit=0;
-	HAL_GPIO_WritePin(GPIOB, BELL_DATA_Pin, GPIO_PIN_SET);					//时钟线
+	HAL_GPIO_WritePin(GPIOB, BELL_DATA_Pin, GPIO_PIN_SET);				//时钟线
 	HAL_GPIO_WritePin(GPIOA, bell_data_Pin, GPIO_PIN_SET);				//数据线
 	HAL_GPIO_WritePin(GPIOB, BELL_DATA_Pin, GPIO_PIN_RESET);
 	Delay_ms(5);

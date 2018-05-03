@@ -56,13 +56,15 @@ void deRadarFilterConfig()
   RadarFilterConfig.FilterCfg_Index = FILTERCFG_INDEX_DISTANCE;
   RadarFilterConfig.FilterCfg_Type = FILTERCFG_TYPE_OBJ;
 }
+
 uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan)
 {
 	uint32_t CAN_TxMailBox=CAN_TX_MAILBOX0;
 	uint8_t CANTxBuf[8]={0};
   deRadarConfig();
   //if change RadarConfig struct, add RadarConfig.*** = someValue here
-	CANTxBuf[0]=RadarConfig.StoreInNVM_valid|RadarConfig.SortIndex_valid|RadarConfig.SendExtInfo_valid|RadarConfig.SendQuality_valid|RadarConfig.OutputType_valid|RadarConfig.RadarPower_valid|RadarConfig.SensorID_valid|RadarConfig.MaxDistance_valid;
+	CANTxBuf[0]=RadarConfig.StoreInNVM_valid|RadarConfig.SortIndex_valid|RadarConfig.SendExtInfo_valid|RadarConfig.SendQuality_valid|\
+		RadarConfig.OutputType_valid|RadarConfig.RadarPower_valid|RadarConfig.SensorID_valid|RadarConfig.MaxDistance_valid;
 	CANTxBuf[1]=RadarConfig.MaxDistance>>2;
 	CANTxBuf[2]=RadarConfig.MaxDistance<<6 & 0xC0;
 	CANTxBuf[4]=RadarConfig.RadarPower|RadarConfig.OutputType|RadarConfig.SensorID;

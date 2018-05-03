@@ -693,7 +693,7 @@ void StartRadarCommTask(void const * argument)
 		ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);
 		if(RadarCANRxBuf[0] != 0)
 		//if(RadarCANRxBuf[0]==0x03)	//一组4个读取完毕
-		osSemaphoreRelease(bSemCalculateSigHandle);
+			osSemaphoreRelease(bSemCalculateSigHandle);
 		osDelay(1);
   }
   /* USER CODE END StartRadarCommTask */
@@ -791,7 +791,7 @@ void StartCalculateTask(void const * argument)
 		{
 			float VrelLong = 0.25 * relSpeed - 128;	//获取真实车速
 			float TimetoCrash = (float)MinRange/VrelLong;
-			if(TimetoCrash<0.8)
+			if(TimetoCrash<0.8f)
 			{
 				CrashWarningLv=WARNING_HIGH;
 			}
