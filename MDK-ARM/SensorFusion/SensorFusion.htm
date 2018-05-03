@@ -3,7 +3,7 @@
 <title>Static Call Graph - [SensorFusion\SensorFusion.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image SensorFusion\SensorFusion.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Thu May 03 16:46:19 2018
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Thu May 03 17:23:02 2018
 <BR><P>
 <H3>Maximum Stack Usage =        368 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1145,7 +1145,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.constdata)
 </UL>
-<P><STRONG><a name="[75]"></a>StartCalculateTask</STRONG> (Thumb, 174 bytes, Stack size 32 bytes, main.o(i.StartCalculateTask))
+<P><STRONG><a name="[75]"></a>StartCalculateTask</STRONG> (Thumb, 198 bytes, Stack size 32 bytes, main.o(i.StartCalculateTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = StartCalculateTask &rArr; osSemaphoreWait &rArr; xQueueGenericReceive &rArr; vTaskPlaceOnEventList &rArr; prvAddCurrentTaskToDelayedList &rArr; vListInsert
 </UL>
 <BR>[Calls]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2d
@@ -1173,7 +1173,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.constdata)
 </UL>
-<P><STRONG><a name="[70]"></a>StartRadarCommTask</STRONG> (Thumb, 60 bytes, Stack size 0 bytes, main.o(i.StartRadarCommTask))
+<P><STRONG><a name="[70]"></a>StartRadarCommTask</STRONG> (Thumb, 68 bytes, Stack size 0 bytes, main.o(i.StartRadarCommTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = StartRadarCommTask &rArr; osSemaphoreWait &rArr; xQueueGenericReceive &rArr; vTaskPlaceOnEventList &rArr; prvAddCurrentTaskToDelayedList &rArr; vListInsert
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ARS_GetRadarObjGeneral

@@ -685,6 +685,7 @@ void StartDefaultTask(void const * argument)
 void StartRadarCommTask(void const * argument)
 {
   /* USER CODE BEGIN StartRadarCommTask */
+	uint8_t minRadarDistFlag = 0;
   /* Infinite loop */
   for(;;)
   {
@@ -692,11 +693,15 @@ void StartRadarCommTask(void const * argument)
 		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
 		if(RadarCANRxHeader.StdId==0x60A)												//60B的之前都读取完毕，开始计算
 		{
+			minRadarDistFlag = 1;
 			osSemaphoreRelease(bSemCalculateSigHandle);
 		}
-		else
-		ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);		//递增获取数据
-		
+		else																										//0x60B时读取目标距离、速度信息
+			if(minRadarDistFlag)
+			{
+				minRadarDistFlag = 0;
+				ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);//获取最近目标数据，即收到的第一个目标
+			}
 			
 		osDelay(1);
   }
@@ -780,7 +785,7 @@ void StartCalculateTask(void const * argument)
 	{
 		osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);
 		//uint8_t i;
-		uint8_t MinRange=255;									//初始化为最大距离
+		uint16_t MinRange=255;									//初始化为最大距离
 		uint32_t relSpeed=0;
 		//for(i=0;i<MAX_OBJ_NUM;i++)						//获取可能碰撞的最小距离和相对速度
 		//{
@@ -793,17 +798,17 @@ void StartCalculateTask(void const * argument)
 		//}
 		MinRange = RadarGeneral[0].Obj_DistLong;
 		relSpeed = RadarGeneral[0].Obj_VrelLong;
-		if(MinRange<250 && MinRange != 0)											//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
+		if(MinRange<3000 && MinRange != 0)											//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
 		{
-			float VrelLong = 0.25 * relSpeed - 128;	//获取真实相对速度
+			float VrelLong = 0.25 * relSpeed - 128;					//获取真实相对速度
 			float TimetoCrash = -(float)MinRange/VrelLong;	//  相对速度为负
 			//if(TimetoCrash<0.8f)
-			if(TimetoCrash<3)
+			if(TimetoCrash<3 && VrelLong)
 			{
 				CrashWarningLv=WARNING_HIGH;
 			}
 			//else if(TimetoCrash<1)
-			else if(TimetoCrash<5)
+			else if(TimetoCrash<5 && VrelLong)
 			{
 				CrashWarningLv=WARNING_LOW;
 			}
