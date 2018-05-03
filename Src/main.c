@@ -627,7 +627,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, LED0_Pin|LED1_Pin|LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, LED3_Pin|LED4_Pin|LED5_Pin|LED6_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, BUZZER_Pin|LED3_Pin|LED4_Pin|LED5_Pin|LED6_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : BELL_DATA_Pin */
   GPIO_InitStruct.Pin = BELL_DATA_Pin;
@@ -651,7 +651,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED3_Pin LED4_Pin LED5_Pin LED6_Pin */
-  GPIO_InitStruct.Pin = LED3_Pin|LED4_Pin|LED5_Pin|LED6_Pin;
+  GPIO_InitStruct.Pin = BUZZER_Pin|LED3_Pin|LED4_Pin|LED5_Pin|LED6_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -781,7 +781,7 @@ void StartCalculateTask(void const * argument)
 	for(;;)
 	{
 		osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);
-		uint8_t i;
+		//uint8_t i;
 		uint8_t MinRange=255;									//初始化为最大距离
 		uint32_t relSpeed=0;
 		//for(i=0;i<MAX_OBJ_NUM;i++)						//获取可能碰撞的最小距离和相对速度
