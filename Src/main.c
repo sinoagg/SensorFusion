@@ -801,14 +801,15 @@ void StartCalculateTask(void const * argument)
 		if(MinRange<3000 && MinRange != 0)											//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
 		{
 			float VrelLong = 0.25 * relSpeed - 128;					//获取真实相对速度
+			MinRange = 0.2 * MinRange - 500;
 			float TimetoCrash = -(float)MinRange/VrelLong;	//  相对速度为负
 			//if(TimetoCrash<0.8f)
-			if(TimetoCrash<3 && VrelLong)
+			if(TimetoCrash<1 && VrelLong < 0 && MinRange > 0)
 			{
 				CrashWarningLv=WARNING_HIGH;
 			}
 			//else if(TimetoCrash<1)
-			else if(TimetoCrash<5 && VrelLong)
+			else if(TimetoCrash<1.5 && VrelLong < 0 && MinRange > 0)
 			{
 				CrashWarningLv=WARNING_LOW;
 			}
