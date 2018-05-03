@@ -1,3 +1,13 @@
+/**
+ * microwave radar - ARS408 by Continental
+ * ---init & config
+ * ARS_Init(hcan): start CAN2 for radar & (optional) config Radadr and RadarFilter
+ * ARS_ConfigRadar(hcan): config Radar through can2
+ * ARS_ConfigFilter(hcan): config Radar filter through can2
+ * ---read Radar data
+ * ARS_GetRadarObjStatus(...): read Radar Obj Status from can2, need to config can2 first
+ * ARS_GetRadarObjGeneral(...): read Radar Obj General(distance, velocity...) from can2
+ */
 #include "ARS408.h"
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
