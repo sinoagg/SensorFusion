@@ -3,7 +3,7 @@
 <title>Static Call Graph - [SensorFusion\SensorFusion.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image SensorFusion\SensorFusion.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Thu May 03 16:30:43 2018
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Thu May 03 16:46:19 2018
 <BR><P>
 <H3>Maximum Stack Usage =        368 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -567,10 +567,8 @@ Global Symbols
 
 <P><STRONG><a name="[134]"></a>__scatterload_rt2</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, init.o(.text), UNUSED)
 
-<P><STRONG><a name="[e7]"></a>ARS_GetRadarObjGeneral</STRONG> (Thumb, 134 bytes, Stack size 8 bytes, ars408.o(i.ARS_GetRadarObjGeneral))
-<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = ARS_GetRadarObjGeneral
-</UL>
-<BR>[Called By]<UL><LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartRadarCommTask
+<P><STRONG><a name="[e7]"></a>ARS_GetRadarObjGeneral</STRONG> (Thumb, 78 bytes, Stack size 0 bytes, ars408.o(i.ARS_GetRadarObjGeneral))
+<BR><BR>[Called By]<UL><LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartRadarCommTask
 </UL>
 
 <P><STRONG><a name="[87]"></a>ARS_Init</STRONG> (Thumb, 44 bytes, Stack size 48 bytes, ars408.o(i.ARS_Init))
@@ -1147,7 +1145,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.constdata)
 </UL>
-<P><STRONG><a name="[75]"></a>StartCalculateTask</STRONG> (Thumb, 170 bytes, Stack size 32 bytes, main.o(i.StartCalculateTask))
+<P><STRONG><a name="[75]"></a>StartCalculateTask</STRONG> (Thumb, 174 bytes, Stack size 32 bytes, main.o(i.StartCalculateTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = StartCalculateTask &rArr; osSemaphoreWait &rArr; xQueueGenericReceive &rArr; vTaskPlaceOnEventList &rArr; prvAddCurrentTaskToDelayedList &rArr; vListInsert
 </UL>
 <BR>[Calls]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2d
@@ -1175,7 +1173,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> main.o(.constdata)
 </UL>
-<P><STRONG><a name="[70]"></a>StartRadarCommTask</STRONG> (Thumb, 68 bytes, Stack size 0 bytes, main.o(i.StartRadarCommTask))
+<P><STRONG><a name="[70]"></a>StartRadarCommTask</STRONG> (Thumb, 60 bytes, Stack size 0 bytes, main.o(i.StartRadarCommTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = StartRadarCommTask &rArr; osSemaphoreWait &rArr; xQueueGenericReceive &rArr; vTaskPlaceOnEventList &rArr; prvAddCurrentTaskToDelayedList &rArr; vListInsert
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ARS_GetRadarObjGeneral

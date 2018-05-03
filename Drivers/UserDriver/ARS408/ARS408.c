@@ -107,15 +107,15 @@ void ARS_GetRadarObjStatus(uint8_t* pCANRxBuf)
 	RadarObjStatus.Obj_MeasCounter=((uint16_t)*(pCANRxBuf+1))<<8|*(pCANRxBuf+2);
 }
 
-void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral, uint8_t BufSequence)
+void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral)
 {
-	(pRadarGeneral+BufSequence)->Obj_ID=*pCANRxBuf;	//OBJ_ID
-	(pRadarGeneral+BufSequence)->Obj_DistLong= (((uint16_t)*(pCANRxBuf+1))<<8|(*pCANRxBuf+2))>>3;
-	(pRadarGeneral+BufSequence)->Obj_DistLat= ((uint16_t)*(pCANRxBuf+2)&0x07)<<8|(*(pCANRxBuf+3));
-	(pRadarGeneral+BufSequence)->Obj_VrelLong= (((uint16_t)*(pCANRxBuf+4))<<8|*(pCANRxBuf+5))>>6;//纵向相对速度
-	(pRadarGeneral+BufSequence)->Obj_VrelLat= (((uint16_t)*(pCANRxBuf+5)&0x3F)<<8|(*(pCANRxBuf+6)&0xE0))>>5;;//横向相对速度
-	(pRadarGeneral+BufSequence)->Obj_DynProp= *(pCANRxBuf+6)&0x07;		//目标动态特性（运动还是静止）
-	(pRadarGeneral+BufSequence)->Obj_RCS= *(pCANRxBuf+7);
+	(pRadarGeneral)->Obj_ID=*pCANRxBuf;	//OBJ_ID
+	(pRadarGeneral)->Obj_DistLong= (((uint16_t)*(pCANRxBuf+1))<<8|(*pCANRxBuf+2))>>3;
+	(pRadarGeneral)->Obj_DistLat= ((uint16_t)*(pCANRxBuf+2)&0x07)<<8|(*(pCANRxBuf+3));
+	(pRadarGeneral)->Obj_VrelLong= (((uint16_t)*(pCANRxBuf+4))<<8|*(pCANRxBuf+5))>>6;//纵向相对速度
+	(pRadarGeneral)->Obj_VrelLat= (((uint16_t)*(pCANRxBuf+5)&0x3F)<<8|(*(pCANRxBuf+6)&0xE0))>>5;;//横向相对速度
+	(pRadarGeneral)->Obj_DynProp= *(pCANRxBuf+6)&0x07;		//目标动态特性（运动还是静止）
+	(pRadarGeneral)->Obj_RCS= *(pCANRxBuf+7);
 }
 
 /*

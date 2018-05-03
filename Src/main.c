@@ -688,16 +688,14 @@ void StartRadarCommTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-		uint8_t i=0;																								//用于目标计数，存在buf的不同位置
 		osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);
 		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
-		if(RadarCANRxHeader.StdId==0x60A)														//60B的之前都读取完毕
+		if(RadarCANRxHeader.StdId==0x60A)												//60B的之前都读取完毕，开始计算
 		{
-			i=0;
 			osSemaphoreRelease(bSemCalculateSigHandle);
 		}
 		else
-		ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral,i++);		//递增获取数据
+		ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);		//递增获取数据
 		
 			
 		osDelay(1);
@@ -795,7 +793,7 @@ void StartCalculateTask(void const * argument)
 		//}
 		MinRange = RadarGeneral[0].Obj_DistLong;
 		relSpeed = RadarGeneral[0].Obj_VrelLong;
-		if(MinRange<250)											//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
+		if(MinRange<250 && MinRange != 0)											//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
 		{
 			float VrelLong = 0.25 * relSpeed - 128;	//获取真实相对速度
 			float TimetoCrash = -(float)MinRange/VrelLong;	//  相对速度为负
