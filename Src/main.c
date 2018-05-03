@@ -737,10 +737,16 @@ void StartSoundWarningTask(void const * argument)
 		{
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
+			osDelay(1000);
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
 		}
 		else if(CrashWarningLv==WARNING_LOW)
 		{
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
+			osDelay(1000);
+			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
 		}
 		else
@@ -798,11 +804,11 @@ void StartCalculateTask(void const * argument)
 		//}
 		MinRange = RadarGeneral[0].Obj_DistLong;
 		relSpeed = RadarGeneral[0].Obj_VrelLong;
-		if(MinRange<3000 && MinRange != 0)											//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
+		if(MinRange<3000 && MinRange != 0)								//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
 		{
 			float VrelLong = 0.25 * relSpeed - 128;					//获取真实相对速度
 			MinRange = 0.2 * MinRange - 500;
-			float TimetoCrash = -(float)MinRange/VrelLong;	//  相对速度为负
+			float TimetoCrash = -(float)MinRange/VrelLong;	//相对速度为负
 			//if(TimetoCrash<0.8f)
 			if(TimetoCrash<1 && VrelLong < 0 && MinRange > 0)
 			{
