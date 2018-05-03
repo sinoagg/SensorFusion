@@ -200,7 +200,7 @@ extern MW_RadarObjStatus RadarObjStatus;
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan);
-void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral);
+void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral, uint8_t BufSequence);
 
 #endif
 

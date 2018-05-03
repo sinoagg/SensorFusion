@@ -688,12 +688,18 @@ void StartRadarCommTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+		uint8_t i=0;																								//用于目标计数，存在buf的不同位置
 		osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);
 		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
-		ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);
-		if(RadarCANRxBuf[0] != 0)
-		//if(RadarCANRxBuf[0]==0x03)	//一组4个读取完毕
+		if(RadarCANRxHeader.StdId==0x60A)														//60B的之前都读取完毕
+		{
+			i=0;
 			osSemaphoreRelease(bSemCalculateSigHandle);
+		}
+		else
+		ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral,i++);		//递增获取数据
+		
+			
 		osDelay(1);
   }
   /* USER CODE END StartRadarCommTask */
@@ -778,31 +784,34 @@ void StartCalculateTask(void const * argument)
 		uint8_t i;
 		uint8_t MinRange=255;									//初始化为最大距离
 		uint32_t relSpeed=0;
-		for(i=0;i<MAX_OBJ_NUM;i++)						//获取可能碰撞的最小距离和相对速度
-		{
-			if((( 0.2*RadarGeneral[i].Obj_DistLat - 204.6) * 2.0) < LANEWIDTH && RadarGeneral[i].Obj_DistLong < MinRange && RadarGeneral[i].Obj_DistLong != 0) 
+		//for(i=0;i<MAX_OBJ_NUM;i++)						//获取可能碰撞的最小距离和相对速度
+		//{
+			//if((( 0.2*RadarGeneral[i].Obj_DistLat - 204.6) * 2.0) < LANEWIDTH && RadarGeneral[i].Obj_DistLong < MinRange && RadarGeneral[i].Obj_DistLong != 0) 
 			//if(( 0.2*(RadarGeneral[i].Obj_DistLat-500) * 2.0) < LANEWIDTH && RadarGeneral[i].Obj_DistLong < MinRange) 
-      {
-				MinRange = RadarGeneral[i].Obj_DistLong;				//此处仍然保留着整数原始状态
-				relSpeed = RadarGeneral[i].Obj_VrelLong;				//以减小计算量
-      }
-		}
-		if(MinRange<100)											//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
+      //{
+			//	MinRange = RadarGeneral[i].Obj_DistLong;				//此处仍然保留着整数原始状态
+			//	relSpeed = RadarGeneral[i].Obj_VrelLong;				//以减小计算量
+      //}
+		//}
+		MinRange = RadarGeneral[0].Obj_DistLong;
+		relSpeed = RadarGeneral[0].Obj_VrelLong;
+		if(MinRange<250)											//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
 		{
-			float VrelLong = 0.25 * relSpeed - 128;	//获取真实车速
-			float TimetoCrash = (float)MinRange/VrelLong;
-			if(TimetoCrash<0.8f)
+			float VrelLong = 0.25 * relSpeed - 128;	//获取真实相对速度
+			float TimetoCrash = -(float)MinRange/VrelLong;	//  相对速度为负
+			//if(TimetoCrash<0.8f)
+			if(TimetoCrash<3)
 			{
 				CrashWarningLv=WARNING_HIGH;
 			}
-			else if(TimetoCrash<1)
+			//else if(TimetoCrash<1)
+			else if(TimetoCrash<5)
 			{
 				CrashWarningLv=WARNING_LOW;
 			}
 			else
 				CrashWarningLv=WARNING_NONE;
 		}
-		CrashWarningLv=WARNING_NONE;
 		osSemaphoreRelease(bSemSoundWarningSigHandle);
 		osDelay(1);
 	}
