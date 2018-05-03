@@ -61,7 +61,7 @@
 #define LANEWIDTH 2											//车道线宽度
 #define MAX_DECELARATION 0.4*9.8				//制动系统最大减速度
 #define DELAY_TIME	0.4									//系统延迟时间
-#define CONFIG_ARS408_RADAR
+//#define CONFIG_ARS408_RADAR
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -693,7 +693,7 @@ void StartRadarCommTask(void const * argument)
 		ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);
 		if(RadarCANRxBuf[0] != 0)
 		//if(RadarCANRxBuf[0]==0x03)	//一组4个读取完毕
-			osSemaphoreRelease(bSemCalculateSigHandle);
+		osSemaphoreRelease(bSemCalculateSigHandle);
 		osDelay(1);
   }
   /* USER CODE END StartRadarCommTask */
@@ -780,7 +780,7 @@ void StartCalculateTask(void const * argument)
 		uint32_t relSpeed=0;
 		for(i=0;i<MAX_OBJ_NUM;i++)						//获取可能碰撞的最小距离和相对速度
 		{
-			if(( 0.2*(RadarGeneral[i].Obj_DistLat - 204.6) * 2.0) < LANEWIDTH && RadarGeneral[i].Obj_DistLong < MinRange && RadarGeneral[i].Obj_DistLong != 0) 
+			if((( 0.2*RadarGeneral[i].Obj_DistLat - 204.6) * 2.0) < LANEWIDTH && RadarGeneral[i].Obj_DistLong < MinRange && RadarGeneral[i].Obj_DistLong != 0) 
 			//if(( 0.2*(RadarGeneral[i].Obj_DistLat-500) * 2.0) < LANEWIDTH && RadarGeneral[i].Obj_DistLong < MinRange) 
       {
 				MinRange = RadarGeneral[i].Obj_DistLong;				//此处仍然保留着整数原始状态
@@ -789,7 +789,7 @@ void StartCalculateTask(void const * argument)
 		}
 		if(MinRange<100)											//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
 		{
-			float VrelLong = 0.25* (relSpeed - 128);	//获取真实车速
+			float VrelLong = 0.25 * relSpeed - 128;	//获取真实车速
 			float TimetoCrash = (float)MinRange/VrelLong;
 			if(TimetoCrash<0.8)
 			{
