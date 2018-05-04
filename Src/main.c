@@ -198,12 +198,13 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
+//	delay_init(100);
 	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
 	ARS_Init(&hcan2);
-	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
-	osDelay(50);
-	WTN6_Broadcast(BELL_ADAS_START);
+//	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
+//	osDelay(50);
+//	WTN6_Broadcast(BELL_ADAS_START);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -625,7 +626,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(BELL_BUSY_GPIO_Port, BELL_BUSY_Pin, GPIO_PIN_RESET);
+ // HAL_GPIO_WritePin(BELL_BUSY_GPIO_Port, BELL_BUSY_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LED0_Pin|LED1_Pin|LED2_Pin, GPIO_PIN_RESET);
@@ -641,10 +642,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(BELL_DATA_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : BELL_BUSY_Pin */
-  GPIO_InitStruct.Pin = BELL_BUSY_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Pin = BELL_BUSY_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(BELL_BUSY_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED0_Pin LED1_Pin LED2_Pin */
@@ -751,7 +751,7 @@ void StartSoundWarningTask(void const * argument)
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
 			//WTN6_Broadcast(BELL_BB_1000MS);
-			osDelay(1000);
+			osDelay(500);
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
 		}
@@ -802,18 +802,18 @@ void StartCalculateTask(void const * argument)
 		MinRange = RadarGeneral[0].Obj_DistLong;
 		relSpeed = RadarGeneral[0].Obj_VrelLong;
 		
-		if((0.2*MinRange-500) < MAXRANGE && MinRange != 0)								//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
+		if((0.2*MinRange-500) < MAXRANGE && MinRange != 0)	//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
 		{
-			float VrelLong = 0.25 * relSpeed - 128;					//获取真实相对速度
-			MinRange = 0.2 * MinRange - 500;
-			float TimetoCrash = -(float)MinRange/VrelLong;	//相对速度为负
+			float VrelLong = 0.25 * relSpeed - 128;						//获取真实相对速度
+			float MinRangeLong = 0.2 * MinRange - 500;				//获取真实距离
+			float TimetoCrash = -(float)MinRangeLong/VrelLong;//相对速度为负
 			//if(TimetoCrash<0.8f)
-			if(TimetoCrash<1 && VrelLong < 0 && MinRange > 0)
+			if(TimetoCrash<1 && VrelLong < 0 && MinRangeLong > 0)
 			{
 				CrashWarningLv=WARNING_HIGH;
 			}
 			//else if(TimetoCrash<1)
-			else if(TimetoCrash<1.5f && VrelLong < 0 && MinRange > 0)
+			else if(TimetoCrash<1.5f && VrelLong < 0 && MinRangeLong > 0)
 			{
 				CrashWarningLv=WARNING_LOW;
 			}

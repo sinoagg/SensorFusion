@@ -2,11 +2,12 @@
 #include "delay.h"
 
 uint8_t fac_us;
+uint8_t fac_ms;
 
 void delay_init(uint8_t SYSCLK)
 {
     #if SYSTEM_SUPPORT_OS //?????? OS.
-        u32 reload;
+        uint32_t reload;
     #endif
     
     HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);

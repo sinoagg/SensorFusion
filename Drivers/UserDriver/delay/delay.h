@@ -5,7 +5,9 @@
  extern "C" {
 #endif
 
-#include "stm32f4xx_hal.h"	
+#include "stm32f4xx_hal.h"
+
+//#define SYSTEM_SUPPORT_OS 1	 
 	 
 void delay_init(uint8_t SYSCLK);	
 void Delay_us(uint32_t nus);
