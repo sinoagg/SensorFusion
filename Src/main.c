@@ -201,6 +201,8 @@ int main(void)
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
 	ARS_Init(&hcan2);
 	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
+	osDelay(50);
+	WTN6_Broadcast(BELL_ADAS_START);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -738,7 +740,7 @@ void StartSoundWarningTask(void const * argument)
 		{
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
-			WTN6_Broadcast(BELL_BB_500MS);
+			//WTN6_Broadcast(BELL_BB_500MS);
 			osDelay(1000);
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
@@ -747,7 +749,7 @@ void StartSoundWarningTask(void const * argument)
 		{
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
-			WTN6_Broadcast(BELL_BB_1000MS);
+			//WTN6_Broadcast(BELL_BB_1000MS);
 			osDelay(1000);
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
@@ -756,7 +758,7 @@ void StartSoundWarningTask(void const * argument)
 		{
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(LED2_GPIO_Port,LED2_Pin,GPIO_PIN_SET);
-			WTN6_Broadcast(BELL_STOP);
+			//WTN6_Broadcast(BELL_STOP);
 		}
 		osDelay(10);
   }

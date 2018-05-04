@@ -35,7 +35,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h)(0x5AD19A1B)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x5AD19A1B)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x5AD19A1B)
 I (..\Drivers\UserDriver\delay\delay.h)(0x5A979852)
-I (..\Drivers\UserDriver\WTN6040\WTN6040.h)(0x5AEAC3BD)
+I (..\Drivers\UserDriver\WTN6040\WTN6040.h)(0x5AEBC9DE)
 F (..\Drivers\UserDriver\InternalFlash\InternalFlash.c)(0x5AC188EC)(--c99 -c --cpu Cortex-M4.fp -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Drivers/CMSIS/Include -I..\Drivers\UserDriver\ADAS -I..\Drivers\UserDriver\InternalFlash -I..\Drivers\UserDriver\WTN6040 -I..\Drivers\UserDriver\delay -I..\Drivers\UserDriver\ARS408-I E:\CodesCircuits\AEBS\SensorFusion\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.13.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="517" -D_RTE_ -DSTM32F413xx -DUSE_HAL_DRIVER -DSTM32F413xx-o sensorfusion\internalflash.o --omf_browse sensorfusion\internalflash.crf --depend sensorfusion\internalflash.d)
 I (..\Drivers\UserDriver\InternalFlash\InternalFlash.h)(0x5AC188EC)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x5AD19A1B)
@@ -71,7 +71,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h)(0x5AD19A1B)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x5AD19A1B)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x5AD19A1B)
 F (..\Drivers\UserDriver\WTN6040\WTN6040.c)(0x5AEAC3BD)(--c99 -c --cpu Cortex-M4.fp -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Drivers/CMSIS/Include -I..\Drivers\UserDriver\ADAS -I..\Drivers\UserDriver\InternalFlash -I..\Drivers\UserDriver\WTN6040 -I..\Drivers\UserDriver\delay -I..\Drivers\UserDriver\ARS408-I E:\CodesCircuits\AEBS\SensorFusion\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.13.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="517" -D_RTE_ -DSTM32F413xx -DUSE_HAL_DRIVER -DSTM32F413xx-o sensorfusion\wtn6040.o --omf_browse sensorfusion\wtn6040.crf --depend sensorfusion\wtn6040.d)
-I (..\Drivers\UserDriver\WTN6040\WTN6040.h)(0x5AEAC3BD)
+I (..\Drivers\UserDriver\WTN6040\WTN6040.h)(0x5AEBC9DE)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x5AD19A1B)
 I (../Inc/stm32f4xx_hal_conf.h)(0x5AD43A57)
 I (../Inc/main.h)(0x5AE29580)
@@ -301,7 +301,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h)(0x5AD19A1B)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h)(0x5AD19A1B)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x5AD19A1B)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x5AD19A1B)
-F (../Src/main.c)(0x5AEADF13)(--c99 -c --cpu Cortex-M4.fp -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Drivers/CMSIS/Include -I..\Drivers\UserDriver\ADAS -I..\Drivers\UserDriver\InternalFlash -I..\Drivers\UserDriver\WTN6040 -I..\Drivers\UserDriver\delay -I..\Drivers\UserDriver\ARS408-I E:\CodesCircuits\AEBS\SensorFusion\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.13.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="517" -D_RTE_ -DSTM32F413xx -DUSE_HAL_DRIVER -DSTM32F413xx-o sensorfusion\main.o --omf_browse sensorfusion\main.crf --depend sensorfusion\main.d)
+F (../Src/main.c)(0x5AEBD4DC)(--c99 -c --cpu Cortex-M4.fp -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Drivers/CMSIS/Include -I..\Drivers\UserDriver\ADAS -I..\Drivers\UserDriver\InternalFlash -I..\Drivers\UserDriver\WTN6040 -I..\Drivers\UserDriver\delay -I..\Drivers\UserDriver\ARS408-I E:\CodesCircuits\AEBS\SensorFusion\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.13.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="517" -D_RTE_ -DSTM32F413xx -DUSE_HAL_DRIVER -DSTM32F413xx-o sensorfusion\main.o --omf_browse sensorfusion\main.crf --depend sensorfusion\main.d)
 I (../Inc/main.h)(0x5AE29580)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x5AD19A1B)
 I (../Inc/stm32f4xx_hal_conf.h)(0x5AD43A57)
@@ -351,7 +351,7 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h)(0x5AD19A1D)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h)(0x5AD19A1D)
 I (..\Drivers\UserDriver\ADAS\ADAS.h)(0x5ACF18AA)
 I (..\Drivers\UserDriver\delay\delay.h)(0x5A979852)
-I (..\Drivers\UserDriver\WTN6040\WTN6040.h)(0x5AEAC3BD)
+I (..\Drivers\UserDriver\WTN6040\WTN6040.h)(0x5AEBC9DE)
 I (..\Drivers\UserDriver\InternalFlash\InternalFlash.h)(0x5AC188EC)
 I (..\Drivers\UserDriver\ARS408\ARS408.h)(0x5AEACBE9)
 F (../Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c)(0x5AD19A1D)(--c99 -c --cpu Cortex-M4.fp -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Drivers/CMSIS/Include -I..\Drivers\UserDriver\ADAS -I..\Drivers\UserDriver\InternalFlash -I..\Drivers\UserDriver\WTN6040 -I..\Drivers\UserDriver\delay -I..\Drivers\UserDriver\ARS408-I E:\CodesCircuits\AEBS\SensorFusion\MDK-ARM\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\5.3.0\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.13.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="517" -D_RTE_ -DSTM32F413xx -DUSE_HAL_DRIVER -DSTM32F413xx-o sensorfusion\heap_4.o --omf_browse sensorfusion\heap_4.crf --depend sensorfusion\heap_4.d)
