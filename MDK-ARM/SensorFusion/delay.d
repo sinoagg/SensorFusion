@@ -1,4 +1,5 @@
 sensorfusion\delay.o: ..\Drivers\UserDriver\delay\delay.c
+sensorfusion\delay.o: ..\Drivers\UserDriver\delay\delay.h
 sensorfusion\delay.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 sensorfusion\delay.o: ../Inc/stm32f4xx_hal_conf.h
 sensorfusion\delay.o: ../Inc/main.h
@@ -32,4 +33,13 @@ sensorfusion\delay.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
 sensorfusion\delay.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 sensorfusion\delay.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 sensorfusion\delay.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
-sensorfusion\delay.o: ..\Drivers\UserDriver\delay\delay.h
+sensorfusion\delay.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+sensorfusion\delay.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+sensorfusion\delay.o: ../Inc/FreeRTOSConfig.h
+sensorfusion\delay.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+sensorfusion\delay.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+sensorfusion\delay.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+sensorfusion\delay.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+sensorfusion\delay.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+sensorfusion\delay.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+sensorfusion\delay.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h

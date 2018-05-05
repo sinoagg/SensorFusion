@@ -198,13 +198,15 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-//	delay_init(100);
+	delay_init(100);
 	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
 	ARS_Init(&hcan2);
-//	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
-//	osDelay(50);
-//	WTN6_Broadcast(BELL_ADAS_START);
+	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
+	delay_ms(50);
+	WTN6_Broadcast(BELL_ADAS_START);
+	delay_ms(50);
+	WTN6_Broadcast(BELL_BB_1000MS);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -623,7 +625,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
  // HAL_GPIO_WritePin(BELL_BUSY_GPIO_Port, BELL_BUSY_Pin, GPIO_PIN_RESET);

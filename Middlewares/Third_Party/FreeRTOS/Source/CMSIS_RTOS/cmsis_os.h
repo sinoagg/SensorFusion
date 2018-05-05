@@ -521,6 +521,7 @@ osPriority osThreadGetPriority (osThreadId thread_id);
 /// \param[in]     millisec      time delay value
 /// \return status code that indicates the execution status of the function.
 osStatus osDelay (uint32_t millisec);
+osStatus osDelay_us (uint32_t usec);
 
 #if (defined (osFeature_Wait)  &&  (osFeature_Wait != 0))     // Generic Wait available
 

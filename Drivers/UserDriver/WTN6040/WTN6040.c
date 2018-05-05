@@ -1,5 +1,6 @@
 #include "WTN6040.h"
 #include "stm32f4xx_hal.h"
+#include "cmsis_os.h"
 #include "delay.h"
 #include "main.h"
 
@@ -11,28 +12,29 @@ uint8_t WTN6_Broadcast(uint8_t addr)
 	{
 		uint8_t bit_data;
 		uint8_t j;
-		HAL_GPIO_WritePin(GPIOD, BELL_DATA_Pin, GPIO_PIN_RESET);
-		Delay_ms(5); 
+		HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_RESET);
+		//osDelay(5);
+		delay_ms(5); 
 		for(j=0;j<8;j++)
 		{
 			bit_data = addr&0X01;
 			if(bit_data == 1)
 			{
-				HAL_GPIO_WritePin(GPIOD, BELL_DATA_Pin, GPIO_PIN_SET);
-				Delay_us(600); 
-				HAL_GPIO_WritePin(GPIOD, BELL_DATA_Pin, GPIO_PIN_RESET);
-				Delay_us(200);
+				HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_SET);
+				delay_us(600); 
+				HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_RESET);
+				delay_us(200);
 			}
 			else
 			{
-				HAL_GPIO_WritePin(GPIOD, BELL_DATA_Pin, GPIO_PIN_SET);
-				Delay_us(200);
-				HAL_GPIO_WritePin(GPIOD, BELL_DATA_Pin, GPIO_PIN_RESET);
-				Delay_us(600); 
+				HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_SET);
+				delay_us(200);
+				HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_RESET);
+				delay_us(600); 
 			}
 			addr = addr>>1;
 		}
-		HAL_GPIO_WritePin(GPIOD, BELL_DATA_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_SET);
 		return 0;
 	}
 	else 
