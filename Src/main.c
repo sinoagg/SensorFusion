@@ -203,9 +203,9 @@ int main(void)
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
 	ARS_Init(&hcan2);
 	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
-	delay_ms(50);
+	delay_ms(100);
 	WTN6_Broadcast(BELL_ADAS_START);
-	delay_ms(50);
+	delay_ms(5000);
 	WTN6_Broadcast(BELL_BB_1000MS);
   /* USER CODE END 2 */
 
