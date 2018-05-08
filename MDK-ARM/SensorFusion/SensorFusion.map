@@ -126,7 +126,7 @@ Section Cross References
     main.o(i.HAL_TIM_PeriodElapsedCallback) refers to stm32f4xx_hal.o(i.HAL_IncTick) for HAL_IncTick
     main.o(i.HAL_UART_RxCpltCallback) refers to stm32f4xx_hal_uart.o(i.HAL_UART_DMAStop) for HAL_UART_DMAStop
     main.o(i.HAL_UART_RxCpltCallback) refers to cmsis_os.o(i.osSemaphoreRelease) for osSemaphoreRelease
-    main.o(i.HAL_UART_RxCpltCallback) refers to main.o(.bss) for huart5
+    main.o(i.HAL_UART_RxCpltCallback) refers to main.o(.bss) for huart1
     main.o(i.HAL_UART_RxCpltCallback) refers to main.o(.data) for CmdRxComplete
     main.o(i.MX_CAN1_Init) refers to stm32f4xx_hal_can.o(i.HAL_CAN_Init) for HAL_CAN_Init
     main.o(i.MX_CAN1_Init) refers to main.o(i._Error_Handler) for _Error_Handler
@@ -190,7 +190,7 @@ Section Cross References
     main.o(i.StartCmdRxTask) refers to cmsis_os.o(i.osSemaphoreRelease) for osSemaphoreRelease
     main.o(i.StartCmdRxTask) refers to cmsis_os.o(i.osDelay) for osDelay
     main.o(i.StartCmdRxTask) refers to main.o(.data) for CmdRxBuf
-    main.o(i.StartCmdRxTask) refers to main.o(.bss) for huart5
+    main.o(i.StartCmdRxTask) refers to main.o(.bss) for huart1
     main.o(i.StartDefaultTask) refers to cmsis_os.o(i.osDelay) for osDelay
     main.o(i.StartLightWarningTask) refers to cmsis_os.o(i.osSemaphoreWait) for osSemaphoreWait
     main.o(i.StartLightWarningTask) refers to cmsis_os.o(i.osDelay) for osDelay

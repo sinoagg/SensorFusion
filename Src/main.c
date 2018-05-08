@@ -539,7 +539,7 @@ static void MX_UART5_Init(void)
 {
 
   huart5.Instance = UART5;
-  huart5.Init.BaudRate = 19200;
+  huart5.Init.BaudRate = 115200;
   huart5.Init.WordLength = UART_WORDLENGTH_8B;
   huart5.Init.StopBits = UART_STOPBITS_1;
   huart5.Init.Parity = UART_PARITY_NONE;
@@ -558,7 +558,7 @@ static void MX_USART1_UART_Init(void)
 {
 
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 19200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -709,19 +709,19 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if(huart->Instance == huart5.Instance)
+	if(huart->Instance == huart1.Instance)
   {
     uint32_t tmp_flag = 0;
 		uint32_t temp = 0;
 	
-		tmp_flag =  __HAL_UART_GET_FLAG(&huart5,UART_FLAG_IDLE);
+		tmp_flag =  __HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE);
 		if((tmp_flag != RESET))
 		{ 
-			__HAL_UART_CLEAR_IDLEFLAG(&huart5);
-			temp = huart5.Instance->SR;
-			temp = huart5.Instance->DR;
-			HAL_UART_DMAStop(&huart5);
-			temp  = hdma_uart5_rx.Instance->NDTR;
+			__HAL_UART_CLEAR_IDLEFLAG(&huart1);
+			temp = huart1.Instance->SR;
+			temp = huart1.Instance->DR;
+			HAL_UART_DMAStop(&huart1);
+			temp  = hdma_usart1_rx.Instance->NDTR;
 			//rx_len =  BUFFER_SIZE - temp;
 			CmdRxComplete = 1;
       osSemaphoreRelease(bSemCmdRxSigHandle);
@@ -776,7 +776,7 @@ void StartCmdRxTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    HAL_UART_Receive_DMA(&huart5, CmdRxBuf, 4);//接收指令信息
+    HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//接收指令信息
     if(1 == CmdRxComplete)  //指令接收完成
     {
       CmdRxComplete = 0;
@@ -790,7 +790,7 @@ void StartCmdRxTask(void const * argument)
             osSemaphoreRelease(bSemRadarDataTxSigHandle);
             break;
           case 0x13:  //停止发送数据
-						
+						//osThreadSuspend
             break;
           default:
             break;
@@ -820,14 +820,14 @@ void StartRadarDataTxTask(void const * argument)
     {
       RadarData.Sys_State = RADAR_OK; //雷达数据发送系统正常工作
       FillRadarDataBuf();
-      HAL_UART_Transmit(&huart5, CmdRadarDataBuf, 11, 100);
+      HAL_UART_Transmit(&huart1, CmdRadarDataBuf, 11, 100);
 			//EN = 0;//转换接收状态
     }
     else
     {
       RadarData.Sys_State = RADAR_DEFAULT;   //系统错误
       FillRadarDataBuf();
-      HAL_UART_Transmit(&huart5, CmdRadarDataBuf, 11, 100);
+      HAL_UART_Transmit(&huart1, CmdRadarDataBuf, 11, 100);
 			//EN = 0;//转换接收状态
     }
     osDelay(10);
