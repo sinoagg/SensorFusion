@@ -222,11 +222,11 @@ int main(void)
   __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //雷达数据发送串口接收使能
 	HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);		//接收指令信息
 	ARS_Init(&hcan2);
-	//WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
-	//delay_ms(100);
-	//WTN6_Broadcast(BELL_ADAS_START);
-	//delay_ms(5000);
-	//WTN6_Broadcast(BELL_BB_1000MS);
+	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
+	delay_ms(100);
+	WTN6_Broadcast(BELL_ADAS_START);
+	delay_ms(5000);
+	WTN6_Broadcast(BELL_BB_1000MS);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */

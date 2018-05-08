@@ -3,7 +3,7 @@
 #include "stm32f4xx_hal.h"
 
 //bell ring address
-#define BELL_LOUDEST			0xEE
+#define BELL_LOUDEST			0xEF
 
 #define BELL_ADAS_START		0x00
 #define BELL_ADAS_OK			0x01
