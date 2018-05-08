@@ -38,6 +38,7 @@
 
 /* USER CODE BEGIN 0 */
 extern uint8_t ADASRxComplete;
+extern uint8_t UART1RxComplete;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -256,9 +257,22 @@ void USART1_IRQHandler(void)
   /* USER CODE BEGIN USART1_IRQn 0 */
 
   /* USER CODE END USART1_IRQn 0 */
-  HAL_UART_IRQHandler(&huart1);
+  //HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
+	uint32_t tmp_flag = 0;
+	uint32_t temp = 0;
 
+	tmp_flag =  __HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE);
+	if((tmp_flag != RESET))
+	{ 
+		__HAL_UART_CLEAR_IDLEFLAG(&huart1);
+		temp = huart1.Instance->SR;
+		temp = huart1.Instance->DR;
+		HAL_UART_DMAStop(&huart1);
+		temp  = hdma_usart1_rx.Instance->NDTR;
+		//rx_len =  BUFFER_SIZE - temp;
+		UART1RxComplete=1;
+	 }
   /* USER CODE END USART1_IRQn 1 */
 }
 

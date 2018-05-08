@@ -92,7 +92,7 @@ osThreadId SoundWarningHandle;
 osThreadId LightWarningHandle;
 osThreadId CANSpeedReadHandle;
 osThreadId StartCalculateHandle;
-osThreadId CmdRxHandle;
+osThreadId UART1RxHandle;
 osThreadId RadarDataTxHandle;
 osSemaphoreId bSemRadarCANRxSigHandle;
 osSemaphoreId bSemADASRxSigHandle;
@@ -100,7 +100,7 @@ osSemaphoreId bSemSoundWarningSigHandle;
 osSemaphoreId bSemLightWarningSigHandle;
 osSemaphoreId bSemSpeedRxSigHandle;
 osSemaphoreId bSemCalculateSigHandle;
-osSemaphoreId bSemCmdRxSigHandle;
+osSemaphoreId bSemUART1RxSigHandle;
 osSemaphoreId bSemRadarDataTxSigHandle;
 
 /* USER CODE BEGIN PV */
@@ -123,6 +123,7 @@ CAN_RxHeaderTypeDef RadarCANRxHeader;
 ADAS_HandleTypeDef ADAS_dev;
 uint8_t MW_RadarRxComplete=0;
 uint8_t ADASRxComplete=0;
+uint8_t UART1RxComplete=0;
 uint8_t SpeedRxComplete=0;
 uint8_t CmdRxComplete=0;
 uint8_t ADASRxBuf[32]={0};
@@ -158,7 +159,7 @@ void StartSoundWarningTask(void const * argument);
 void StartLightWarningTask(void const * argument);
 void StartCANSpeedReadTask(void const * argument);
 void StartCalculateTask(void const * argument);
-void StartCmdRxTask(void const * argument);
+void StartUART1RxTask(void const * argument);
 void StartRadarDataTxTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
@@ -218,13 +219,14 @@ int main(void)
 	delay_init(100);
 	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
-  __HAL_UART_ENABLE_IT(&huart5, UART_IT_IDLE);  //雷达数据发送串口接收使能
+  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //雷达数据发送串口接收使能
+	HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);		//接收指令信息
 	ARS_Init(&hcan2);
-	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
-	delay_ms(100);
-	WTN6_Broadcast(BELL_ADAS_START);
-	delay_ms(5000);
-	WTN6_Broadcast(BELL_BB_1000MS);
+	//WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
+	//delay_ms(100);
+	//WTN6_Broadcast(BELL_ADAS_START);
+	//delay_ms(5000);
+	//WTN6_Broadcast(BELL_BB_1000MS);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -245,10 +247,11 @@ int main(void)
   bSemSpeedRxSigHandle = osSemaphoreCreate(osSemaphore(bSemSpeedRxSig), 1);
 	osSemaphoreDef(bSemCalculateSig);
 	bSemCalculateSigHandle = osSemaphoreCreate(osSemaphore(bSemCalculateSig), 1);
-  osSemaphoreDef(bSemCmdRxSig);
-  bSemCalculateSigHandle = osSemaphoreCreate(osSemaphore(bSemCmdRxSig), 1);
+  osSemaphoreDef(bSemUART1RxSig);
+  bSemUART1RxSigHandle = osSemaphoreCreate(osSemaphore(bSemUART1RxSig), 1);
   osSemaphoreDef(bSemRadarDataTxSig);
-  bSemCalculateSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarDataTxSig), 1);
+  bSemRadarDataTxSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarDataTxSig), 1);
+
 	
 	osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
 	osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
@@ -256,8 +259,8 @@ int main(void)
   osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  osSemaphoreWait(bSemCmdRxSigHandle, osWaitForever);         //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever);   //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever);   //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   
   
 
@@ -299,12 +302,13 @@ int main(void)
 	osThreadDef(CalculateTask, StartCalculateTask, osPriorityNormal, 0, 128);
   StartCalculateHandle = osThreadCreate(osThread(CalculateTask), NULL);
 
-  osThreadDef(CmdRxTask, StartCmdRxTask, osPriorityNormal, 0, 128);
-  StartCalculateHandle = osThreadCreate(osThread(CmdRxTask), NULL);
+  osThreadDef(UART1RxTask, StartUART1RxTask, osPriorityNormal, 0, 128);
+  UART1RxHandle = osThreadCreate(osThread(UART1RxTask), NULL);
 
   osThreadDef(RadarDataTxTask, StartRadarDataTxTask, osPriorityNormal, 0, 128);
-  StartCalculateHandle = osThreadCreate(osThread(RadarDataTxTask), NULL);
-  
+  RadarDataTxHandle = osThreadCreate(osThread(RadarDataTxTask), NULL);
+
+	osThreadSuspend( RadarDataTxHandle );		//挂起串口发送雷达数据线程
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -707,27 +711,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   }
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	if(huart->Instance == huart1.Instance)
-  {
-    uint32_t tmp_flag = 0;
-		uint32_t temp = 0;
-	
-		tmp_flag =  __HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE);
-		if((tmp_flag != RESET))
-		{ 
-			__HAL_UART_CLEAR_IDLEFLAG(&huart1);
-			temp = huart1.Instance->SR;
-			temp = huart1.Instance->DR;
-			HAL_UART_DMAStop(&huart1);
-			temp  = hdma_usart1_rx.Instance->NDTR;
-			//rx_len =  BUFFER_SIZE - temp;
-			CmdRxComplete = 1;
-      osSemaphoreRelease(bSemCmdRxSigHandle);
-		 }
-  }
-}
 /* USER CODE END 4 */
 
 /* StartDefaultTask function */
@@ -738,6 +721,12 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+		if(UART1RxComplete==1)
+		{
+			osSemaphoreRelease(bSemUART1RxSigHandle);
+			HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//接收指令信息
+			UART1RxComplete=0;
+		}
 		osDelay(100);
   }
   /* USER CODE END 5 */ 
@@ -770,32 +759,30 @@ void StartRadarCommTask(void const * argument)
   /* USER CODE END StartRadarCommTask */
 }
 
-void StartCmdRxTask(void const * argument)
+void StartUART1RxTask(void const * argument)
 {
   /* USER CODE BEGIN StartCmdRxTask */
   /* Infinite loop */
   for(;;)
   {
-    HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//接收指令信息
-    if(1 == CmdRxComplete)  //指令接收完成
-    {
-      CmdRxComplete = 0;
-      HAL_GPIO_TogglePin(LED3_GPIO_Port,LED3_Pin);
-      if(0x01 == CmdRxBuf[0] && 0xA5 == CmdRxBuf[2] && 0x5A == CmdRxBuf[3]) //接收到启动或停止指令
-      {
-        switch(CmdRxBuf[1])
-        {
-          case 0x12:  //启动输出数据
-						//EN = 1; //发送状态
-            osSemaphoreRelease(bSemRadarDataTxSigHandle);
-            break;
-          case 0x13:  //停止发送数据
-						//osThreadSuspend
-            break;
-          default:
-            break;
-        }
-      }
+		osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);
+      
+		HAL_GPIO_TogglePin(LED3_GPIO_Port,LED3_Pin);
+		osDelay(1000);
+		if(0x01 == CmdRxBuf[0] && 0xA5 == CmdRxBuf[2] && 0x5A == CmdRxBuf[3]) //接收到启动或停止指令
+		{
+			switch(CmdRxBuf[1])
+			{
+				case 0x12:  //启动输出数据
+					//EN = 1; //发送状态
+					osThreadResume(RadarDataTxHandle);
+					break;
+				case 0x13:  //停止发送数据
+					osThreadSuspend(RadarDataTxHandle);
+					break;
+				default:
+					break;
+			}   
     }
     osSemaphoreRelease(bSemRadarDataTxSigHandle);
     osDelay(10);
@@ -813,24 +800,23 @@ void StartRadarDataTxTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever);
     HAL_GPIO_TogglePin(LED5_GPIO_Port,LED5_Pin);
     uint8_t speed = 50;
     if(GetRadarData(CrashWarningLv, speed, MinRangeLong, TimetoCrash) == 0)
     {
       RadarData.Sys_State = RADAR_OK; //雷达数据发送系统正常工作
       FillRadarDataBuf();
-      HAL_UART_Transmit(&huart1, CmdRadarDataBuf, 11, 100);
+      HAL_UART_Transmit(&huart1, CmdRadarDataBuf, 11, 1000);
 			//EN = 0;//转换接收状态
     }
     else
     {
       RadarData.Sys_State = RADAR_DEFAULT;   //系统错误
       FillRadarDataBuf();
-      HAL_UART_Transmit(&huart1, CmdRadarDataBuf, 11, 100);
+      HAL_UART_Transmit(&huart1, CmdRadarDataBuf, 11, 1000);
 			//EN = 0;//转换接收状态
     }
-    osDelay(10);
+    osDelay(100);
   }
   /* USER CODE END StartRadarDataTxTask */
 }
@@ -944,7 +930,7 @@ void StartCalculateTask(void const * argument)
 				CrashWarningLv=WARNING_NONE;
 		}
 		osSemaphoreRelease(bSemSoundWarningSigHandle);
-		osDelay(1);
+		osDelay(2);
 	}
 }
 
