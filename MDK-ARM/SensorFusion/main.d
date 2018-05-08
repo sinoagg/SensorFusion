@@ -52,3 +52,4 @@ sensorfusion\main.o: ..\Drivers\UserDriver\delay\delay.h
 sensorfusion\main.o: ..\Drivers\UserDriver\WTN6040\WTN6040.h
 sensorfusion\main.o: ..\Drivers\UserDriver\InternalFlash\InternalFlash.h
 sensorfusion\main.o: ..\Drivers\UserDriver\ARS408\ARS408.h
+sensorfusion\main.o: ..\Drivers\UserDriver\cmd\cmd.h

@@ -451,6 +451,11 @@
               <FileType>1</FileType>
               <FilePath>..\Drivers\UserDriver\ARS408\ARS408.c</FilePath>
             </File>
+            <File>
+              <FileName>cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\cmd.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -5,6 +5,7 @@
 "sensorfusion\wtn6040.o"
 "sensorfusion\delay.o"
 "sensorfusion\ars408.o"
+"sensorfusion\cmd.o"
 "sensorfusion\freertos.o"
 "sensorfusion\stm32f4xx_it.o"
 "sensorfusion\stm32f4xx_hal_timebase_tim.o"
