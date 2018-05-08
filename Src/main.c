@@ -128,7 +128,7 @@ uint8_t SpeedRxComplete=0;
 uint8_t CmdRxComplete=0;
 uint8_t ADASRxBuf[32]={0};
 uint8_t CmdRxBuf[4]={0};
-uint8_t CmdRadarDataBuf[11];
+uint8_t CmdRadarDataTxBuf[11];
 uint8_t RadarCANRxBuf[8]={0};
 uint8_t CrashWarningLv=WARNING_NONE;
 
@@ -260,7 +260,7 @@ int main(void)
   osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever);   //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever); //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   
   
 
@@ -802,19 +802,19 @@ void StartRadarDataTxTask(void const * argument)
   {
     HAL_GPIO_TogglePin(LED5_GPIO_Port,LED5_Pin);
     uint8_t speed = 50;
-    if(GetRadarData(CrashWarningLv, speed, MinRangeLong, TimetoCrash) == 0)
+    if(GetRadarData(CrashWarningLv, speed, MinRangeLong, TimetoCrash) == 0)	//获取雷达数据成功
     {
-      RadarData.Sys_State = RADAR_OK; //雷达数据发送系统正常工作
-      FillRadarDataBuf();
-      HAL_UART_Transmit(&huart1, CmdRadarDataBuf, 11, 1000);
-			//EN = 0;//转换接收状态
+      RadarData.Sys_State = RADAR_OK;			//雷达数据发送系统正常工作
+      FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
+      HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
+			//使用RS85时需要让EN = 0;//转换接收状态
     }
     else
     {
-      RadarData.Sys_State = RADAR_DEFAULT;   //系统错误
-      FillRadarDataBuf();
-      HAL_UART_Transmit(&huart1, CmdRadarDataBuf, 11, 1000);
-			//EN = 0;//转换接收状态
+      RadarData.Sys_State = RADAR_ERROR;	//雷达数据发送系统错误
+      FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
+      HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
+			//使用RS485时需要让EN = 0;//转换接收状态
     }
     osDelay(100);
   }
@@ -849,25 +849,25 @@ void StartSoundWarningTask(void const * argument)
 		if(CrashWarningLv==WARNING_HIGH)
 		{
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
-			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
+			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
 			//WTN6_Broadcast(BELL_BB_500MS);
 			osDelay(1000);
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
+			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
 		}
 		else if(CrashWarningLv==WARNING_LOW)
 		{
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
-			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
+			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
 			//WTN6_Broadcast(BELL_BB_1000MS);
 			osDelay(500);
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-			HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
+			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
 		}
 		else
 		{
 			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(LED2_GPIO_Port,LED2_Pin,GPIO_PIN_SET);
+			HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_SET);
 			//WTN6_Broadcast(BELL_STOP);
 		}
 		osDelay(10);

@@ -4,7 +4,7 @@
 #include "stm32f4xx_hal.h"
 
 #define RADAR_OK 0x00
-#define RADAR_DEFAULT 0x01
+#define RADAR_ERROR 0x01
 typedef union
 {
 	float f;
@@ -14,7 +14,7 @@ typedef union
 /**
  * Sys_State
  * 		0x00 OK
- * 		0x01 DEFAULT
+ * 		0x01 ERROR
  * 	Warning_State(defined in main.c)
  * 		0x00 WARNING_NONE
  * 		0x01 WARNING_LOW
@@ -42,6 +42,6 @@ extern uint8_t CmdRadarDataBuf[];
 extern Cmd_RadarData RadarData;
 
 uint8_t GetRadarData(uint8_t warning_state, uint8_t vehicle_speed, float dist, float crashing_time);
-void FillRadarDataBuf(void);
+void FillRadarDataTxBuf(uint8_t * pCmdRadarData, Cmd_RadarData RadarData);
 
 #endif
