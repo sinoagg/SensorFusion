@@ -118,6 +118,7 @@ MW_RadarFilterConfig RadarFilterConfig;
 MW_RadarObjStatus RadarObjStatus;
 MW_RadarGeneral RadarGeneral[16];
 
+
 Cmd_RadarData RadarData;
 
 CAN_RxHeaderTypeDef RadarCANRxHeader;
@@ -166,6 +167,8 @@ void StartCalculateTask(void const * argument);
 void StartUART1RxTask(void const * argument);
 void StartRadarDataTxTask(void const * argument);
 
+uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan);
+
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
@@ -211,7 +214,7 @@ int main(void)
   MX_DMA_Init();
   MX_CAN1_Init();
   MX_CAN2_Init();
-  MX_CAN3_Init();
+  //MX_CAN3_Init();
   MX_CRC_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
@@ -226,6 +229,7 @@ int main(void)
   __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //雷达数据发送串口接收使能
 	HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);		//接收指令信息
 	ARS_Init(&hcan2);
+	//Vehicle_CAN_Init(&hcan3);										//warning! not working
 	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
 	delay_ms(100);
 	WTN6_Broadcast(BELL_ADAS_START);
@@ -667,7 +671,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
- // HAL_GPIO_WritePin(BELL_BUSY_GPIO_Port, BELL_BUSY_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(BELL_BUSY_GPIO_Port, BELL_BUSY_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LED0_Pin|LED1_Pin|LED2_Pin, GPIO_PIN_RESET);
@@ -724,7 +728,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 {
 	//配置CAN3滤波器接收车速信息
-	CAN_FilterTypeDef VehicleCANFilter={VEHICLE_SPEED_ADDR_HIGH<<5,VEHICLE_SPEED_ADDR_LOW<<5,0xFFA6<<5,0xFF<<5,CAN_FILTER_FIFO1, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};
+	CAN_FilterTypeDef VehicleCANFilter={VEHICLE_SPEED_ADDR_HIGH<<5,VEHICLE_SPEED_ADDR_LOW<<5,0xFA6<<5,0,CAN_FILTER_FIFO1, 13, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,13};
 	HAL_CAN_ConfigFilter(hcan, &VehicleCANFilter);
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
