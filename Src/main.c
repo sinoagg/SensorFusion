@@ -220,8 +220,8 @@ int main(void)
 	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
   __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //雷达数据发送串口接收使能
-	HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);		//接收指令信息
-	ARS_Init(&hcan2);
+	//HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);		//接收指令信息
+	
 	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
 	delay_ms(100);
 	WTN6_Broadcast(BELL_ADAS_START);
@@ -286,11 +286,11 @@ int main(void)
   ADASCommHandle = osThreadCreate(osThread(ADASComm), NULL);
 
   /* definition and creation of SoundWarning */
-  osThreadDef(SoundWarning, StartSoundWarningTask, osPriorityIdle, 0, 128);
+  osThreadDef(SoundWarning, StartSoundWarningTask, osPriorityIdle, 0, 64);
   SoundWarningHandle = osThreadCreate(osThread(SoundWarning), NULL);
 
   /* definition and creation of LightWarning */
-  osThreadDef(LightWarning, StartLightWarningTask, osPriorityIdle, 0, 128);
+  osThreadDef(LightWarning, StartLightWarningTask, osPriorityIdle, 0, 64);
   LightWarningHandle = osThreadCreate(osThread(LightWarning), NULL);
 
   /* definition and creation of CANSpeedRead */
@@ -315,7 +315,7 @@ int main(void)
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
  
-
+	ARS_Init(&hcan2);
   /* Start scheduler */
   osKernelStart();
   
