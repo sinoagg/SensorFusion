@@ -708,6 +708,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
   	osSemaphoreRelease(bSemRadarCANRxSigHandle);
   	//__HAL_CAN_CLEAR_FLAG(hcan, CAN_FLAG_FF0);
+		HAL_CAN_DeactivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);		// 关闭中断
   }
 }
 
@@ -753,7 +754,7 @@ void StartRadarCommTask(void const * argument)
 				minRadarDistFlag = 0;
 				ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);//获取最近目标数据，即收到的第一个目标
 			}
-			
+		HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);		//再次打开中断	
 		osDelay(1);
   }
   /* USER CODE END StartRadarCommTask */
