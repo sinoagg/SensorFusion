@@ -63,6 +63,8 @@
 #define MAX_DECELARATION 0.4*9.8				//制动系统最大减速度
 #define DELAY_TIME	0.4									//系统延迟时间
 #define LIMIT_RANGE 100									//计算碰撞时间的极限距离/m
+#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
+#define VEHICLE_SPEED_ADDR_LOW 0x6E0B
 //#define CONFIG_ARS408_RADAR
 /* USER CODE END Includes */
 
@@ -116,9 +118,11 @@ MW_RadarFilterConfig RadarFilterConfig;
 MW_RadarObjStatus RadarObjStatus;
 MW_RadarGeneral RadarGeneral[16];
 
+
 Cmd_RadarData RadarData;
 
 CAN_RxHeaderTypeDef RadarCANRxHeader;
+CAN_RxHeaderTypeDef VehicleCANRxHeader;
 
 ADAS_HandleTypeDef ADAS_dev;
 uint8_t MW_RadarRxComplete=0;
@@ -130,6 +134,7 @@ uint8_t ADASRxBuf[32]={0};
 uint8_t CmdRxBuf[4]={0};
 uint8_t CmdRadarDataTxBuf[11];
 uint8_t RadarCANRxBuf[8]={0};
+uint8_t VehicleCANRxBuf[8]={0};
 uint8_t CrashWarningLv=WARNING_NONE;
 
 float VrelLong = 0.0;
@@ -161,6 +166,8 @@ void StartCANSpeedReadTask(void const * argument);
 void StartCalculateTask(void const * argument);
 void StartUART1RxTask(void const * argument);
 void StartRadarDataTxTask(void const * argument);
+
+uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -220,8 +227,7 @@ int main(void)
 	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
   __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //雷达数据发送串口接收使能
-	//HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);		//接收指令信息
-	
+
 	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
 	delay_ms(100);
 	WTN6_Broadcast(BELL_ADAS_START);
@@ -316,6 +322,7 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
  
 	ARS_Init(&hcan2);
+  Vehicle_CAN_Init(&hcan3); 
   /* Start scheduler */
   osKernelStart();
   
@@ -444,7 +451,7 @@ static void MX_CAN3_Init(void)
 {
 
   hcan3.Instance = CAN3;
-  hcan3.Init.Prescaler = 10;
+  hcan3.Init.Prescaler = 20;
   hcan3.Init.Mode = CAN_MODE_NORMAL;
   hcan3.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan3.Init.TimeSeg1 = CAN_BS1_5TQ;
@@ -663,7 +670,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
- // HAL_GPIO_WritePin(BELL_BUSY_GPIO_Port, BELL_BUSY_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(BELL_BUSY_GPIO_Port, BELL_BUSY_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LED0_Pin|LED1_Pin|LED2_Pin, GPIO_PIN_RESET);
@@ -708,8 +715,25 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
   	osSemaphoreRelease(bSemRadarCANRxSigHandle);
   	//__HAL_CAN_CLEAR_FLAG(hcan, CAN_FLAG_FF0);
-		HAL_CAN_DeactivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);		// 关闭中断
+		HAL_CAN_DeactivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);		// 关闭中断
   }
+	if(hcan->Instance == hcan3.Instance)
+	{
+		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO1, &VehicleCANRxHeader, VehicleCANRxBuf);
+		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
+  	//osSemaphoreRelease(bSemRadarCANRxSigHandle);
+	}
+}
+
+uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
+{
+	//配置CAN3滤波器接收车速信息
+	CAN_FilterTypeDef VehicleCANFilter={VEHICLE_SPEED_ADDR_HIGH<<5,VEHICLE_SPEED_ADDR_LOW<<5,0xFA6<<5,0,CAN_FILTER_FIFO1, 20, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,20};
+	HAL_CAN_ConfigFilter(hcan, &VehicleCANFilter);
+	HAL_CAN_Start(hcan);
+	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
+
+	return 0;
 }
 
 /* USER CODE END 4 */
@@ -775,7 +799,7 @@ void StartUART1RxTask(void const * argument)
 			switch(CmdRxBuf[1])
 			{
 				case 0x12:  //启动输出数据
-					//EN = 1; //发送状态
+					//RS485需要让EN = 1; //发送状态
 					osThreadResume(RadarDataTxHandle);
 					break;
 				case 0x13:  //停止发送数据
