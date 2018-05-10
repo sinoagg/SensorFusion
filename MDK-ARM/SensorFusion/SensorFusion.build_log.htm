@@ -28,12 +28,14 @@ Project File Date:  05/10/2018
 *** Using Compiler 'V5.06 update 1 (build 61)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'SensorFusion'
 compiling main.c...
+../Src/main.c(758): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+    uint32_t Dist_mm = (Dist - 0.4) * 1000;   //?院???为单位?木???
 ../Src/main.c(454): warning:  #177-D: function "MX_CAN3_Init" was declared but never referenced
   static void MX_CAN3_Init(void)
-../Src/main.c: 1 warning, 0 errors
+../Src/main.c: 2 warnings, 0 errors
 linking...
-Program Size: Code=25432 RO-data=924 RW-data=272 ZI-data=17952  
-"SensorFusion\SensorFusion.axf" - 0 Error(s), 1 Warning(s).
+Program Size: Code=25552 RO-data=924 RW-data=272 ZI-data=17952  
+"SensorFusion\SensorFusion.axf" - 0 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -51,7 +53,7 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.1.1
-Build Time Elapsed:  00:00:03
+Build Time Elapsed:  00:00:04
 </pre>
 </body>
 </html>

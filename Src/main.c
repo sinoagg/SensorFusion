@@ -755,7 +755,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 uint8_t DBC_SendDist(CAN_HandleTypeDef *hcan, float Dist)
 {
   uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
-  uint32_t Dist_mm = Dist * 1000;   //以毫米为单位的距离
+  uint32_t Dist_mm = (Dist - 0.4) * 1000;   //以毫米为单位的距离
   uint8_t CANTxBuf[4] = {0};
   CANTxBuf[0] = Dist_mm;
   CANTxBuf[1] = Dist_mm >> 8;
@@ -781,7 +781,7 @@ void StartDefaultTask(void const * argument)
 			HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//接收指令信息
 			UART1RxComplete=0;
 		}
-    DBC_SendDist(&hcan1, 0.89f);
+    //DBC_SendDist(&hcan1, 0.89f);
 		osDelay(100);
   }
   /* USER CODE END 5 */ 
