@@ -110,7 +110,7 @@ void ARS_GetRadarObjStatus(uint8_t* pCANRxBuf)
 void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral)
 {
 	(pRadarGeneral)->Obj_ID=*pCANRxBuf;	//OBJ_ID
-	(pRadarGeneral)->Obj_DistLong= (((uint16_t)*(pCANRxBuf+1))<<8|(*pCANRxBuf+2))>>3;
+	(pRadarGeneral)->Obj_DistLong= (((uint16_t)*(pCANRxBuf+1))<<8|*(pCANRxBuf+2))>>3;
 	(pRadarGeneral)->Obj_DistLat= ((uint16_t)*(pCANRxBuf+2)&0x07)<<8|(*(pCANRxBuf+3));
 	(pRadarGeneral)->Obj_VrelLong= (((uint16_t)*(pCANRxBuf+4))<<8|*(pCANRxBuf+5))>>6;//纵向相对速度
 	(pRadarGeneral)->Obj_VrelLat= (((uint16_t)*(pCANRxBuf+5)&0x3F)<<8|(*(pCANRxBuf+6)&0xE0))>>5;;//横向相对速度

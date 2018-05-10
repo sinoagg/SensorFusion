@@ -65,6 +65,7 @@
 #define LIMIT_RANGE 100									//计算碰撞时间的极限距离/m
 #define VEHICLE_SPEED_ADDR_HIGH 0x18FE
 #define VEHICLE_SPEED_ADDR_LOW 0x6E0B
+#define DBC_ADDR 0x509
 //#define CONFIG_ARS408_RADAR
 /* USER CODE END Includes */
 
@@ -121,6 +122,7 @@ MW_RadarGeneral RadarGeneral[16];
 
 Cmd_RadarData RadarData;
 
+CAN_TxHeaderTypeDef CAN_TxDBCHeader={DBC_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_RxHeaderTypeDef RadarCANRxHeader;
 CAN_RxHeaderTypeDef VehicleCANRxHeader;
 
@@ -167,6 +169,7 @@ void StartCalculateTask(void const * argument);
 void StartUART1RxTask(void const * argument);
 void StartRadarDataTxTask(void const * argument);
 
+uint8_t DBC_Init(CAN_HandleTypeDef *hcan);
 uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan);
 
 /* USER CODE BEGIN PFP */
@@ -321,6 +324,7 @@ int main(void)
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
  
+	DBC_Init(&hcan1);
 	ARS_Init(&hcan2);
   Vehicle_CAN_Init(&hcan3); 
   /* Start scheduler */
@@ -725,6 +729,18 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	}
 }
 
+uint8_t DBC_Init(CAN_HandleTypeDef *hcan)
+{
+  //配置CAN滤波器接收Objct_General信息，即相对目标的距离、速度等
+  CAN_FilterTypeDef MW_RadarCANFilter={OBJ_GENERAL_ADDR<<5,0,0xEFE<<5,0,CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};   //0x60B 和 0x60A同时检测
+  //CAN_FilterTypeDef MW_RadarCANFilter = {0,OBJ_GENERAL_ADDR,0,0xEFF,CAN_FILTER_FIFO0,CAN_FILTERMODE_IDLIST,CAN_FILTERSCALE_32BIT,ENABLE,0};
+  HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
+  HAL_CAN_Start(hcan);
+  //HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+  
+  return 0;
+}
+
 uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 {
 	//配置CAN3滤波器接收车速信息
@@ -734,6 +750,19 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
 
 	return 0;
+}
+
+uint8_t DBC_SendDist(CAN_HandleTypeDef *hcan, float Dist)
+{
+  uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
+  uint32_t Dist_mm = Dist * 1000;   //以毫米为单位的距离
+  uint8_t CANTxBuf[4] = {0};
+  CANTxBuf[0] = Dist_mm;
+  CANTxBuf[1] = Dist_mm >> 8;
+  CANTxBuf[2] = Dist_mm >> 16;
+  CANTxBuf[3] = Dist_mm >> 24;
+  HAL_CAN_AddTxMessage(hcan, &CAN_TxDBCHeader, CANTxBuf, &CAN_TxMailBox);
+  return 0;
 }
 
 /* USER CODE END 4 */
@@ -752,6 +781,7 @@ void StartDefaultTask(void const * argument)
 			HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//接收指令信息
 			UART1RxComplete=0;
 		}
+    DBC_SendDist(&hcan1, 0.89f);
 		osDelay(100);
   }
   /* USER CODE END 5 */ 
@@ -835,6 +865,7 @@ void StartRadarDataTxTask(void const * argument)
       RadarData.Sys_State = RADAR_OK;			//雷达数据发送系统正常工作
       FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
       HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
+      DBC_SendDist(&hcan1, MinRangeLong);
 			//使用RS85时需要让EN = 0;//转换接收状态
     }
     else
@@ -842,6 +873,7 @@ void StartRadarDataTxTask(void const * argument)
       RadarData.Sys_State = RADAR_ERROR;	//雷达数据发送系统错误
       FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
       HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
+      DBC_SendDist(&hcan1, MinRangeLong);
 			//使用RS485时需要让EN = 0;//转换接收状态
     }
     osDelay(100);
