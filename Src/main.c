@@ -715,7 +715,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
   	osSemaphoreRelease(bSemRadarCANRxSigHandle);
   	//__HAL_CAN_CLEAR_FLAG(hcan, CAN_FLAG_FF0);
-		HAL_CAN_DeactivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);		// 关闭中断
+		//HAL_CAN_DeactivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);		// 关闭中断
   }
 	if(hcan->Instance == hcan3.Instance)
 	{
@@ -770,15 +770,18 @@ void StartRadarCommTask(void const * argument)
 		if(RadarCANRxHeader.StdId==0x60A)												//60B的之前都读取完毕，开始计算
 		{
 			minRadarDistFlag = 1;
-			osSemaphoreRelease(bSemCalculateSigHandle);
 		}
 		else																										//0x60B时读取目标距离、速度信息
+		{
 			if(minRadarDistFlag)
 			{
 				minRadarDistFlag = 0;
 				ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);//获取最近目标数据，即收到的第一个目标
+				osSemaphoreRelease(bSemCalculateSigHandle);
 			}
-		HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);		//再次打开中断	
+			
+		}
+		//HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);		//再次打开中断	
 		osDelay(1);
   }
   /* USER CODE END StartRadarCommTask */
@@ -827,7 +830,7 @@ void StartRadarDataTxTask(void const * argument)
   {
     HAL_GPIO_TogglePin(LED5_GPIO_Port,LED5_Pin);
     uint8_t speed = 50;
-    if(GetRadarData(CrashWarningLv, speed, MinRangeLong, TimetoCrash) == 0)	//获取雷达数据成功
+    if(GetRadarData(CrashWarningLv, VrelLong, MinRangeLong, TimetoCrash) == 0)	//获取雷达数据成功
     {
       RadarData.Sys_State = RADAR_OK;			//雷达数据发送系统正常工作
       FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
