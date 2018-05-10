@@ -829,8 +829,8 @@ void StartRadarDataTxTask(void const * argument)
   for(;;)
   {
     HAL_GPIO_TogglePin(LED5_GPIO_Port,LED5_Pin);
-    uint8_t speed = 50;
-    if(GetRadarData(CrashWarningLv, VrelLong, MinRangeLong, TimetoCrash) == 0)	//获取雷达数据成功
+    uint8_t speed = (uint8_t)VrelLong;
+    if(GetRadarData(CrashWarningLv, speed, MinRangeLong, TimetoCrash) == 0)	//获取雷达数据成功
     {
       RadarData.Sys_State = RADAR_OK;			//雷达数据发送系统正常工作
       FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
