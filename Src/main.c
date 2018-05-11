@@ -62,7 +62,7 @@
 #define LANEWIDTH 2											//车道线宽度
 #define MAX_DECELARATION 0.4*9.8				//制动系统最大减速度
 #define DELAY_TIME	0.4									//系统延迟时间
-#define LIMIT_RANGE 100									//计算碰撞时间的极限距离/m
+#define LIMIT_RANGE 200									//计算碰撞时间的极限距离/m
 #define VEHICLE_SPEED_ADDR_HIGH 0x18FE
 #define VEHICLE_SPEED_ADDR_LOW 0x6E0B
 #define DBC_ADDR 0x509
@@ -256,10 +256,10 @@ int main(void)
   bSemSpeedRxSigHandle = osSemaphoreCreate(osSemaphore(bSemSpeedRxSig), 1);
 	osSemaphoreDef(bSemCalculateSig);
 	bSemCalculateSigHandle = osSemaphoreCreate(osSemaphore(bSemCalculateSig), 1);
-  osSemaphoreDef(bSemUART1RxSig);
-  bSemUART1RxSigHandle = osSemaphoreCreate(osSemaphore(bSemUART1RxSig), 1);
-  osSemaphoreDef(bSemRadarDataTxSig);
-  bSemRadarDataTxSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarDataTxSig), 1);
+//  osSemaphoreDef(bSemUART1RxSig);
+//  bSemUART1RxSigHandle = osSemaphoreCreate(osSemaphore(bSemUART1RxSig), 1);
+//  osSemaphoreDef(bSemRadarDataTxSig);
+//  bSemRadarDataTxSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarDataTxSig), 1);
 
 	
 	osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
@@ -268,7 +268,7 @@ int main(void)
   osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+//  osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever); //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   
   
@@ -311,11 +311,11 @@ int main(void)
 	osThreadDef(CalculateTask, StartCalculateTask, osPriorityNormal, 0, 128);
   StartCalculateHandle = osThreadCreate(osThread(CalculateTask), NULL);
 
-  osThreadDef(UART1RxTask, StartUART1RxTask, osPriorityNormal, 0, 128);
-  UART1RxHandle = osThreadCreate(osThread(UART1RxTask), NULL);
+//  osThreadDef(UART1RxTask, StartUART1RxTask, osPriorityNormal, 0, 128);
+//  UART1RxHandle = osThreadCreate(osThread(UART1RxTask), NULL);
 
-  osThreadDef(RadarDataTxTask, StartRadarDataTxTask, osPriorityNormal, 0, 128);
-  RadarDataTxHandle = osThreadCreate(osThread(RadarDataTxTask), NULL);
+//  osThreadDef(RadarDataTxTask, StartRadarDataTxTask, osPriorityNormal, 0, 128);
+//  RadarDataTxHandle = osThreadCreate(osThread(RadarDataTxTask), NULL);
 
 	osThreadSuspend( RadarDataTxHandle );		//挂起串口发送雷达数据线程
   /* USER CODE END RTOS_THREADS */
@@ -326,7 +326,7 @@ int main(void)
  
 	DBC_Init(&hcan1);
 	ARS_Init(&hcan2);
-  Vehicle_CAN_Init(&hcan3); 
+  //Vehicle_CAN_Init(&hcan3); 
   /* Start scheduler */
   osKernelStart();
   
@@ -573,7 +573,7 @@ static void MX_USART1_UART_Init(void)
 {
 
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 19200;
+  huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -757,10 +757,10 @@ uint8_t DBC_SendDist(CAN_HandleTypeDef *hcan, float Dist)
   uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
   uint32_t Dist_mm = (Dist - 0.4) * 1000;   //以毫米为单位的距离
   uint8_t CANTxBuf[4] = {0};
-  CANTxBuf[0] = Dist_mm;
-  CANTxBuf[1] = Dist_mm >> 8;
-  CANTxBuf[2] = Dist_mm >> 16;
-  CANTxBuf[3] = Dist_mm >> 24;
+  CANTxBuf[3] = Dist_mm;
+  CANTxBuf[2] = Dist_mm >> 8;
+  CANTxBuf[1] = Dist_mm >> 16;
+  CANTxBuf[0] = Dist_mm >> 24;
   HAL_CAN_AddTxMessage(hcan, &CAN_TxDBCHeader, CANTxBuf, &CAN_TxMailBox);
   return 0;
 }
@@ -977,18 +977,19 @@ void StartCalculateTask(void const * argument)
 			MinRangeLong = 0.2 * MinRange - 500;				//获取真实距离
 			TimetoCrash = -(float)MinRangeLong/VrelLong;//相对速度为负
 			//if(TimetoCrash<0.8f)
-			if(TimetoCrash<1 && VrelLong < 0 && MinRangeLong > 0)
+			if(TimetoCrash<3 && VrelLong < 0 && MinRangeLong > 0)
 			{
 				CrashWarningLv=WARNING_HIGH;
 			}
 			//else if(TimetoCrash<1)
-			else if(TimetoCrash<1.5f && VrelLong < 0 && MinRangeLong > 0)
+			else if(TimetoCrash<3.5f && VrelLong < 0 && MinRangeLong > 0)
 			{
 				CrashWarningLv=WARNING_LOW;
 			}
 			else
 				CrashWarningLv=WARNING_NONE;
 		}
+		DBC_SendDist(&hcan1, MinRangeLong);
 		osSemaphoreRelease(bSemSoundWarningSigHandle);
 		osDelay(2);
 	}
