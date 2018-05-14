@@ -228,8 +228,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	delay_init(100);
 	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
-	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
-  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //雷达数据发送串口接收使能
+	//__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
+  //__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //雷达数据发送串口接收使能
 
 	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
 	delay_ms(100);
@@ -246,14 +246,14 @@ int main(void)
   /* add semaphores, ... */
   osSemaphoreDef(bSemRadarCANRxSig);
   bSemRadarCANRxSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarCANRxSig), 1);
-  osSemaphoreDef(bSemADASRxSig);
-  bSemADASRxSigHandle = osSemaphoreCreate(osSemaphore(bSemADASRxSig), 1);
+  //osSemaphoreDef(bSemADASRxSig);
+  //bSemADASRxSigHandle = osSemaphoreCreate(osSemaphore(bSemADASRxSig), 1);
 	osSemaphoreDef(bSemSoundWarningSig);
   bSemSoundWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemSoundWarningSig), 1);
-	osSemaphoreDef(bSemLightWarningSig);
-  bSemLightWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemLightWarningSig), 1);
-	osSemaphoreDef(bSemSpeedRxSig);
-  bSemSpeedRxSigHandle = osSemaphoreCreate(osSemaphore(bSemSpeedRxSig), 1);
+	//osSemaphoreDef(bSemLightWarningSig);
+  //bSemLightWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemLightWarningSig), 1);
+	//osSemaphoreDef(bSemSpeedRxSig);
+  //bSemSpeedRxSigHandle = osSemaphoreCreate(osSemaphore(bSemSpeedRxSig), 1);
 	osSemaphoreDef(bSemCalculateSig);
 	bSemCalculateSigHandle = osSemaphoreCreate(osSemaphore(bSemCalculateSig), 1);
 //  osSemaphoreDef(bSemUART1RxSig);
@@ -263,10 +263,10 @@ int main(void)
 
 	
 	osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-	osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+	//osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  //osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  //osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
 //  osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever); //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
@@ -291,20 +291,20 @@ int main(void)
   RadarCommHandle = osThreadCreate(osThread(RadarComm), NULL);
 
   /* definition and creation of ADASComm */
-  osThreadDef(ADASComm, StartADASCommTask, osPriorityBelowNormal, 0, 128);
-  ADASCommHandle = osThreadCreate(osThread(ADASComm), NULL);
+  //osThreadDef(ADASComm, StartADASCommTask, osPriorityBelowNormal, 0, 128);
+  //ADASCommHandle = osThreadCreate(osThread(ADASComm), NULL);
 
   /* definition and creation of SoundWarning */
   osThreadDef(SoundWarning, StartSoundWarningTask, osPriorityIdle, 0, 64);
   SoundWarningHandle = osThreadCreate(osThread(SoundWarning), NULL);
 
   /* definition and creation of LightWarning */
-  osThreadDef(LightWarning, StartLightWarningTask, osPriorityIdle, 0, 64);
-  LightWarningHandle = osThreadCreate(osThread(LightWarning), NULL);
+  //osThreadDef(LightWarning, StartLightWarningTask, osPriorityIdle, 0, 64);
+  //LightWarningHandle = osThreadCreate(osThread(LightWarning), NULL);
 
   /* definition and creation of CANSpeedRead */
-  osThreadDef(CANSpeedRead, StartCANSpeedReadTask, osPriorityIdle, 0, 128);
-  CANSpeedReadHandle = osThreadCreate(osThread(CANSpeedRead), NULL);
+  //osThreadDef(CANSpeedRead, StartCANSpeedReadTask, osPriorityIdle, 0, 128);
+  //CANSpeedReadHandle = osThreadCreate(osThread(CANSpeedRead), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -317,7 +317,7 @@ int main(void)
 //  osThreadDef(RadarDataTxTask, StartRadarDataTxTask, osPriorityNormal, 0, 128);
 //  RadarDataTxHandle = osThreadCreate(osThread(RadarDataTxTask), NULL);
 
-	osThreadSuspend( RadarDataTxHandle );		//挂起串口发送雷达数据线程
+	//osThreadSuspend( RadarDataTxHandle );		//挂起串口发送雷达数据线程
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -777,12 +777,12 @@ void StartDefaultTask(void const * argument)
   {
 		if(UART1RxComplete==1)
 		{
-			osSemaphoreRelease(bSemUART1RxSigHandle);
+			//osSemaphoreRelease(bSemUART1RxSigHandle);
 			HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//接收指令信息
 			UART1RxComplete=0;
 		}
-    //DBC_SendDist(&hcan1, 0.89f);
-		osDelay(100);
+    DBC_SendDist(&hcan1, MinRangeLong);
+		osDelay(20);
   }
   /* USER CODE END 5 */ 
 }
@@ -842,7 +842,7 @@ void StartUART1RxTask(void const * argument)
 					break;
 			}   
     }
-    osSemaphoreRelease(bSemRadarDataTxSigHandle);
+    //osSemaphoreRelease(bSemRadarDataTxSigHandle);
     osDelay(10);
   }
   /* USER CODE END StartRadarDataTxTask */
@@ -989,7 +989,7 @@ void StartCalculateTask(void const * argument)
 			else
 				CrashWarningLv=WARNING_NONE;
 		}
-		DBC_SendDist(&hcan1, MinRangeLong);
+		//DBC_SendDist(&hcan1, MinRangeLong);
 		osSemaphoreRelease(bSemSoundWarningSigHandle);
 		osDelay(2);
 	}
