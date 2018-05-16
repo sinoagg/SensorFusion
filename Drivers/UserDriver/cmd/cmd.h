@@ -25,9 +25,9 @@ typedef union
  * 		offset 0
  * 		range 0~255
  * 	Dist
- * 		Array[4] of float, high to low
+ * 		Array[4] of float, low to high
  * 	Crash_time
- * 		Array[4] of float, high to low
+ * 		Array[4] of float, low to high
  */
 typedef struct
 {

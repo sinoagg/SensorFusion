@@ -252,7 +252,7 @@ int main(void)
   bSemSoundWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemSoundWarningSig), 1);
 	//osSemaphoreDef(bSemLightWarningSig);
   //bSemLightWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemLightWarningSig), 1);
-	//osSemaphoreDef(bSemSpeedRxSig);
+	//osSemaphoreDef(bSemSpeedRxSig);  
   //bSemSpeedRxSigHandle = osSemaphoreCreate(osSemaphore(bSemSpeedRxSig), 1);
 	osSemaphoreDef(bSemCalculateSig);
 	bSemCalculateSigHandle = osSemaphoreCreate(osSemaphore(bSemCalculateSig), 1);
