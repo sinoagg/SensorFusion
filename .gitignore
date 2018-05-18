@@ -1,0 +1,5 @@
+#project
+*.swp
+.mxproject
+./Drivers/CMSIS/
+/Middlewares
