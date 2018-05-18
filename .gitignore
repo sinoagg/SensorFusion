@@ -3,3 +3,11 @@
 .mxproject
 ./Drivers/CMSIS/
 /Middlewares
+*.o
+*.a
+*.crf
+*.d
+*.dep
+*.Bak
+*.s
+*.lst
