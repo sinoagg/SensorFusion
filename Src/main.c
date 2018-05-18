@@ -892,7 +892,9 @@ void StartADASCommTask(void const * argument)
 		HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
 		CalADASData(&ADAS_dev, ADASRxBuf);
 		if(ADAS_dev.crash_level==0x03)//严重报警
-		{}
+		{
+      //开启报警线程
+    }
     osDelay(10);
   }
   /* USER CODE END StartADASCommTask */

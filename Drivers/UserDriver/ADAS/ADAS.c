@@ -34,89 +34,89 @@ uint8_t CalADASData(ADAS_HandleTypeDef *pADAS_dev, uint8_t *pRxBuf)
 		
 //解析协议，点灯
 //LDW状态获取//////////////////////////////////////////////////////////////	
-					switch(pADAS_dev->LDW_warning)
-					{
-						case 0x00:
-							//显示无车道偏离图片
-							break;
-						case 0x01:
-							//显示左车道偏离图片
-							break;
-						case 0x02:
-							//显示右车道偏离图片
-							break;
-						default:
-							//显示无车道偏离图片
-							break;
-					}
+		switch(pADAS_dev->LDW_warning)
+		{
+			case 0x00:
+				//显示无车道偏离图片
+				break;
+			case 0x01:
+				//显示左车道偏离图片
+				break;
+			case 0x02:
+				//显示右车道偏离图片
+				break;
+			default:
+				//显示无车道偏离图片
+				break;
+		}
 //碰撞强度获取//////////////////////////////////////////////////////////////						
-					switch(pADAS_dev->crash_level)
-					{
-						case 0x00:
-							//显示无行人碰撞报警图片
-							//显示无车辆碰撞报警图片
-							break;
-						case 0x01:
-							//显示无行人碰撞报警图片
-							//显示无车辆碰撞报警图片
-							break;
-						case 0x02:
-							if(pADAS_dev->crash_type==0x00) 
-							{
-								//显示中等车辆碰撞报警图片
-								//清除中等行人碰撞报警图片
-							}
-							else
-							{
-								//清除中等车辆碰撞报警图片
-								//显示中等行人碰撞报警图片
-							}
-							
-							break;
-						case 0x03:
-							if(pADAS_dev->crash_type==0x00) 
-							{
-								//显示严重车辆碰撞报警图片
-								//清除严重行人碰撞报警图片
-							}
-							else
-							{
-								//清除严重车辆碰撞报警图片
-								//显示严重行人碰撞报警图片
-							}
-							break;
-						default:
-							//显示无行人碰撞报警图片
-							//显示无车辆碰撞报警图片
-							break;
-					}
+		switch(pADAS_dev->crash_level)
+		{
+			case 0x00:
+				//显示无行人碰撞报警图片
+				//显示无车辆碰撞报警图片
+				break;
+			case 0x01:
+				//显示无行人碰撞报警图片
+				//显示无车辆碰撞报警图片
+				break;
+			case 0x02:
+				if(pADAS_dev->crash_type==0x00) 
+				{
+					//显示中等车辆碰撞报警图片
+					//清除中等行人碰撞报警图片
+				}
+				else
+				{
+					//清除中等车辆碰撞报警图片
+					//显示中等行人碰撞报警图片
+				}
+				
+				break;
+			case 0x03:
+				if(pADAS_dev->crash_type==0x00) 
+				{
+					//显示严重车辆碰撞报警图片
+					//清除严重行人碰撞报警图片
+				}
+				else
+				{
+					//清除严重车辆碰撞报警图片
+					//显示严重行人碰撞报警图片
+				}
+				break;
+			default:
+				//显示无行人碰撞报警图片
+				//显示无车辆碰撞报警图片
+				break;
+		}
 //疲劳状态获取//////////////////////////////////////////////////////////////					
-					switch(pADAS_dev->driver_status)
-					{
-						case 0x000:
-							//Display_Face(0);
-							break;
-						case 0x001:
-							//Display_Face(1);
-							
-							break;
-						case 0x002:
-							//Display_Face(1);
-							
-							break;
-						case 0x003:
-							//Display_Face(1);
-							
-							break;
-						case 0x004:
-							//Display_Face(1);
-							
-							break;
-						default:
-							//Display_Face(0);
-							break;
-					}
-					return 0;
+		switch(pADAS_dev->driver_status)
+		{
+			case 0x000:
+				//Display_Face(0);
+				break;
+			case 0x001:
+				//Display_Face(1);
+				
+				break;
+			case 0x002:
+				//Display_Face(1);
+				
+				break;
+			case 0x003:
+				//Display_Face(1);
+				
+				break;
+			case 0x004:
+				//Display_Face(1);
+				
+				break;
+			default:
+				//Display_Face(0);
+				break;
+		}
+		return 0;
 	}
 	return 1;
 }
