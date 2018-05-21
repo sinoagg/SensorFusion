@@ -217,7 +217,7 @@ int main(void)
   MX_DMA_Init();
   MX_CAN1_Init();
   MX_CAN2_Init();
-  //MX_CAN3_Init();
+  MX_CAN3_Init();
   MX_CRC_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
@@ -228,7 +228,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	delay_init(100);
 	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
-	//__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
+	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
   //__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //雷达数据发送串口接收使能
 
 	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
@@ -246,8 +246,8 @@ int main(void)
   /* add semaphores, ... */
   osSemaphoreDef(bSemRadarCANRxSig);
   bSemRadarCANRxSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarCANRxSig), 1);
-  //osSemaphoreDef(bSemADASRxSig);
-  //bSemADASRxSigHandle = osSemaphoreCreate(osSemaphore(bSemADASRxSig), 1);
+  osSemaphoreDef(bSemADASRxSig);
+  bSemADASRxSigHandle = osSemaphoreCreate(osSemaphore(bSemADASRxSig), 1);
 	osSemaphoreDef(bSemSoundWarningSig);
   bSemSoundWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemSoundWarningSig), 1);
 	//osSemaphoreDef(bSemLightWarningSig);
@@ -263,12 +263,12 @@ int main(void)
 
 	
 	osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-	//osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+	osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   //osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   //osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-//  osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  //osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever); //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   
   
@@ -291,8 +291,8 @@ int main(void)
   RadarCommHandle = osThreadCreate(osThread(RadarComm), NULL);
 
   /* definition and creation of ADASComm */
-  //osThreadDef(ADASComm, StartADASCommTask, osPriorityBelowNormal, 0, 128);
-  //ADASCommHandle = osThreadCreate(osThread(ADASComm), NULL);
+  osThreadDef(ADASComm, StartADASCommTask, osPriorityBelowNormal, 0, 128);
+  ADASCommHandle = osThreadCreate(osThread(ADASComm), NULL);
 
   /* definition and creation of SoundWarning */
   osThreadDef(SoundWarning, StartSoundWarningTask, osPriorityIdle, 0, 64);
@@ -326,7 +326,7 @@ int main(void)
  
 	DBC_Init(&hcan1);
 	ARS_Init(&hcan2);
-  //Vehicle_CAN_Init(&hcan3); 
+  Vehicle_CAN_Init(&hcan3); 
   /* Start scheduler */
   osKernelStart();
   
@@ -462,7 +462,7 @@ static void MX_CAN3_Init(void)
   hcan3.Init.TimeSeg2 = CAN_BS2_4TQ;
   hcan3.Init.TimeTriggeredMode = DISABLE;
   hcan3.Init.AutoBusOff = DISABLE;
-  hcan3.Init.AutoWakeUp = DISABLE;
+  hcan3.Init.AutoWakeUp = ENABLE;
   hcan3.Init.AutoRetransmission = DISABLE;
   hcan3.Init.ReceiveFifoLocked = DISABLE;
   hcan3.Init.TransmitFifoPriority = DISABLE;
@@ -723,6 +723,17 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   }
 	if(hcan->Instance == hcan3.Instance)
 	{
+		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
+		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
+  	//osSemaphoreRelease(bSemRadarCANRxSigHandle);
+	}
+	
+}
+
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+	if(hcan->Instance == hcan3.Instance)
+	{
 		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO1, &VehicleCANRxHeader, VehicleCANRxBuf);
 		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
   	//osSemaphoreRelease(bSemRadarCANRxSigHandle);
@@ -744,10 +755,13 @@ uint8_t DBC_Init(CAN_HandleTypeDef *hcan)
 uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 {
 	//配置CAN3滤波器接收车速信息
-	CAN_FilterTypeDef VehicleCANFilter={VEHICLE_SPEED_ADDR_HIGH<<5,VEHICLE_SPEED_ADDR_LOW<<5,0xFA6<<5,0,CAN_FILTER_FIFO1, 20, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,20};
+	CAN_FilterTypeDef VehicleCANFilter={VEHICLE_SPEED_ADDR_HIGH<<3,VEHICLE_SPEED_ADDR_LOW<<3 | 0x4,0xF66<<3,0<<3,CAN_FILTER_FIFO0, 1, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1};
+	//CAN_FilterTypeDef VehicleCANFilter = {0xC7F3, 0x706C, 0, 0, CAN_FilterFIFO1, 15, CAN_FILTERMODE_IDMASK, CAN_FILTERSCALE_32BIT, ENABLE, 15};
+	//CAN_FilterTypeDef VehicleCANFilter = {0x0000, 0x0, 0, 0, CAN_FilterFIFO1, 1, CAN_FILTERMODE_IDMASK, CAN_FILTERSCALE_32BIT, ENABLE, 1};
+
 	HAL_CAN_ConfigFilter(hcan, &VehicleCANFilter);
 	HAL_CAN_Start(hcan);
-	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
+	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 
 	return 0;
 }
@@ -755,7 +769,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 uint8_t DBC_SendDist(CAN_HandleTypeDef *hcan, float Dist)
 {
   uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
-  uint32_t Dist_mm = (Dist - 0.4) * 1000;   //以毫米为单位的距离
+  uint32_t Dist_mm = (Dist - 0.4f) * 1000;   //以毫米为单位的距离
   uint8_t CANTxBuf[4] = {0};
   CANTxBuf[3] = Dist_mm;
   CANTxBuf[2] = Dist_mm >> 8;
@@ -781,7 +795,17 @@ void StartDefaultTask(void const * argument)
 			HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//接收指令信息
 			UART1RxComplete=0;
 		}
+    if(ADASRxComplete==1)
+    {
+      HAL_UART_Receive_DMA(&huart3, ADASRxBuf, 32);//接收指令信息
+      ADASRxComplete=0;
+      osSemaphoreRelease(bSemADASRxSigHandle);
+    }
     DBC_SendDist(&hcan1, MinRangeLong);
+		/*
+		uint32_t CAN_TxMailBox = CAN_TX_MAILBOX1;
+		uint8_t CAN3TxBuf[8]={3};
+		HAL_CAN_AddTxMessage(&hcan3, &CAN_TxDBCHeader, CAN3TxBuf, &CAN_TxMailBox);*/
 		osDelay(20);
   }
   /* USER CODE END 5 */ 
@@ -908,30 +932,41 @@ void StartSoundWarningTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);
-		if(CrashWarningLv==WARNING_HIGH)
-		{
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
-			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
-			//WTN6_Broadcast(BELL_BB_500MS);
-			osDelay(1000);
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
-		}
-		else if(CrashWarningLv==WARNING_LOW)
-		{
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
-			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
-			//WTN6_Broadcast(BELL_BB_1000MS);
-			osDelay(500);
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
-		}
-		else
-		{
-			HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_SET);
-			//WTN6_Broadcast(BELL_STOP);
-		}
+    switch(CrashWarningLv)
+    {
+      case WARNING_HIGH:
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+        //WTN6_Broadcast(BELL_BB_500MS);
+        osDelay(1000);
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+        break;
+      case WARNING_LOW:
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+        //WTN6_Broadcast(BELL_BB_1000MS);
+        osDelay(500);
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+        break;
+      default:
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_SET);
+        break;
+    }
+    /*
+    switch(ADAS_dev.crash_level)
+    {
+      case 0x03:
+        break;
+      case 0x02:
+        break;
+      case 0x01:
+        break;
+      default:
+        break;
+    }*/
 		osDelay(10);
   }
   /* USER CODE END StartSoundWarningTask */
