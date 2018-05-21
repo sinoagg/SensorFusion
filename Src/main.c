@@ -252,8 +252,8 @@ int main(void)
   bSemSoundWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemSoundWarningSig), 1);
 	//osSemaphoreDef(bSemLightWarningSig);
   //bSemLightWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemLightWarningSig), 1);
-	//osSemaphoreDef(bSemSpeedRxSig);  
-  //bSemSpeedRxSigHandle = osSemaphoreCreate(osSemaphore(bSemSpeedRxSig), 1);
+	osSemaphoreDef(bSemSpeedRxSig);  
+  bSemSpeedRxSigHandle = osSemaphoreCreate(osSemaphore(bSemSpeedRxSig), 1);
 	osSemaphoreDef(bSemCalculateSig);
 	bSemCalculateSigHandle = osSemaphoreCreate(osSemaphore(bSemCalculateSig), 1);
 //  osSemaphoreDef(bSemUART1RxSig);
@@ -266,7 +266,7 @@ int main(void)
 	osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   //osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  //osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   //osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever); //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
@@ -303,8 +303,8 @@ int main(void)
   //LightWarningHandle = osThreadCreate(osThread(LightWarning), NULL);
 
   /* definition and creation of CANSpeedRead */
-  //osThreadDef(CANSpeedRead, StartCANSpeedReadTask, osPriorityIdle, 0, 128);
-  //CANSpeedReadHandle = osThreadCreate(osThread(CANSpeedRead), NULL);
+  osThreadDef(CANSpeedRead, StartCANSpeedReadTask, osPriorityIdle, 0, 128);
+  CANSpeedReadHandle = osThreadCreate(osThread(CANSpeedRead), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -725,19 +725,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	{
 		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
 		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
-  	//osSemaphoreRelease(bSemRadarCANRxSigHandle);
+  	osSemaphoreRelease(bSemSpeedRxSigHandle);
 	}
 	
-}
-
-void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
-{
-	if(hcan->Instance == hcan3.Instance)
-	{
-		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO1, &VehicleCANRxHeader, VehicleCANRxBuf);
-		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
-  	//osSemaphoreRelease(bSemRadarCANRxSigHandle);
-	}
 }
 
 uint8_t DBC_Init(CAN_HandleTypeDef *hcan)
@@ -915,9 +905,10 @@ void StartADASCommTask(void const * argument)
 		osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);
 		HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
 		CalADASData(&ADAS_dev, ADASRxBuf);
-		if(ADAS_dev.crash_level==0x03)//严重报警
+		if(ADAS_dev.crash_level==0x03 || ADAS_dev.crash_level == 0x02)//报警级别高或低
 		{
-      //开启报警线程
+      //报警
+			osSemaphoreRelease(bSemSoundWarningSigHandle);
     }
     osDelay(10);
   }
@@ -955,18 +946,30 @@ void StartSoundWarningTask(void const * argument)
         HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_SET);
         break;
     }
-    /*
+    
     switch(ADAS_dev.crash_level)
     {
       case 0x03:
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+        //WTN6_Broadcast(BELL_BB_500MS);
+        osDelay(1000);
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
         break;
       case 0x02:
-        break;
-      case 0x01:
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+        //WTN6_Broadcast(BELL_BB_1000MS);
+        osDelay(500);
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
         break;
       default:
+				HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_SET);
         break;
-    }*/
+    }
 		osDelay(10);
   }
   /* USER CODE END StartSoundWarningTask */
