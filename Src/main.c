@@ -136,8 +136,9 @@ uint8_t ADASRxBuf[32]={0};
 uint8_t CmdRxBuf[4]={0};
 uint8_t CmdRadarDataTxBuf[11];
 uint8_t RadarCANRxBuf[8]={0};
-uint8_t VehicleCANRxBuf[8]={0};
+uint8_t VehicleCANRxBuf[4]={0};
 uint8_t CrashWarningLv=WARNING_NONE;
+uint8_t VehicleSpeed = 0;
 
 float VrelLong = 0.0;
 float MinRangeLong = 0.0;
@@ -996,6 +997,10 @@ void StartCANSpeedReadTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);
+    if(0xD1 == VehicleCANRxBuf[0] && 0xD1 == VehicleCANRxBuf[2])
+    {
+      VehicleSpeed = VehicleCANRxBuf[1];//车速16进制,km/h
+    }
 		osDelay(10);
   }
   /* USER CODE END StartCANSpeedReadTask */
