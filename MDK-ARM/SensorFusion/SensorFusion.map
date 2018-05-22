@@ -1045,7 +1045,7 @@ Removing Unused input sections from the image.
     Removing ars408.o(i.ARS_ConfigFilter), (108 bytes).
     Removing ars408.o(i.ARS_ConfigRadar), (192 bytes).
     Removing ars408.o(i.ARS_GetRadarObjStatus), (24 bytes).
-    Removing ars408.o(i.deRadarConfig), (88 bytes).
+    Removing ars408.o(i.deRadarConfig), (80 bytes).
     Removing ars408.o(i.deRadarFilterConfig), (24 bytes).
     Removing ars408.o(.data), (48 bytes).
     Removing cmd.o(.rev16_text), (4 bytes).
@@ -1552,7 +1552,7 @@ Removing Unused input sections from the image.
     Removing system_stm32f4xx.o(.rrx_text), (6 bytes).
     Removing system_stm32f4xx.o(i.SystemCoreClockUpdate), (192 bytes).
 
-531 unused section(s) (total 42172 bytes) removed from the image.
+531 unused section(s) (total 42164 bytes) removed from the image.
 
 ==============================================================================
 
@@ -2662,12 +2662,12 @@ Image component sizes
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
        296         16          0          0          0     688562   adas.o
-       124          4         40          0          0       6599   ars408.o
+       124          4         40          0          0       6615   ars408.o
        360          8          0          0          0      17613   cmsis_os.o
        204         18          0          4          0       2051   delay.o
        692         62          0         24      15360       8851   heap_4.o
        148          0          0          0          0       3542   list.o
-      3458        602        242        152       1263      24024   main.o
+      3458        602        242        152       1263      24040   main.o
        958         92          0         12          0      12009   port.o
       1928         16          0          0          0      22105   queue.o
         36          8        472          0       1024        832   startup_stm32f413xx.o
@@ -2690,7 +2690,7 @@ Image component sizes
        148          8          0          0          0      21349   wtn6040.o
 
     ----------------------------------------------------------------------
-     22840       1716        820        268      17948     938142   Object Totals
+     22840       1716        820        268      17948     938174   Object Totals
          0          0         32          0          0          0   (incl. Generated)
         34          0          2          3          1          0   (incl. Padding)
 
@@ -2743,8 +2743,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     24152       1732        820        268      17948     919126   Grand Totals
-     24152       1732        820        268      17948     919126   ELF Image Totals
+     24152       1732        820        268      17948     919158   Grand Totals
+     24152       1732        820        268      17948     919158   ELF Image Totals
      24152       1732        820        268          0          0   ROM Totals
 
 ==============================================================================

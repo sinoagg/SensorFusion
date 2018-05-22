@@ -783,8 +783,8 @@ void StartDefaultTask(void const * argument)
 		HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//接收指令信息
 		if(UART1RxComplete==1)
 		{
-			//osSemaphoreRelease(bSemUART1RxSigHandle);
 			UART1RxComplete=0;
+			//osSemaphoreRelease(bSemUART1RxSigHandle);
 		}
 
     HAL_UART_Receive_DMA(&huart3, ADASRxBuf, 32);//接收指令信息
@@ -926,7 +926,7 @@ void StartSoundWarningTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);
-    switch(CrashWarningLv)
+    switch(CrashWarningLv)				//前向碰撞
     {
       case WARNING_HIGH:
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
@@ -950,7 +950,7 @@ void StartSoundWarningTask(void const * argument)
         break;
     }
     
-    switch(ADAS_dev.LDW_warning)
+    switch(ADAS_dev.LDW_warning)		//车道偏移
     {
       case 0x01:	//left
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);

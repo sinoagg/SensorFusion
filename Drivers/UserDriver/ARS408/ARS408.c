@@ -48,7 +48,7 @@ void deRadarConfig()
   RadarConfig.MaxDistance = RADARCFG_MAXDISTANCE;
   RadarConfig.SensorID = RADARCFG_SENSORID;
   RadarConfig.OutputType = RADARCFG_OUTPUTTYPE_OBJ;
-  RadarConfig.RadarPower = RADARCFG_RADARPOWER_3dB;
+  RadarConfig.RadarPower = RADARCFG_RADARPOWER_STD;
   RadarConfig.CtrlRelay_valid = RADARCFG_CTRLRELEY_VALID;
   RadarConfig.CtrlRelay = RADARCFG_CTRLRELEY;
   RadarConfig.SendQuality = RADARCFG_SENDQUALITY;
