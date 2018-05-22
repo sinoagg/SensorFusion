@@ -612,7 +612,7 @@ static void MX_USART3_UART_Init(void)
 {
 
   huart3.Instance = USART3;
-  huart3.Init.BaudRate = 115200;
+  huart3.Init.BaudRate = 19200;
   huart3.Init.WordLength = UART_WORDLENGTH_8B;
   huart3.Init.StopBits = UART_STOPBITS_1;
   huart3.Init.Parity = UART_PARITY_NONE;
@@ -908,7 +908,7 @@ void StartADASCommTask(void const * argument)
 		osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);
 		HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
 		CalADASData(&ADAS_dev, ADASRxBuf);
-		if(ADAS_dev.crash_level==0x03 || ADAS_dev.crash_level == 0x02)//报警级别高或低
+		if(ADAS_dev.LDW_warning==0x01 || ADAS_dev.LDW_warning == 0x02)//左侧或右侧车道偏移报警
 		{
       //报警
 			osSemaphoreRelease(bSemSoundWarningSigHandle);
@@ -956,7 +956,7 @@ void StartSoundWarningTask(void const * argument)
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
         HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
         //WTN6_Broadcast(BELL_BB_500MS);
-        osDelay(1000);
+        osDelay(2000);
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
         HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
         break;
@@ -964,7 +964,7 @@ void StartSoundWarningTask(void const * argument)
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
         HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
         //WTN6_Broadcast(BELL_BB_1000MS);
-        osDelay(500);
+        osDelay(2000);
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
         HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
         break;
