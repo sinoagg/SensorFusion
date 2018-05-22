@@ -780,18 +780,20 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+		HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//接收指令信息
 		if(UART1RxComplete==1)
 		{
 			//osSemaphoreRelease(bSemUART1RxSigHandle);
-			HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//接收指令信息
 			UART1RxComplete=0;
 		}
-    if(ADASRxComplete==1)
-    {
-      HAL_UART_Receive_DMA(&huart3, ADASRxBuf, 32);//接收指令信息
+
+    HAL_UART_Receive_DMA(&huart3, ADASRxBuf, 32);//接收指令信息
+		if(ADASRxComplete==1)
+		{
       ADASRxComplete=0;
       osSemaphoreRelease(bSemADASRxSigHandle);
-    }
+		}
+		
     DBC_SendDist(&hcan1, MinRangeLong);
 		/*
 		uint32_t CAN_TxMailBox = CAN_TX_MAILBOX1;
@@ -948,9 +950,9 @@ void StartSoundWarningTask(void const * argument)
         break;
     }
     
-    switch(ADAS_dev.crash_level)
+    switch(ADAS_dev.LDW_warning)
     {
-      case 0x03:
+      case 0x01:	//left
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
         HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
         //WTN6_Broadcast(BELL_BB_500MS);
@@ -958,7 +960,7 @@ void StartSoundWarningTask(void const * argument)
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
         HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
         break;
-      case 0x02:
+      case 0x02:	//right
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
         HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
         //WTN6_Broadcast(BELL_BB_1000MS);
