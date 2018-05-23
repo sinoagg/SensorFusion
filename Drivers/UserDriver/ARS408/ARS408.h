@@ -208,7 +208,7 @@ typedef struct
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan);
-uint8_t ARS_ConfigIndexFilter(CAN_HandleTypeDef *hcan, uint8_t index, uint16_t filter_min, uint16_t filter_max);
+void ARS_GetRadarObjStatus(uint8_t* pCANRxBuf, MW_RadarObjStatus *pRadarObjStatus);
 void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral);
 
 #endif

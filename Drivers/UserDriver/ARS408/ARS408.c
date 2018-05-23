@@ -4,6 +4,10 @@
  * ARS_Init(hcan): start CAN2 for radar & (optional) config Radadr and RadarFilter
  * ARS_ConfigRadar(hcan): config Radar through can2
  * ARS_ConfigFilter(hcan): config Radar filter through can2
+ * 
+ * RadarConfig_func(): fill RadarConfig struct with #define in ARS408.h
+ * RadarFilterConfig_func(index): fill RadarFilterConfig struct with #define in ARS408.h
+ * FilterContentCfg_func(hcan, index, filter_min, filter_max): fill CANTxBuf[] && send 1 content of filter to can2
  * ---read Radar data
  * ARS_GetRadarObjStatus(...): read Radar Obj Status from can2, need to config can2 first
  * ARS_GetRadarObjGeneral(...): read Radar Obj General(distance, velocity...) from can2
@@ -94,7 +98,15 @@ uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan)
 	return 0;
 }
 
-uint8_t ARS_ConfigIndexFilter(CAN_HandleTypeDef *hcan, uint8_t index, uint16_t filter_min, uint16_t filter_max)
+/**
+ * [FilterContentCfg_func config content of filter]
+ * @param  hcan       [hcan index]
+ * @param  index      [filter index]
+ * @param  filter_min [content min]
+ * @param  filter_max [content max]
+ * @return            [ok]
+ */
+uint8_t FilterContentCfg_func(CAN_HandleTypeDef *hcan, uint8_t index, uint16_t filter_min, uint16_t filter_max)
 {
 	uint32_t CAN_TxMailBox=CAN_TX_MAILBOX0;
 	uint8_t CANTxBuf[8]={0};
@@ -144,22 +156,22 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Min_Object_Class = 0x5;//0x0: point, 0x1: car, 0x2: truck, 0x3: not used
   FilterContent.FilterCfg_Max_Object_Class = 0x2;//0x4: motorcyc, 0x5: bicycle, 0x6: wide, 0x7: reserved
 
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_NOFOBJ, FilterContent.FilterCfg_Min_NofObj, FilterContent.FilterCfg_Max_NofObj);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_DISTANCE, FilterContent.FilterCfg_Min_Distance, FilterContent.FilterCfg_Max_Distance);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_AZIMUTH, FilterContent.FilterCfg_Min_Azimuth, FilterContent.FilterCfg_Max_Azimuth);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_VRELONCOME, FilterContent.FilterCfg_Min_VrelOncome, FilterContent.FilterCfg_Max_VrelOncome);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_VRELDEPART, FilterContent.FilterCfg_Min_VrelDepart, FilterContent.FilterCfg_Max_VrelDepart);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_RCS, FilterContent.FilterCfg_Min_RCS, FilterContent.FilterCfg_Max_RCS);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_LIFETIME, FilterContent.FilterCfg_Min_Lifetime, FilterContent.FilterCfg_Max_Lifetime);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_SIZE, FilterContent.FilterCfg_Min_Size, FilterContent.FilterCfg_Max_Size);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_PROBEXIST, FilterContent.FilterCfg_Min_ProbExists, FilterContent.FilterCfg_Max_ProbExists);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_Y, FilterContent.FilterCfg_Min_Y, FilterContent.FilterCfg_Max_Y);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_X, FilterContent.FilterCfg_Min_X, FilterContent.FilterCfg_Max_X);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_VYRIGHTLEFT, FilterContent.FilterCfg_Min_VYRightLeft, FilterContent.FilterCfg_Max_VYRightLeft);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_VXONCOME, FilterContent.FilterCfg_Min_VXOncome, FilterContent.FilterCfg_Max_VXOncome);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_VYLEFTRIGHT, FilterContent.FilterCfg_Min_VYLeftRight, FilterContent.FilterCfg_Max_VYLeftRight);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_VXDEPART, FilterContent.FilterCfg_Min_VXDepart, FilterContent.FilterCfg_Max_VXDepart);
-  ARS_ConfigIndexFilter(hcan, FILTERCFG_INDEX_OBJCLASS, FilterContent.FilterCfg_Min_Object_Class, FilterContent.FilterCfg_Max_Object_Class);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_NOFOBJ, FilterContent.FilterCfg_Min_NofObj, FilterContent.FilterCfg_Max_NofObj);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_DISTANCE, FilterContent.FilterCfg_Min_Distance, FilterContent.FilterCfg_Max_Distance);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_AZIMUTH, FilterContent.FilterCfg_Min_Azimuth, FilterContent.FilterCfg_Max_Azimuth);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_VRELONCOME, FilterContent.FilterCfg_Min_VrelOncome, FilterContent.FilterCfg_Max_VrelOncome);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_VRELDEPART, FilterContent.FilterCfg_Min_VrelDepart, FilterContent.FilterCfg_Max_VrelDepart);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_RCS, FilterContent.FilterCfg_Min_RCS, FilterContent.FilterCfg_Max_RCS);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_LIFETIME, FilterContent.FilterCfg_Min_Lifetime, FilterContent.FilterCfg_Max_Lifetime);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_SIZE, FilterContent.FilterCfg_Min_Size, FilterContent.FilterCfg_Max_Size);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_PROBEXIST, FilterContent.FilterCfg_Min_ProbExists, FilterContent.FilterCfg_Max_ProbExists);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_Y, FilterContent.FilterCfg_Min_Y, FilterContent.FilterCfg_Max_Y);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_X, FilterContent.FilterCfg_Min_X, FilterContent.FilterCfg_Max_X);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_VYRIGHTLEFT, FilterContent.FilterCfg_Min_VYRightLeft, FilterContent.FilterCfg_Max_VYRightLeft);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_VXONCOME, FilterContent.FilterCfg_Min_VXOncome, FilterContent.FilterCfg_Max_VXOncome);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_VYLEFTRIGHT, FilterContent.FilterCfg_Min_VYLeftRight, FilterContent.FilterCfg_Max_VYLeftRight);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_VXDEPART, FilterContent.FilterCfg_Min_VXDepart, FilterContent.FilterCfg_Max_VXDepart);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_OBJCLASS, FilterContent.FilterCfg_Min_Object_Class, FilterContent.FilterCfg_Max_Object_Class);
 
   return 0;
 }
