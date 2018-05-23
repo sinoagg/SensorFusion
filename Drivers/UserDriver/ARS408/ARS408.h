@@ -1,6 +1,27 @@
 #ifndef __ARS408_H
 #define __ARS408_H
-
+/**
+ * microwave radar - ARS408 by Continental
+ * ===functions:
+ * ---init & config
+ * ARS_Init(hcan): start CAN2 for radar & (optional) config Radadr and RadarFilter
+ * ARS_ConfigRadar(hcan): config Radar through can2
+ * ARS_ConfigFilter(hcan): config Radar filter through can2
+ * 
+ * ---read Radar data
+ * ARS_GetRadarObjStatus(...): read Radar Obj Status from can2, need to config can2 first
+ * ARS_GetRadarObjGeneral(...): read Radar Obj General(distance, relVelocity...) from can2
+ * ===#defines:
+ * ADDR: (can id, std)
+ * (write)config addr 0x200 ~ 0x408
+ * (read) obj & cluster addr 0x600~0x60E
+ * 
+ * VALID && config value: values with shift(<<)
+ * RADAR
+ * FILTER
+ *
+ * structs
+ */
 #include "stm32f4xx_hal.h"
 
 /* µØÖ·¶¨Òå--------------------------------------*/
@@ -46,7 +67,7 @@
 #define RADARCFG_SORTINDEX_VALID		(VALID<<6)
 #define RADARCFG_STOREINNVM_VALID		(VALID<<7)
 #define RADARCFG_MAXDISTANCE 				(200)
-#define RADARCFG_SENSORID 					(1)
+#define RADARCFG_SENSORID 					(0)
 #define RADARCFG_OUTPUTTYPE_NONE		(0<<3)
 #define RADARCFG_OUTPUTTYPE_OBJ			(1<<3)
 #define RADARCFG_OUTPUTTYPE_CLUSTER	(2<<3)

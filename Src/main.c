@@ -39,7 +39,7 @@
   * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
   * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
   * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+  * OR PROFITS; OR BUSINESS INTERRUPTION) HOsWEVER CAUSED AND ON ANY THEORY OF 
   * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
   * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
@@ -66,7 +66,10 @@
 #define VEHICLE_SPEED_ADDR_HIGH 0x18FE
 #define VEHICLE_SPEED_ADDR_LOW 0x6E0B
 #define DBC_ADDR 0x509
-//#define CONFIG_ARS408_RADAR
+//switches
+#define DBC_SEND 1
+#define ADAS_COMM 1
+#define RADAR_DATA_SEND 1
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -228,8 +231,12 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	delay_init(100);
 	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
+  #if ADAS_COMM
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
-  //__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //雷达数据发送串口接收使能
+  #endif
+  #if RADAR_DATA_SEND
+  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //雷达数据发送串口接收使能
+  #endif
 
 	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
 	delay_ms(100);
@@ -246,35 +253,42 @@ int main(void)
   /* add semaphores, ... */
   osSemaphoreDef(bSemRadarCANRxSig);
   bSemRadarCANRxSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarCANRxSig), 1);
+  #if ADAS_COMM
   osSemaphoreDef(bSemADASRxSig);
   bSemADASRxSigHandle = osSemaphoreCreate(osSemaphore(bSemADASRxSig), 1);
+  #endif
 	osSemaphoreDef(bSemSoundWarningSig);
   bSemSoundWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemSoundWarningSig), 1);
 	//osSemaphoreDef(bSemLightWarningSig);
   //bSemLightWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemLightWarningSig), 1);
-	osSemaphoreDef(bSemSpeedRxSig);  
+	#if CAN_READ_VEHICLE
+  osSemaphoreDef(bSemSpeedRxSig);  
   bSemSpeedRxSigHandle = osSemaphoreCreate(osSemaphore(bSemSpeedRxSig), 1);
-	osSemaphoreDef(bSemCalculateSig);
+	#endif
+  osSemaphoreDef(bSemCalculateSig);
 	bSemCalculateSigHandle = osSemaphoreCreate(osSemaphore(bSemCalculateSig), 1);
-//  osSemaphoreDef(bSemUART1RxSig);
-//  bSemUART1RxSigHandle = osSemaphoreCreate(osSemaphore(bSemUART1RxSig), 1);
-//  osSemaphoreDef(bSemRadarDataTxSig);
-//  bSemRadarDataTxSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarDataTxSig), 1);
+  #if RADAR_DATA_SEND
+  osSemaphoreDef(bSemUART1RxSig);
+  bSemUART1RxSigHandle = osSemaphoreCreate(osSemaphore(bSemUART1RxSig), 1);
+  osSemaphoreDef(bSemRadarDataTxSig);
+  bSemRadarDataTxSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarDataTxSig), 1);
+  #endif
 
-	
 	osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-	osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  #if ADAS_COMM
+  osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  #endif
   osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   //osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  #if CAN_READ_VEHICLE
   osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  #endif
   osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  //osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  #if RADAR_DATA_SEND
+  osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever); //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  
-  
+  #endif
 
-
-	
 	/* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -291,8 +305,10 @@ int main(void)
   RadarCommHandle = osThreadCreate(osThread(RadarComm), NULL);
 
   /* definition and creation of ADASComm */
+  #if ADAS_COMM
   osThreadDef(ADASComm, StartADASCommTask, osPriorityBelowNormal, 0, 128);
   ADASCommHandle = osThreadCreate(osThread(ADASComm), NULL);
+  #endif
 
   /* definition and creation of SoundWarning */
   osThreadDef(SoundWarning, StartSoundWarningTask, osPriorityIdle, 0, 64);
@@ -303,30 +319,39 @@ int main(void)
   //LightWarningHandle = osThreadCreate(osThread(LightWarning), NULL);
 
   /* definition and creation of CANSpeedRead */
+  #if CAN_READ_VEHICLE
   osThreadDef(CANSpeedRead, StartCANSpeedReadTask, osPriorityIdle, 0, 128);
   CANSpeedReadHandle = osThreadCreate(osThread(CANSpeedRead), NULL);
+  #endif
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
 	osThreadDef(CalculateTask, StartCalculateTask, osPriorityNormal, 0, 128);
   StartCalculateHandle = osThreadCreate(osThread(CalculateTask), NULL);
 
-//  osThreadDef(UART1RxTask, StartUART1RxTask, osPriorityNormal, 0, 128);
-//  UART1RxHandle = osThreadCreate(osThread(UART1RxTask), NULL);
+  #if RADAR_DATA_SEND
+  osThreadDef(UART1RxTask, StartUART1RxTask, osPriorityNormal, 0, 128);
+  UART1RxHandle = osThreadCreate(osThread(UART1RxTask), NULL);
 
-//  osThreadDef(RadarDataTxTask, StartRadarDataTxTask, osPriorityNormal, 0, 128);
-//  RadarDataTxHandle = osThreadCreate(osThread(RadarDataTxTask), NULL);
+  osThreadDef(RadarDataTxTask, StartRadarDataTxTask, osPriorityNormal, 0, 128);
+  RadarDataTxHandle = osThreadCreate(osThread(RadarDataTxTask), NULL);
+	
+	osThreadSuspend(RadarDataTxHandle);		//挂起串口发送雷达数据线程
+  #endif
 
-	//osThreadSuspend( RadarDataTxHandle );		//挂起串口发送雷达数据线程
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
- 
+
+  //hcan1~hcan3 init, start
 	DBC_Init(&hcan1);
 	ARS_Init(&hcan2);
+  #if CAN_READ_VEHICLE
   Vehicle_CAN_Init(&hcan3); 
+  #endif
+
   /* Start scheduler */
   osKernelStart();
   
@@ -723,9 +748,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   }
 	if(hcan->Instance == hcan3.Instance)
 	{
+    #if CAN_READ_VEHICLE
 		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
 		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
   	osSemaphoreRelease(bSemSpeedRxSigHandle);
+    #endif
 	}
 	
 }
@@ -779,21 +806,27 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+    #if RADAR_DATA_SEND
 		HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//接收指令信息
 		if(UART1RxComplete==1)
 		{
 			UART1RxComplete=0;
 			osSemaphoreRelease(bSemUART1RxSigHandle);
 		}
+    #endif
 
+    #if ADAS_COMM
     HAL_UART_Receive_DMA(&huart3, ADASRxBuf, 32);//接收指令信息
 		if(ADASRxComplete==1)
 		{
       ADASRxComplete=0;
       osSemaphoreRelease(bSemADASRxSigHandle);
 		}
+    #endif
 		
+    #if DBC_SEND
     DBC_SendDist(&hcan1, MinRangeLong);
+    #endif
 		/*
 		uint32_t CAN_TxMailBox = CAN_TX_MAILBOX1;
 		uint8_t CAN3TxBuf[8]={3};
@@ -948,7 +981,8 @@ void StartSoundWarningTask(void const * argument)
         HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_SET);
         break;
     }
-    
+
+    #if ADAS_COMM
     switch(ADAS_dev.LDW_warning)		//车道偏移
     {
       case 0x01:	//left
@@ -972,6 +1006,7 @@ void StartSoundWarningTask(void const * argument)
         HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_SET);
         break;
     }
+    #endif
 		osDelay(10);
   }
   /* USER CODE END StartSoundWarningTask */

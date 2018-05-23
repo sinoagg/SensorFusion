@@ -8,11 +8,15 @@
  * RadarConfig_func(): fill RadarConfig struct with #define in ARS408.h
  * RadarFilterConfig_func(index): fill RadarFilterConfig struct with #define in ARS408.h
  * FilterContentCfg_func(hcan, index, filter_min, filter_max): fill CANTxBuf[] && send 1 content of filter to can2
+ * 
  * ---read Radar data
  * ARS_GetRadarObjStatus(...): read Radar Obj Status from can2, need to config can2 first
- * ARS_GetRadarObjGeneral(...): read Radar Obj General(distance, velocity...) from can2
+ * ARS_GetRadarObjGeneral(...): read Radar Obj General(distance, relVelocity...) from can2
  */
 #include "ARS408.h"
+
+#define CONFIG_ARS408_RADAR 1
+#define CONFIG_ARS408_FILTER 0
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
@@ -31,11 +35,11 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 	
-	#ifdef CONFIG_ARS408_RADAR
+	#if CONFIG_ARS408_RADAR
 		ARS_ConfigRadar(hcan);
 		HAL_Delay(100);
 	#endif
-	#ifdef CONFIG_ARS408_FILTER
+	#if CONFIG_ARS408_FILTER
 		ARS_ConfigFilter(hcan);
 		HAL_Delay(100);
 	#endif
@@ -64,7 +68,7 @@ void RadarConfig_func()
   RadarConfig.SortIndex = RADARCFG_SORTINDEX_RANGE;
   RadarConfig.StoreInNVM = RADARCFG_STOREINNVM;
   RadarConfig.RCS_Threshold_valid = RADARCFG_RCS_THRES_VALID;
-  RadarConfig.RCS_Threshold = RADARCFG_RCSTHRES_HIGHSENSE;
+  RadarConfig.RCS_Threshold = RADARCFG_RCSTHRES_STD;
 }
 
 void RadarFilterConfig_func(uint8_t index)
