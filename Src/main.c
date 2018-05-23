@@ -114,8 +114,7 @@ osSemaphoreId bSemRadarDataTxSigHandle;
 #define WARNING_MID 2
 #define	WARNING_HIGH 3
 
-MW_RadarConfig RadarConfig;
-MW_RadarFilterConfig RadarFilterConfig;
+
 MW_RadarObjStatus RadarObjStatus;
 MW_RadarGeneral RadarGeneral[16];
 
@@ -784,7 +783,7 @@ void StartDefaultTask(void const * argument)
 		if(UART1RxComplete==1)
 		{
 			UART1RxComplete=0;
-			//osSemaphoreRelease(bSemUART1RxSigHandle);
+			osSemaphoreRelease(bSemUART1RxSigHandle);
 		}
 
     HAL_UART_Receive_DMA(&huart3, ADASRxBuf, 32);//接收指令信息

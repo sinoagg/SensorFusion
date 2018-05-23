@@ -107,6 +107,7 @@ typedef struct
 #define FILTERCFG_INDEX_VXONCOME 			(12<<3)
 #define FILTERCFG_INDEX_VYLEFTRIGHT 	(13<<3)
 #define FILTERCFG_INDEX_VXDEPART 			(14<<3)
+#define FILTERCFG_INDEX_OBJCLASS			(0xF<<3)
 #define FILTERCFG_TYPE_CLUSTER 				(0<<7)
 #define FILTERCFG_TYPE_OBJ 						(1<<7)
 
@@ -124,8 +125,8 @@ typedef struct
 
 typedef struct
 {
-	uint16_t FilterCfg_Min_NofObj;			//最大目标或集群检测数量
-	uint16_t FilterCfg_Max_NofObj;			//此值已忽略
+	uint16_t FilterCfg_Min_NofObj;			//最小目标或集群检测数量
+	uint16_t FilterCfg_Max_NofObj;			//最大目标或集群检测数量
 	uint16_t FilterCfg_Min_Distance;		//最小过滤半径
 	uint16_t FilterCfg_Max_Distance;		//最大过滤半径
 	uint16_t FilterCfg_Min_Azimuth;			//最小过滤航向角度
@@ -135,17 +136,27 @@ typedef struct
 	uint16_t FilterCfg_Min_VrelDepart;	//最小相对远离速度
 	uint16_t FilterCfg_Max_VrelDepart;	//最大相对远离速度
 	uint16_t FilterCfg_Min_RCS;					//最小反射截面积
+	uint16_t FilterCfg_Max_RCS;					//最大反射截面积
 	uint16_t FilterCfg_Min_Lifetime;		//最小被探测时间
+	uint16_t FilterCfg_Max_Lifetime;		//最大被探测时间
 	uint16_t FilterCfg_Min_Size;				//最小探测尺寸
+	uint16_t FilterCfg_Max_Size;				//最大探测尺寸
 	uint16_t FilterCfg_Min_ProbExists;	//最小物体存在概率
+	uint16_t FilterCfg_Max_ProbExists;	//最大物体存在概率
 	uint16_t FilterCfg_Min_Y;						//Y轴方向最小距离
 	uint16_t FilterCfg_Max_Y;						//Y轴方向最大距离
 	uint16_t FilterCfg_Min_X;						//X轴方向最小距离
 	uint16_t FilterCfg_Max_X;						//X轴方向最大距离
-	uint16_t FilterCfg_Min_VYRightLeft;	//Y轴横向移动最小速度
-	uint16_t FilterCfg_Max_VYRightLeft;	//Y轴横向移动最大速度
+	uint16_t FilterCfg_Min_VYRightLeft;	//Y轴右向左移动最小速度
+	uint16_t FilterCfg_Max_VYRightLeft;	//Y轴右向左移动最大速度
 	uint16_t FilterCfg_Min_VXOncome;		//X轴相对驶来最小速度
+	uint16_t FilterCfg_Max_VXOncome;		//X轴相对驶来最大速度
+	uint16_t FilterCfg_Min_VYLeftRight;	//Y轴左向右移动最小速度
+	uint16_t FilterCfg_Max_VYLeftRight;	//Y轴左向右移动最大速度
+	uint16_t FilterCfg_Min_VXDepart;		//X轴相互离开最小速度
 	uint16_t FilterCfg_Max_VXDepart;		//X轴相互离开最大速度
+	uint16_t FilterCfg_Min_Object_Class;//最小物体等级
+	uint16_t FilterCfg_Max_Object_Class;//最大物体等级
 }MW_RadarFilterIndexContent;
 	
 typedef struct
@@ -193,13 +204,11 @@ typedef struct
 	uint8_t Obj_RCS;
 }MW_RadarGeneral;
 
-extern MW_RadarConfig RadarConfig;
-extern MW_RadarFilterConfig RadarFilterConfig;
-extern MW_RadarObjStatus RadarObjStatus;
 
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan);
+uint8_t ARS_ConfigIndexFilter(CAN_HandleTypeDef *hcan, uint8_t index, uint16_t filter_min, uint16_t filter_max);
 void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral);
 
 #endif
