@@ -961,20 +961,34 @@ void StartSoundWarningTask(void const * argument)
     switch(CrashWarningLv)				//前向碰撞
     {
       case WARNING_HIGH:
-        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
-        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
-        //WTN6_Broadcast(BELL_BB_500MS);
-        osDelay(1000);
-        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+				#if ADAS_COMM
+				if(0 != ADAS_dev.crash_level)
+				{
+				#endif
+					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+					HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+					//WTN6_Broadcast(BELL_BB_500MS);
+					osDelay(1000);
+					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+					HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+				#if ADAS_COMM
+				}
+				#endif
         break;
       case WARNING_LOW:
-        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
-        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
-        //WTN6_Broadcast(BELL_BB_1000MS);
-        osDelay(500);
-        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+				#if ADAS_COMM
+				if(0 != ADAS_dev.crash_level)
+				{
+				#endif
+					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+					HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+					//WTN6_Broadcast(BELL_BB_1000MS);
+					osDelay(500);
+					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+					HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+				#if ADAS_COMM
+				}
+				#endif
         break;
       default:
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
@@ -983,7 +997,7 @@ void StartSoundWarningTask(void const * argument)
     }
 
     #if ADAS_COMM
-    switch(ADAS_dev.LDW_warning)		//车道偏移
+    switch(ADAS_dev.LDW_warning)	//车道偏移
     {
       case 0x01:	//left
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
