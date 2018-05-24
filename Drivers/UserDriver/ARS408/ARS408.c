@@ -139,7 +139,7 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_VrelDepart = 3175;
   FilterContent.FilterCfg_Min_RCS = 2001;     //0.025~30dBm2, offset -50, Res 0.025
   FilterContent.FilterCfg_Max_RCS = 3200;
-  FilterContent.FilterCfg_Min_Lifetime = 2;   //0.1~409.5s, offset 0, Res 0.1
+  FilterContent.FilterCfg_Min_Lifetime = 3;   //0.1~409.5s, offset 0, Res 0.1
   FilterContent.FilterCfg_Max_Lifetime = 4095;
   FilterContent.FilterCfg_Min_Size = 1;       //0.025~20m2, offset 0, Res 0.025
   FilterContent.FilterCfg_Max_Size = 800;
