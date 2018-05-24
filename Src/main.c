@@ -67,9 +67,9 @@
 #define VEHICLE_SPEED_ADDR_LOW 0x6E0B
 #define DBC_ADDR 0x509
 //switches
-#define DBC_SEND 1
-#define ADAS_COMM 1
-#define RADAR_DATA_SEND 1
+#define DBC_SEND 0
+#define ADAS_COMM 0
+#define RADAR_DATA_SEND 0
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
