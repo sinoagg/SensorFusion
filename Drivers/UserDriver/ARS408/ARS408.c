@@ -15,8 +15,8 @@
  */
 #include "ARS408.h"
 
-#define CONFIG_ARS408_RADAR 0
-#define CONFIG_ARS408_FILTER 0
+#define CONFIG_ARS408_RADAR 1
+#define CONFIG_ARS408_FILTER 1
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
@@ -129,34 +129,34 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
 {
   FilterContent.FilterCfg_Min_NofObj = 0;
   FilterContent.FilterCfg_Max_NofObj = 1;
-  FilterContent.FilterCfg_Min_Distance = 0;   //0~200m, offset 0, Res 0.1
-  FilterContent.FilterCfg_Max_Distance = 2000;
-  FilterContent.FilterCfg_Min_Azimuth = 160;  //-8¡ã~8¡ã£¬offset -50, Res 0.025
-  FilterContent.FilterCfg_Max_Azimuth = 200;
-  FilterContent.FilterCfg_Min_VrelOncome = 3; //0.1~100m/s, offset 0, Res 0.0315
-  FilterContent.FilterCfg_Max_VrelOncome = 3175;
-  FilterContent.FilterCfg_Min_VrelDepart = 3; //0.1~100m/s, offset 0, Res 0.0315
-  FilterContent.FilterCfg_Max_VrelDepart = 3175;
-  FilterContent.FilterCfg_Min_RCS = 2001;     //0.025~30dBm2, offset -50, Res 0.025
-  FilterContent.FilterCfg_Max_RCS = 3200;
-  FilterContent.FilterCfg_Min_Lifetime = 3;   //0.1~409.5s, offset 0, Res 0.1
-  FilterContent.FilterCfg_Max_Lifetime = 4095;
-  FilterContent.FilterCfg_Min_Size = 1;       //0.025~20m2, offset 0, Res 0.025
-  FilterContent.FilterCfg_Max_Size = 800;
+  FilterContent.FilterCfg_Min_Distance = (uint16_t)((0 - 0) / 0.1);     //0~200m, offset 0, Res 0.1
+  FilterContent.FilterCfg_Max_Distance = (uint16_t)((200 - 0) / 0.1);
+  FilterContent.FilterCfg_Min_Azimuth = (uint16_t)((-9 + 50) / 0.025);  //-9¡ã~9¡ã£¬offset -50, Res 0.025
+  FilterContent.FilterCfg_Max_Azimuth = (uint16_t)((9 + 50) / 0.025);
+  FilterContent.FilterCfg_Min_VrelOncome = (uint16_t)((0.1 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VrelOncome = (uint16_t)((100 - 0) / 0.0315);
+  FilterContent.FilterCfg_Min_VrelDepart = (uint16_t)((0.1 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VrelDepart = (uint16_t)((100 - 0) / 0.0315);
+  FilterContent.FilterCfg_Min_RCS = (uint16_t)((0.025 + 50) / 0.025);   //0.025~30dBm2, offset -50, Res 0.025
+  FilterContent.FilterCfg_Max_RCS = (uint16_t)((30 + 50) / 0.025);
+  FilterContent.FilterCfg_Min_Lifetime = (uint16_t)((0.1 - 0) / 0.1);   //0.1~409.5s, offset 0, Res 0.1
+  FilterContent.FilterCfg_Max_Lifetime = (uint16_t)((409.5 - 0) / 0.1);
+  FilterContent.FilterCfg_Min_Size = (uint16_t)((0.025 - 0) / 0.025);   //0.025~20m2, offset 0, Res 0.025
+  FilterContent.FilterCfg_Max_Size = (uint16_t)((20 - 0) / 0.025);
   FilterContent.FilterCfg_Min_ProbExists = 0x5;//99%~100%, 0x0: 0%, 0x1: 25%, 0x2: 50%
   FilterContent.FilterCfg_Max_ProbExists = 0x7;//0x3: 75%, 0x4: 90%, 0x5: 99%, 0x6: 99.9%, 0x7: 100%
-  FilterContent.FilterCfg_Min_Y = 2040;       //-1.5~1.5m, offset -409.5, Res 0.2
-  FilterContent.FilterCfg_Max_Y = 2055;
-  FilterContent.FilterCfg_Min_X = 2500;       //0~200m, offset -500, Res 0.2
-  FilterContent.FilterCfg_Max_X = 3500;
-  FilterContent.FilterCfg_Min_VYRightLeft = 3;//0.1~100m/s, offset 0, Res 0.0315
-  FilterContent.FilterCfg_Max_VYRightLeft = 3175;
-  FilterContent.FilterCfg_Min_VXOncome = 3;   //0.1~100m/s, offset 0, Res 0.0315
-  FilterContent.FilterCfg_Max_VXOncome = 3175;
-  FilterContent.FilterCfg_Min_VYLeftRight = 3;//0.1~100m/s, offset 0, Res 0.0315
-  FilterContent.FilterCfg_Max_VYLeftRight = 3175;
-  FilterContent.FilterCfg_Min_VXDepart = 3;   //0.1~100m/s, offset 0, Res 0.0315
-  FilterContent.FilterCfg_Max_VXDepart = 3175;
+  FilterContent.FilterCfg_Min_Y = (uint16_t)((-1.5 + 409.5) / 0.2);     //-1.5~1.5m, offset -409.5, Res 0.2
+  FilterContent.FilterCfg_Max_Y = (uint16_t)((1.5 + 409.5) / 0.2);
+  FilterContent.FilterCfg_Min_X = (uint16_t)((0 + 500) / 0.2);          //0~200m, offset -500, Res 0.2
+  FilterContent.FilterCfg_Max_X = (uint16_t)((200 + 500) / 0.2);
+  FilterContent.FilterCfg_Min_VYRightLeft = (uint16_t)((0.1 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VYRightLeft = (uint16_t)(100 - 0) / 0.0315;
+  FilterContent.FilterCfg_Min_VXOncome = (uint16_t)((0.1 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VXOncome = (uint16_t)((100 - 0) / 0.0315);
+  FilterContent.FilterCfg_Min_VYLeftRight = (uint16_t)((0.1 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VYLeftRight = (uint16_t)((100 - 0) / 0.0315);
+  FilterContent.FilterCfg_Min_VXDepart = (uint16_t)((0.1 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VXDepart = (uint16_t)((100 - 0) / 0.0315);
   FilterContent.FilterCfg_Min_Object_Class = 0x5;//0x0: point, 0x1: car, 0x2: truck, 0x3: not used
   FilterContent.FilterCfg_Max_Object_Class = 0x2;//0x4: motorcyc, 0x5: bicycle, 0x6: wide, 0x7: reserved
 
