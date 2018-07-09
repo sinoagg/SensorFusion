@@ -39,7 +39,7 @@
   * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
   * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
   * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOsWEVER CAUSED AND ON ANY THEORY OF 
+  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
   * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
   * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
@@ -73,6 +73,8 @@
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
+ADC_HandleTypeDef hadc1;
+
 CAN_HandleTypeDef hcan1;
 CAN_HandleTypeDef hcan2;
 CAN_HandleTypeDef hcan3;
@@ -100,6 +102,7 @@ osThreadId CANSpeedReadHandle;
 osThreadId StartCalculateHandle;
 osThreadId UART1RxHandle;
 osThreadId RadarDataTxHandle;
+osSemaphoreId bSemCANRxSigHandle;
 osSemaphoreId bSemRadarCANRxSigHandle;
 osSemaphoreId bSemADASRxSigHandle;
 osSemaphoreId bSemSoundWarningSigHandle;
@@ -162,6 +165,7 @@ static void MX_UART5_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_ADC1_Init(void);
 void StartDefaultTask(void const * argument);
 void StartRadarCommTask(void const * argument);
 void StartADASCommTask(void const * argument);
@@ -228,6 +232,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 	delay_init(100);
 	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
@@ -248,6 +253,11 @@ int main(void)
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* definition and creation of bSemCANRxSig */
+  osSemaphoreDef(bSemCANRxSig);
+  bSemCANRxSigHandle = osSemaphoreCreate(osSemaphore(bSemCANRxSig), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -289,7 +299,7 @@ int main(void)
   //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever); //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   #endif
 
-	/* USER CODE END RTOS_SEMAPHORES */
+  /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -315,8 +325,8 @@ int main(void)
   SoundWarningHandle = osThreadCreate(osThread(SoundWarning), NULL);
 
   /* definition and creation of LightWarning */
-  //osThreadDef(LightWarning, StartLightWarningTask, osPriorityIdle, 0, 64);
-  //LightWarningHandle = osThreadCreate(osThread(LightWarning), NULL);
+  osThreadDef(LightWarning, StartLightWarningTask, osPriorityIdle, 0, 64);
+  LightWarningHandle = osThreadCreate(osThread(LightWarning), NULL);
 
   /* definition and creation of CANSpeedRead */
   #if CAN_READ_VEHICLE
@@ -343,14 +353,14 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
-
-  //hcan1~hcan3 init, start
-	DBC_Init(&hcan1);
-	ARS_Init(&hcan2);
+  //hcan1~hcan3 init & start
+  DBC_Init(&hcan1);
+  ARS_Init(&hcan2);//hcan2 must use hcan1
   #if CAN_READ_VEHICLE
-  Vehicle_CAN_Init(&hcan3); 
+  Vehicle_CAN_Init(&hcan3);
   #endif
+  /* USER CODE END RTOS_QUEUES */
+ 
 
   /* Start scheduler */
   osKernelStart();
@@ -427,6 +437,43 @@ void SystemClock_Config(void)
 
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 15, 0);
+}
+
+/* ADC1 init function */
+static void MX_ADC1_Init(void)
+{
+
+  ADC_ChannelConfTypeDef sConfig;
+
+    /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
+    */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc1.Init.ScanConvMode = DISABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+    */
+  sConfig.Channel = ADC_CHANNEL_0;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
 }
 
 /* CAN1 init function */
@@ -715,7 +762,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(BELL_DATA_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : BELL_BUSY_Pin */
-	GPIO_InitStruct.Pin = BELL_BUSY_Pin;
+  GPIO_InitStruct.Pin = BELL_BUSY_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(BELL_BUSY_GPIO_Port, &GPIO_InitStruct);

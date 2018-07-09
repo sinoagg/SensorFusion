@@ -1,6 +1,0 @@
-void StartDefaultTask(void const * argument);
-void StartRadarCommTask(void const * argument);
-void StartADASCommTask(void const * argument);
-void StartSoundWarningTask(void const * argument);
-void StartLightWarningTask(void const * argument);
-void StartCANSpeedReadTask(void const * argument);

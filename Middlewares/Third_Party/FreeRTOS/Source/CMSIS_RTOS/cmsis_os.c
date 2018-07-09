@@ -377,21 +377,6 @@ osStatus osDelay (uint32_t millisec)
 #endif
 }
 
-osStatus osDelay_us (uint32_t usec)
-{
-#if INCLUDE_vTaskDelay
-  TickType_t ticks = usec / portTICK_PERIOD_US;
-  
-  vTaskDelay(ticks ? ticks : 1);          /* Minimum delay = 1 tick */
-  
-  return osOK;
-#else
-  (void) usec;
-  
-  return osErrorResource;
-#endif
-}
-
 #if (defined (osFeature_Wait)  &&  (osFeature_Wait != 0)) /* Generic Wait available */
 /**
 * @brief  Wait for Signal, Message, Mail, or Timeout

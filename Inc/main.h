@@ -58,6 +58,7 @@
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
+
 #define BELL_DATA_Pin GPIO_PIN_7
 #define BELL_DATA_GPIO_Port GPIOA
 #define BELL_BUSY_Pin GPIO_PIN_4
