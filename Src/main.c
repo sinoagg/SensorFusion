@@ -70,10 +70,12 @@
 #define DBC_SEND 0
 #define ADAS_COMM 0
 #define RADAR_DATA_SEND 0
+#define CAN_READ_VEHICLE 1
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
 
 CAN_HandleTypeDef hcan1;
 CAN_HandleTypeDef hcan2;
@@ -97,7 +99,7 @@ osThreadId defaultTaskHandle;
 osThreadId RadarCommHandle;
 osThreadId ADASCommHandle;
 osThreadId SoundWarningHandle;
-osThreadId LightWarningHandle;
+osThreadId GyroCommHandle;
 osThreadId CANSpeedReadHandle;
 osThreadId StartCalculateHandle;
 osThreadId UART1RxHandle;
@@ -106,7 +108,7 @@ osSemaphoreId bSemCANRxSigHandle;
 osSemaphoreId bSemRadarCANRxSigHandle;
 osSemaphoreId bSemADASRxSigHandle;
 osSemaphoreId bSemSoundWarningSigHandle;
-osSemaphoreId bSemLightWarningSigHandle;
+osSemaphoreId bSemGyroCommSigHandle;
 osSemaphoreId bSemSpeedRxSigHandle;
 osSemaphoreId bSemCalculateSigHandle;
 osSemaphoreId bSemUART1RxSigHandle;
@@ -170,7 +172,7 @@ void StartDefaultTask(void const * argument);
 void StartRadarCommTask(void const * argument);
 void StartADASCommTask(void const * argument);
 void StartSoundWarningTask(void const * argument);
-void StartLightWarningTask(void const * argument);
+void StartGyroCommTask(void const * argument);
 void StartCANSpeedReadTask(void const * argument);
 void StartCalculateTask(void const * argument);
 void StartUART1RxTask(void const * argument);
@@ -191,6 +193,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan);
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
+
 
 /**
   * @brief  The application entry point.
@@ -269,8 +272,8 @@ int main(void)
   #endif
 	osSemaphoreDef(bSemSoundWarningSig);
   bSemSoundWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemSoundWarningSig), 1);
-	//osSemaphoreDef(bSemLightWarningSig);
-  //bSemLightWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemLightWarningSig), 1);
+	osSemaphoreDef(bSemGyroCommSig);
+  bSemGyroCommSigHandle = osSemaphoreCreate(osSemaphore(bSemGyroCommSig), 1);
 	#if CAN_READ_VEHICLE
   osSemaphoreDef(bSemSpeedRxSig);  
   bSemSpeedRxSigHandle = osSemaphoreCreate(osSemaphore(bSemSpeedRxSig), 1);
@@ -289,7 +292,7 @@ int main(void)
   osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   #endif
   osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  //osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  //osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);	  //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   #if CAN_READ_VEHICLE
   osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   #endif
@@ -324,9 +327,9 @@ int main(void)
   osThreadDef(SoundWarning, StartSoundWarningTask, osPriorityIdle, 0, 64);
   SoundWarningHandle = osThreadCreate(osThread(SoundWarning), NULL);
 
-  /* definition and creation of LightWarning */
-  osThreadDef(LightWarning, StartLightWarningTask, osPriorityIdle, 0, 64);
-  LightWarningHandle = osThreadCreate(osThread(LightWarning), NULL);
+  /* definition and creation of GyroComm */
+  osThreadDef(GyroComm, StartGyroCommTask, osPriorityIdle, 0, 64);
+  GyroCommHandle = osThreadCreate(osThread(GyroComm), NULL);
 
   /* definition and creation of CANSpeedRead */
   #if CAN_READ_VEHICLE
@@ -1073,17 +1076,17 @@ void StartSoundWarningTask(void const * argument)
   /* USER CODE END StartSoundWarningTask */
 }
 
-/* StartLightWarningTask function */
-void StartLightWarningTask(void const * argument)
+/* StartGyroCommTask function */
+void StartGyroCommTask(void const * argument)
 {
-  /* USER CODE BEGIN StartLightWarningTask */
+  /* USER CODE BEGIN StartGyroCommTask */
   /* Infinite loop */
   for(;;)
   {
-    osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);
+    osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);
 		osDelay(10);
   }
-  /* USER CODE END StartLightWarningTask */
+  /* USER CODE END StartGyroCommTask */
 }
 
 /* StartCANSpeedReadTask function */
