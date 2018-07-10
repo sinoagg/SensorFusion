@@ -979,6 +979,39 @@ Section Cross References
     stm32f4xx_hal_rcc.o(i.HAL_RCC_MCOConfig) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_Init) for HAL_GPIO_Init
     stm32f4xx_hal_rcc.o(i.HAL_RCC_NMI_IRQHandler) refers to stm32f4xx_hal_rcc.o(i.HAL_RCC_CSSCallback) for HAL_RCC_CSSCallback
     stm32f4xx_hal_rcc.o(i.HAL_RCC_OscConfig) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
+    stm32f4xx_hal_adc.o(i.ADC_DMAConvCplt) refers to stm32f4xx_hal_adc.o(i.HAL_ADC_ConvCpltCallback) for HAL_ADC_ConvCpltCallback
+    stm32f4xx_hal_adc.o(i.ADC_DMAError) refers to stm32f4xx_hal_adc.o(i.HAL_ADC_ErrorCallback) for HAL_ADC_ErrorCallback
+    stm32f4xx_hal_adc.o(i.ADC_DMAHalfConvCplt) refers to stm32f4xx_hal_adc.o(i.HAL_ADC_ConvHalfCpltCallback) for HAL_ADC_ConvHalfCpltCallback
+    stm32f4xx_hal_adc.o(i.HAL_ADC_ConfigChannel) refers to system_stm32f4xx.o(.data) for SystemCoreClock
+    stm32f4xx_hal_adc.o(i.HAL_ADC_DeInit) refers to stm32f4xx_hal_adc.o(i.HAL_ADC_MspDeInit) for HAL_ADC_MspDeInit
+    stm32f4xx_hal_adc.o(i.HAL_ADC_IRQHandler) refers to stm32f4xx_hal_adc.o(i.HAL_ADC_ConvCpltCallback) for HAL_ADC_ConvCpltCallback
+    stm32f4xx_hal_adc.o(i.HAL_ADC_IRQHandler) refers to stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_InjectedConvCpltCallback) for HAL_ADCEx_InjectedConvCpltCallback
+    stm32f4xx_hal_adc.o(i.HAL_ADC_IRQHandler) refers to stm32f4xx_hal_adc.o(i.HAL_ADC_LevelOutOfWindowCallback) for HAL_ADC_LevelOutOfWindowCallback
+    stm32f4xx_hal_adc.o(i.HAL_ADC_IRQHandler) refers to stm32f4xx_hal_adc.o(i.HAL_ADC_ErrorCallback) for HAL_ADC_ErrorCallback
+    stm32f4xx_hal_adc.o(i.HAL_ADC_Init) refers to stm32f4xx_hal_adc.o(i.HAL_ADC_MspInit) for HAL_ADC_MspInit
+    stm32f4xx_hal_adc.o(i.HAL_ADC_Init) refers to stm32f4xx_hal_adc.o(i.ADC_Init) for ADC_Init
+    stm32f4xx_hal_adc.o(i.HAL_ADC_PollForConversion) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
+    stm32f4xx_hal_adc.o(i.HAL_ADC_PollForEvent) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
+    stm32f4xx_hal_adc.o(i.HAL_ADC_Start) refers to system_stm32f4xx.o(.data) for SystemCoreClock
+    stm32f4xx_hal_adc.o(i.HAL_ADC_Start_DMA) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Start_IT) for HAL_DMA_Start_IT
+    stm32f4xx_hal_adc.o(i.HAL_ADC_Start_DMA) refers to system_stm32f4xx.o(.data) for SystemCoreClock
+    stm32f4xx_hal_adc.o(i.HAL_ADC_Start_DMA) refers to stm32f4xx_hal_adc.o(i.ADC_DMAConvCplt) for ADC_DMAConvCplt
+    stm32f4xx_hal_adc.o(i.HAL_ADC_Start_DMA) refers to stm32f4xx_hal_adc.o(i.ADC_DMAHalfConvCplt) for ADC_DMAHalfConvCplt
+    stm32f4xx_hal_adc.o(i.HAL_ADC_Start_DMA) refers to stm32f4xx_hal_adc.o(i.ADC_DMAError) for ADC_DMAError
+    stm32f4xx_hal_adc.o(i.HAL_ADC_Start_IT) refers to system_stm32f4xx.o(.data) for SystemCoreClock
+    stm32f4xx_hal_adc.o(i.HAL_ADC_Stop_DMA) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Abort) for HAL_DMA_Abort
+    stm32f4xx_hal_adc_ex.o(i.ADC_MultiModeDMAConvCplt) refers to stm32f4xx_hal_adc.o(i.HAL_ADC_ConvCpltCallback) for HAL_ADC_ConvCpltCallback
+    stm32f4xx_hal_adc_ex.o(i.ADC_MultiModeDMAError) refers to stm32f4xx_hal_adc.o(i.HAL_ADC_ErrorCallback) for HAL_ADC_ErrorCallback
+    stm32f4xx_hal_adc_ex.o(i.ADC_MultiModeDMAHalfConvCplt) refers to stm32f4xx_hal_adc.o(i.HAL_ADC_ConvHalfCpltCallback) for HAL_ADC_ConvHalfCpltCallback
+    stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_InjectedPollForConversion) refers to stm32f4xx_hal.o(i.HAL_GetTick) for HAL_GetTick
+    stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_InjectedStart) refers to system_stm32f4xx.o(.data) for SystemCoreClock
+    stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_InjectedStart_IT) refers to system_stm32f4xx.o(.data) for SystemCoreClock
+    stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_MultiModeStart_DMA) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Start_IT) for HAL_DMA_Start_IT
+    stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_MultiModeStart_DMA) refers to system_stm32f4xx.o(.data) for SystemCoreClock
+    stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_MultiModeStart_DMA) refers to stm32f4xx_hal_adc_ex.o(i.ADC_MultiModeDMAConvCplt) for ADC_MultiModeDMAConvCplt
+    stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_MultiModeStart_DMA) refers to stm32f4xx_hal_adc_ex.o(i.ADC_MultiModeDMAHalfConvCplt) for ADC_MultiModeDMAHalfConvCplt
+    stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_MultiModeStart_DMA) refers to stm32f4xx_hal_adc_ex.o(i.ADC_MultiModeDMAError) for ADC_MultiModeDMAError
+    stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_MultiModeStop_DMA) refers to stm32f4xx_hal_dma.o(i.HAL_DMA_Abort) for HAL_DMA_Abort
     system_stm32f4xx.o(i.SystemCoreClockUpdate) refers to system_stm32f4xx.o(.data) for SystemCoreClock
     system_stm32f4xx.o(i.SystemCoreClockUpdate) refers to system_stm32f4xx.o(.constdata) for AHBPrescTable
     entry.o(.ARM.Collect$$$$00000000) refers (Special) to entry10a.o(.ARM.Collect$$$$0000000D) for __rt_final_cpp
@@ -1547,12 +1580,59 @@ Removing Unused input sections from the image.
     Removing stm32f4xx_hal_rcc.o(i.HAL_RCC_MCOConfig), (192 bytes).
     Removing stm32f4xx_hal_rcc.o(i.HAL_RCC_NMI_IRQHandler), (32 bytes).
     Removing stm32f4xx_hal_rcc.o(i.HAL_RCC_OscConfig), (1096 bytes).
+    Removing stm32f4xx_hal_adc.o(.rev16_text), (4 bytes).
+    Removing stm32f4xx_hal_adc.o(.revsh_text), (4 bytes).
+    Removing stm32f4xx_hal_adc.o(.rrx_text), (6 bytes).
+    Removing stm32f4xx_hal_adc.o(i.ADC_DMAConvCplt), (110 bytes).
+    Removing stm32f4xx_hal_adc.o(i.ADC_DMAError), (26 bytes).
+    Removing stm32f4xx_hal_adc.o(i.ADC_DMAHalfConvCplt), (14 bytes).
+    Removing stm32f4xx_hal_adc.o(i.ADC_Init), (348 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_AnalogWDGConfig), (136 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_ConfigChannel), (396 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_ConvCpltCallback), (2 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_ConvHalfCpltCallback), (2 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_DeInit), (68 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_ErrorCallback), (2 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_GetError), (6 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_GetState), (6 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_GetValue), (8 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_IRQHandler), (372 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_Init), (104 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_LevelOutOfWindowCallback), (2 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_MspDeInit), (2 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_MspInit), (2 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_PollForConversion), (186 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_PollForEvent), (118 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_Start), (256 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_Start_DMA), (328 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_Start_IT), (272 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_Stop), (72 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_Stop_DMA), (108 bytes).
+    Removing stm32f4xx_hal_adc.o(i.HAL_ADC_Stop_IT), (88 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(.rev16_text), (4 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(.revsh_text), (4 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(.rrx_text), (6 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.ADC_MultiModeDMAConvCplt), (110 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.ADC_MultiModeDMAError), (26 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.ADC_MultiModeDMAHalfConvCplt), (14 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_InjectedConfigChannel), (552 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_InjectedConvCpltCallback), (2 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_InjectedGetValue), (70 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_InjectedPollForConversion), (160 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_InjectedStart), (268 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_InjectedStart_IT), (280 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_InjectedStop), (104 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_InjectedStop_IT), (116 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_MultiModeConfigChannel), (96 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_MultiModeGetValue), (12 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_MultiModeStart_DMA), (292 bytes).
+    Removing stm32f4xx_hal_adc_ex.o(i.HAL_ADCEx_MultiModeStop_DMA), (112 bytes).
     Removing system_stm32f4xx.o(.rev16_text), (4 bytes).
     Removing system_stm32f4xx.o(.revsh_text), (4 bytes).
     Removing system_stm32f4xx.o(.rrx_text), (6 bytes).
     Removing system_stm32f4xx.o(i.SystemCoreClockUpdate), (192 bytes).
 
-534 unused section(s) (total 42684 bytes) removed from the image.
+581 unused section(s) (total 47960 bytes) removed from the image.
 
 ==============================================================================
 
@@ -1596,32 +1676,34 @@ Image Symbol Table
     ../Src/stm32f4xx_it.c                    0x00000000   Number         0  stm32f4xx_it.o ABSOLUTE
     ../clib/../cmprslib/zerorunl2.c          0x00000000   Number         0  __dczerorl2.o ABSOLUTE
     ../clib/microlib/division.c              0x00000000   Number         0  uldiv.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry2.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry5.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8a.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry5.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry2.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11a.o ABSOLUTE
-    ../clib/microlib/longlong.c              0x00000000   Number         0  llushr.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
     ../clib/microlib/longlong.c              0x00000000   Number         0  llsshr.o ABSOLUTE
     ../clib/microlib/longlong.c              0x00000000   Number         0  llshl.o ABSOLUTE
+    ../clib/microlib/longlong.c              0x00000000   Number         0  llushr.o ABSOLUTE
     ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpyb.o ABSOLUTE
     ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpya.o ABSOLUTE
     ../clib/microlib/stubs.s                 0x00000000   Number         0  iusefp.o ABSOLUTE
     ../fplib/microlib/d2f.c                  0x00000000   Number         0  d2f.o ABSOLUTE
     ../fplib/microlib/fpadd.c                0x00000000   Number         0  dadd.o ABSOLUTE
-    ../fplib/microlib/fpepilogue.c           0x00000000   Number         0  fepilogue.o ABSOLUTE
     ../fplib/microlib/fpepilogue.c           0x00000000   Number         0  depilogue.o ABSOLUTE
+    ../fplib/microlib/fpepilogue.c           0x00000000   Number         0  fepilogue.o ABSOLUTE
     ../fplib/microlib/fpflt.c                0x00000000   Number         0  dfltui.o ABSOLUTE
     ../fplib/microlib/fpmul.c                0x00000000   Number         0  dmul.o ABSOLUTE
     ..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal.c 0x00000000   Number         0  stm32f4xx_hal.o ABSOLUTE
+    ..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_adc.c 0x00000000   Number         0  stm32f4xx_hal_adc.o ABSOLUTE
+    ..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_adc_ex.c 0x00000000   Number         0  stm32f4xx_hal_adc_ex.o ABSOLUTE
     ..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_can.c 0x00000000   Number         0  stm32f4xx_hal_can.o ABSOLUTE
     ..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_cortex.c 0x00000000   Number         0  stm32f4xx_hal_cortex.o ABSOLUTE
     ..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_crc.c 0x00000000   Number         0  stm32f4xx_hal_crc.o ABSOLUTE
@@ -1650,6 +1732,8 @@ Image Symbol Table
     ..\Src\stm32f4xx_hal_msp.c               0x00000000   Number         0  stm32f4xx_hal_msp.o ABSOLUTE
     ..\Src\stm32f4xx_hal_timebase_TIM.c      0x00000000   Number         0  stm32f4xx_hal_timebase_tim.o ABSOLUTE
     ..\Src\stm32f4xx_it.c                    0x00000000   Number         0  stm32f4xx_it.o ABSOLUTE
+    ..\\Drivers\\STM32F4xx_HAL_Driver\\Src\\stm32f4xx_hal_adc.c 0x00000000   Number         0  stm32f4xx_hal_adc.o ABSOLUTE
+    ..\\Drivers\\STM32F4xx_HAL_Driver\\Src\\stm32f4xx_hal_adc_ex.c 0x00000000   Number         0  stm32f4xx_hal_adc_ex.o ABSOLUTE
     ..\\Drivers\\UserDriver\\ADAS\\ADAS.c    0x00000000   Number         0  adas.o ABSOLUTE
     ..\\Drivers\\UserDriver\\ARS408\\ARS408.c 0x00000000   Number         0  ars408.o ABSOLUTE
     ..\\Drivers\\UserDriver\\InternalFlash\\InternalFlash.c 0x00000000   Number         0  internalflash.o ABSOLUTE
@@ -1687,8 +1771,8 @@ Image Symbol Table
     .text                                    0x08000608   Section        0  llshl.o(.text)
     .text                                    0x08000626   Section        0  llushr.o(.text)
     .text                                    0x08000646   Section        0  llsshr.o(.text)
-    .text                                    0x0800066a   Section        0  fepilogue.o(.text)
     .text                                    0x0800066a   Section        0  iusefp.o(.text)
+    .text                                    0x0800066a   Section        0  fepilogue.o(.text)
     .text                                    0x080006d8   Section        0  depilogue.o(.text)
     .text                                    0x08000794   Section       36  init.o(.text)
     .text                                    0x080007b8   Section        0  __dczerorl2.o(.text)
@@ -2376,35 +2460,35 @@ Memory Map of the image
     Base Addr    Size         Type   Attr      Idx    E Section Name        Object
 
     0x08000000   0x000001d8   Data   RO            3    RESET               startup_stm32f413xx.o
-    0x080001d8   0x00000000   Code   RO         4690  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
-    0x080001d8   0x00000004   Code   RO         4709    .ARM.Collect$$$$00000001  mc_w.l(entry2.o)
-    0x080001dc   0x00000004   Code   RO         4712    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
-    0x080001e0   0x00000000   Code   RO         4714    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
-    0x080001e0   0x00000000   Code   RO         4716    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
-    0x080001e0   0x00000008   Code   RO         4717    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
-    0x080001e8   0x00000000   Code   RO         4719    .ARM.Collect$$$$0000000D  mc_w.l(entry10a.o)
-    0x080001e8   0x00000000   Code   RO         4721    .ARM.Collect$$$$0000000F  mc_w.l(entry11a.o)
-    0x080001e8   0x00000004   Code   RO         4710    .ARM.Collect$$$$00002712  mc_w.l(entry2.o)
+    0x080001d8   0x00000000   Code   RO         4965  * .ARM.Collect$$$$00000000  mc_w.l(entry.o)
+    0x080001d8   0x00000004   Code   RO         4984    .ARM.Collect$$$$00000001  mc_w.l(entry2.o)
+    0x080001dc   0x00000004   Code   RO         4987    .ARM.Collect$$$$00000004  mc_w.l(entry5.o)
+    0x080001e0   0x00000000   Code   RO         4989    .ARM.Collect$$$$00000008  mc_w.l(entry7b.o)
+    0x080001e0   0x00000000   Code   RO         4991    .ARM.Collect$$$$0000000A  mc_w.l(entry8b.o)
+    0x080001e0   0x00000008   Code   RO         4992    .ARM.Collect$$$$0000000B  mc_w.l(entry9a.o)
+    0x080001e8   0x00000000   Code   RO         4994    .ARM.Collect$$$$0000000D  mc_w.l(entry10a.o)
+    0x080001e8   0x00000000   Code   RO         4996    .ARM.Collect$$$$0000000F  mc_w.l(entry11a.o)
+    0x080001e8   0x00000004   Code   RO         4985    .ARM.Collect$$$$00002712  mc_w.l(entry2.o)
     0x080001ec   0x000000ba   Code   RO         1578    .emb_text           port.o
     0x080002a6   0x00000002   PAD
     0x080002a8   0x00000024   Code   RO            4    .text               startup_stm32f413xx.o
-    0x080002cc   0x00000062   Code   RO         4693    .text               mc_w.l(uldiv.o)
-    0x0800032e   0x00000024   Code   RO         4695    .text               mc_w.l(memcpya.o)
-    0x08000352   0x0000014e   Code   RO         4699    .text               mf_w.l(dadd.o)
-    0x080004a0   0x000000e4   Code   RO         4701    .text               mf_w.l(dmul.o)
-    0x08000584   0x0000001a   Code   RO         4703    .text               mf_w.l(dfltui.o)
+    0x080002cc   0x00000062   Code   RO         4968    .text               mc_w.l(uldiv.o)
+    0x0800032e   0x00000024   Code   RO         4970    .text               mc_w.l(memcpya.o)
+    0x08000352   0x0000014e   Code   RO         4974    .text               mf_w.l(dadd.o)
+    0x080004a0   0x000000e4   Code   RO         4976    .text               mf_w.l(dmul.o)
+    0x08000584   0x0000001a   Code   RO         4978    .text               mf_w.l(dfltui.o)
     0x0800059e   0x00000002   PAD
-    0x080005a0   0x00000030   Code   RO         4705    .text               mf_w.l(cdcmple.o)
-    0x080005d0   0x00000038   Code   RO         4707    .text               mf_w.l(d2f.o)
-    0x08000608   0x0000001e   Code   RO         4723    .text               mc_w.l(llshl.o)
-    0x08000626   0x00000020   Code   RO         4725    .text               mc_w.l(llushr.o)
-    0x08000646   0x00000024   Code   RO         4727    .text               mc_w.l(llsshr.o)
-    0x0800066a   0x00000000   Code   RO         4729    .text               mc_w.l(iusefp.o)
-    0x0800066a   0x0000006e   Code   RO         4730    .text               mf_w.l(fepilogue.o)
-    0x080006d8   0x000000ba   Code   RO         4732    .text               mf_w.l(depilogue.o)
+    0x080005a0   0x00000030   Code   RO         4980    .text               mf_w.l(cdcmple.o)
+    0x080005d0   0x00000038   Code   RO         4982    .text               mf_w.l(d2f.o)
+    0x08000608   0x0000001e   Code   RO         4998    .text               mc_w.l(llshl.o)
+    0x08000626   0x00000020   Code   RO         5000    .text               mc_w.l(llushr.o)
+    0x08000646   0x00000024   Code   RO         5002    .text               mc_w.l(llsshr.o)
+    0x0800066a   0x00000000   Code   RO         5004    .text               mc_w.l(iusefp.o)
+    0x0800066a   0x0000006e   Code   RO         5005    .text               mf_w.l(fepilogue.o)
+    0x080006d8   0x000000ba   Code   RO         5007    .text               mf_w.l(depilogue.o)
     0x08000792   0x00000002   PAD
-    0x08000794   0x00000024   Code   RO         4734    .text               mc_w.l(init.o)
-    0x080007b8   0x00000056   Code   RO         4744    .text               mc_w.l(__dczerorl2.o)
+    0x08000794   0x00000024   Code   RO         5009    .text               mc_w.l(init.o)
+    0x080007b8   0x00000056   Code   RO         5019    .text               mc_w.l(__dczerorl2.o)
     0x0800080e   0x00000002   PAD
     0x08000810   0x00000190   Code   RO          315    i.ARS_ConfigFilter  ars408.o
     0x080009a0   0x000000c0   Code   RO          316    i.ARS_ConfigRadar   ars408.o
@@ -2530,7 +2614,7 @@ Memory Map of the image
     0x080038d4   0x000000ac   Code   RO          711    i.StartSoundWarningTask  main.o
     0x08003980   0x00000008   Code   RO          451    i.SysTick_Handler   stm32f4xx_it.o
     0x08003988   0x000000e0   Code   RO          713    i.SystemClock_Config  main.o
-    0x08003a68   0x00000064   Code   RO         4657    i.SystemInit        system_stm32f4xx.o
+    0x08003a68   0x00000064   Code   RO         4932    i.SystemInit        system_stm32f4xx.o
     0x08003acc   0x00000010   Code   RO          452    i.TIM4_IRQHandler   stm32f4xx_it.o
     0x08003adc   0x000000e4   Code   RO         2615    i.TIM_Base_SetConfig  stm32f4xx_hal_tim.o
     0x08003bc0   0x00000018   Code   RO         2622    i.TIM_ETR_SetConfig  stm32f4xx_hal_tim.o
@@ -2554,9 +2638,9 @@ Memory Map of the image
     0x080041e0   0x00000030   Code   RO          714    i.Vehicle_CAN_Init  main.o
     0x08004210   0x00000094   Code   RO          202    i.WTN6_Broadcast    wtn6040.o
     0x080042a4   0x00000004   Code   RO          715    i._Error_Handler    main.o
-    0x080042a8   0x0000000e   Code   RO         4738    i.__scatterload_copy  mc_w.l(handlers.o)
-    0x080042b6   0x00000002   Code   RO         4739    i.__scatterload_null  mc_w.l(handlers.o)
-    0x080042b8   0x0000000e   Code   RO         4740    i.__scatterload_zeroinit  mc_w.l(handlers.o)
+    0x080042a8   0x0000000e   Code   RO         5013    i.__scatterload_copy  mc_w.l(handlers.o)
+    0x080042b6   0x00000002   Code   RO         5014    i.__scatterload_null  mc_w.l(handlers.o)
+    0x080042b8   0x0000000e   Code   RO         5015    i.__scatterload_zeroinit  mc_w.l(handlers.o)
     0x080042c6   0x00000002   PAD
     0x080042c8   0x00000044   Code   RO          271    i.delay_init        delay.o
     0x0800430c   0x00000040   Code   RO          272    i.delay_ms          delay.o
@@ -2629,10 +2713,10 @@ Memory Map of the image
     0x08005f60   0x00000028   Data   RO          324    .constdata          ars408.o
     0x08005f88   0x000000a0   Data   RO          718    .constdata          main.o
     0x08006028   0x00000008   Data   RO         3894    .constdata          stm32f4xx_hal_dma.o
-    0x08006030   0x00000018   Data   RO         4658    .constdata          system_stm32f4xx.o
+    0x08006030   0x00000018   Data   RO         4933    .constdata          system_stm32f4xx.o
     0x08006048   0x00000052   Data   RO          719    .conststring        main.o
     0x0800609a   0x00000002   PAD
-    0x0800609c   0x00000020   Data   RO         4736    Region$$Table       anon$$obj.o
+    0x0800609c   0x00000020   Data   RO         5011    Region$$Table       anon$$obj.o
 
 
     Execution Region RW_IRAM1 (Base: 0x20000000, Size: 0x000047a0, Max: 0x00050000, ABSOLUTE, COMPRESSED[0x0000001c])
@@ -2647,7 +2731,7 @@ Memory Map of the image
     0x200000f8   0x0000003c   Data   RW         1703    .data               tasks.o
     0x20000134   0x00000009   Data   RW         2123    .data               stm32f4xx_hal.o
     0x2000013d   0x00000003   PAD
-    0x20000140   0x00000004   Data   RW         4659    .data               system_stm32f4xx.o
+    0x20000140   0x00000004   Data   RW         4934    .data               system_stm32f4xx.o
     0x20000144   0x00000056   Zero   RW          323    .bss                ars408.o
     0x2000019a   0x00000002   PAD
     0x2000019c   0x0000003c   Zero   RW          578    .bss                stm32f4xx_hal_timebase_tim.o
@@ -2671,7 +2755,7 @@ Image component sizes
        204         18          0          4          0       2051   delay.o
        692         62          0         24      15360       8851   heap_4.o
        148          0          0          0          0       3542   list.o
-      3164        558        242        152       1239      18367   main.o
+      3164        558        242        152       1239      18371   main.o
        958         92          0         12          0      12009   port.o
       1928         16          0          0          0      22105   queue.o
         36          8        472          0       1024        832   startup_stm32f413xx.o
@@ -2694,7 +2778,7 @@ Image component sizes
        148          8          0          0          0      21349   wtn6040.o
 
     ----------------------------------------------------------------------
-     22544       1676        820        324      18012     931112   Object Totals
+     22544       1676        820        324      18012     931116   Object Totals
          0          0         32          0          0          0   (incl. Generated)
         32          0          2          3          3          0   (incl. Padding)
 
@@ -2748,8 +2832,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     23944       1692        820        324      18012     912476   Grand Totals
-     23944       1692        820         28      18012     912476   ELF Image Totals (compressed)
+     23944       1692        820        324      18012     912480   Grand Totals
+     23944       1692        820         28      18012     912480   ELF Image Totals (compressed)
      23944       1692        820         28          0          0   ROM Totals
 
 ==============================================================================
