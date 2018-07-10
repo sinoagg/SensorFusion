@@ -70,7 +70,7 @@
 #define DBC_SEND 0
 #define ADAS_COMM 0
 #define RADAR_DATA_SEND 0
-#define CAN_READ_VEHICLE 0
+#define CAN_READ_VEHICLE 1
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
