@@ -70,6 +70,7 @@
 #define DBC_SEND 0
 #define ADAS_COMM 0
 #define RADAR_DATA_SEND 0
+#define CAN_READ_VEHICLE 0
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -95,7 +96,7 @@ osThreadId defaultTaskHandle;
 osThreadId RadarCommHandle;
 osThreadId ADASCommHandle;
 osThreadId SoundWarningHandle;
-osThreadId LightWarningHandle;
+osThreadId GyroCommHandle;
 osThreadId CANSpeedReadHandle;
 osThreadId StartCalculateHandle;
 osThreadId UART1RxHandle;
@@ -103,7 +104,7 @@ osThreadId RadarDataTxHandle;
 osSemaphoreId bSemRadarCANRxSigHandle;
 osSemaphoreId bSemADASRxSigHandle;
 osSemaphoreId bSemSoundWarningSigHandle;
-osSemaphoreId bSemLightWarningSigHandle;
+osSemaphoreId bSemGyroCommSigHandle;
 osSemaphoreId bSemSpeedRxSigHandle;
 osSemaphoreId bSemCalculateSigHandle;
 osSemaphoreId bSemUART1RxSigHandle;
@@ -138,10 +139,11 @@ uint8_t ADASRxBuf[32]={0};
 uint8_t CmdRxBuf[4]={0};
 uint8_t CmdRadarDataTxBuf[11];
 uint8_t RadarCANRxBuf[8]={0};
-uint8_t VehicleCANRxBuf[4]={0};
+uint8_t VehicleCANRxBuf[6]={0};
 uint8_t CrashWarningLv=WARNING_NONE;
 uint8_t VehicleSpeed = 0;
 
+float yaw = 0;
 float VrelLong = 0.0;
 float MinRangeLong = 0.0;
 float TimetoCrash = 0.0;
@@ -166,7 +168,7 @@ void StartDefaultTask(void const * argument);
 void StartRadarCommTask(void const * argument);
 void StartADASCommTask(void const * argument);
 void StartSoundWarningTask(void const * argument);
-void StartLightWarningTask(void const * argument);
+void StartGyroCommTask(void const * argument);
 void StartCANSpeedReadTask(void const * argument);
 void StartCalculateTask(void const * argument);
 void StartUART1RxTask(void const * argument);
@@ -259,9 +261,9 @@ int main(void)
   #endif
 	osSemaphoreDef(bSemSoundWarningSig);
   bSemSoundWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemSoundWarningSig), 1);
-	//osSemaphoreDef(bSemLightWarningSig);
-  //bSemLightWarningSigHandle = osSemaphoreCreate(osSemaphore(bSemLightWarningSig), 1);
-	#if CAN_READ_VEHICLE
+  #if CAN_READ_VEHICLE
+	osSemaphoreDef(bSemGyroCommSig);
+  bSemGyroCommSigHandle = osSemaphoreCreate(osSemaphore(bSemGyroCommSig), 1);
   osSemaphoreDef(bSemSpeedRxSig);  
   bSemSpeedRxSigHandle = osSemaphoreCreate(osSemaphore(bSemSpeedRxSig), 1);
 	#endif
@@ -279,8 +281,8 @@ int main(void)
   osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   #endif
   osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  //osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   #if CAN_READ_VEHICLE
+  osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);	    //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   #endif
   osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
@@ -314,9 +316,9 @@ int main(void)
   osThreadDef(SoundWarning, StartSoundWarningTask, osPriorityIdle, 0, 64);
   SoundWarningHandle = osThreadCreate(osThread(SoundWarning), NULL);
 
-  /* definition and creation of LightWarning */
-  //osThreadDef(LightWarning, StartLightWarningTask, osPriorityIdle, 0, 64);
-  //LightWarningHandle = osThreadCreate(osThread(LightWarning), NULL);
+  /* definition and creation of GyroComm */
+  osThreadDef(GyroComm, StartGyroCommTask, osPriorityIdle, 0, 128);
+  GyroCommHandle = osThreadCreate(osThread(GyroComm), NULL);
 
   /* definition and creation of CANSpeedRead */
   #if CAN_READ_VEHICLE
@@ -751,7 +753,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     #if CAN_READ_VEHICLE
 		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
 		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
-  	osSemaphoreRelease(bSemSpeedRxSigHandle);
+    if(0x18FF0DE6 == VehicleCANRxHeader.ExtId)      //gyroscope ID
+      //start gyro semaphore
+      osSemaphoreRelease(bSemGyroCommSigHandle);
+    else if(0x18FE6E0B == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
+  	  osSemaphoreRelease(bSemSpeedRxSigHandle);
     #endif
 	}
 	
@@ -1026,17 +1032,29 @@ void StartSoundWarningTask(void const * argument)
   /* USER CODE END StartSoundWarningTask */
 }
 
-/* StartLightWarningTask function */
-void StartLightWarningTask(void const * argument)
+/* StartGyroCommTask function */
+void StartGyroCommTask(void const * argument)
 {
-  /* USER CODE BEGIN StartLightWarningTask */
+  /* USER CODE BEGIN StartGyroCommTask */
   /* Infinite loop */
   for(;;)
   {
-    osSemaphoreWait(bSemLightWarningSigHandle, osWaitForever);
+    osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);
+    uint8_t sum = 0;
+    uint8_t i = 0;
+    uint16_t yawH = 0;
+    uint16_t yawL = 0;
+    for(; i < 5; i++)
+      sum += VehicleCANRxBuf[i];
+    if(VehicleCANRxBuf[5] == sum)   //校验和
+    {
+      yawH = VehicleCANRxBuf[2];
+      yawL = VehicleCANRxBuf[1];
+      yaw = ((float)((yawH<<8)|yawL))/32768.0f*180;  //单位是°
+    }
 		osDelay(10);
   }
-  /* USER CODE END StartLightWarningTask */
+  /* USER CODE END StartGyroCommTask */
 }
 
 /* StartCANSpeedReadTask function */
