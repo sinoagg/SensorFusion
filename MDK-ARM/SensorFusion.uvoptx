@@ -116,6 +116,10 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
+          <Key>DLGUARM</Key>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
           <Key>ARMRTXEVENTFLAGS</Key>
           <Name>-L70 -Z18 -C0 -M0 -T1</Name>
         </SetRegEntry>
@@ -144,9 +148,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>847</LineNumber>
+          <LineNumber>1055</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134232660</Address>
+          <Address>134232122</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -155,7 +159,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Src/main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SensorFusion\../Src/main.c\847</Expression>
+          <Expression>\\SensorFusion\../Src/main.c\1055</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -200,6 +204,11 @@
           <count>1</count>
           <WinNumber>2</WinNumber>
           <ItemText>RadarCANRxHeader</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>yaw</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>
