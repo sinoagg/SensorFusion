@@ -181,9 +181,6 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan);
 /* Private function prototypes -----------------------------------------------*/
 
 
-/* USER CODE BEGIN PFP */
-/* Private function prototypes -----------------------------------------------*/
-
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -288,7 +285,7 @@ int main(void)
   osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   #if RADAR_DATA_SEND
   osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever);	//Radar Data Tx at the beginning of the system
   #endif
 
 	/* USER CODE END RTOS_SEMAPHORES */
@@ -876,7 +873,7 @@ void StartRadarCommTask(void const * argument)
 
 void StartUART1RxTask(void const * argument)
 {
-  /* USER CODE BEGIN StartCmdRxTask */
+  /* USER CODE BEGIN StartUART1RxTask */
   /* Infinite loop */
   for(;;)
   {
@@ -902,7 +899,7 @@ void StartUART1RxTask(void const * argument)
     //osSemaphoreRelease(bSemRadarDataTxSigHandle);
     osDelay(10);
   }
-  /* USER CODE END StartRadarDataTxTask */
+  /* USER CODE END StartUART1RxTask */
 }
 
 /**
