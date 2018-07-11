@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # SensorFusion
  * AEBS & ADAS
 
@@ -12,6 +11,3 @@
  * USART1(RS232) to receive cmd from labview & send Radar data to labview(not using)
  * USART3(TTL) to receive ADAS warnings
  * LED0~6 to display system state
-=======
-# SensorFusion
->>>>>>> de8e4835ef78a01fb4bf3bac03c5e2e641a9226a
