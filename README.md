@@ -1,9 +1,7 @@
 # SensorFusion
- * AEBS & ADAS
-
+ * [AEBS](https://en.wikipedia.org/wiki/AEBS) & ADAS
 ## platforms
  * FreeRTOS on STM32F413
-
 ## peripherals
  * CAN1 to send distance received from Radar(DBC)
  * CAN2 to receive Radar data & config Radar
