@@ -18,3 +18,6 @@
     * LED4: sound warning
     * LED5: Radar data Tx(**DBC**)
     * LED6: CAN Rx from **Vehicle**(speed & gyroscope)
+* BUZZER
+    * FCW: 1second(high), 0.5s(low)
+    * LDW: 2s
