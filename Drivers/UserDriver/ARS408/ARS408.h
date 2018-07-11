@@ -1,6 +1,27 @@
 #ifndef __ARS408_H
 #define __ARS408_H
-
+/**
+ * microwave radar - ARS408 by Continental
+ * ===functions:
+ * ---init & config
+ * ARS_Init(hcan): start CAN2 for radar & (optional) config Radadr and RadarFilter
+ * ARS_ConfigRadar(hcan): config Radar through can2
+ * ARS_ConfigFilter(hcan): config Radar filter through can2
+ * 
+ * ---read Radar data
+ * ARS_GetRadarObjStatus(...): read Radar Obj Status from can2, need to config can2 first
+ * ARS_GetRadarObjGeneral(...): read Radar Obj General(distance, relVelocity...) from can2
+ * ===#defines:
+ * ADDR: (can id, std)
+ * (write)config addr 0x200 ~ 0x408
+ * (read) obj & cluster addr 0x600~0x60E
+ * 
+ * VALID && config value: values with shift(<<)
+ * RADAR
+ * FILTER
+ *
+ * structs
+ */
 #include "stm32f4xx_hal.h"
 
 /* 地址定义--------------------------------------*/
@@ -41,12 +62,12 @@
 #define RADARCFG_SENSORID_VALID			(VALID<<1)
 #define RADARCFG_RADARPOWER_VALID		(VALID<<2)
 #define RADARCFG_OUTPUTTYPE_VALID		(VALID<<3)
-#define RADARCFG_SENDQUALITY_VALID 	(VALID<<4)
-#define RADARCFG_SENDEXTINFO_VALID	(VALID<<5)
+#define RADARCFG_SENDQUALITY_VALID 	(INVALID<<4)
+#define RADARCFG_SENDEXTINFO_VALID	(INVALID<<5)
 #define RADARCFG_SORTINDEX_VALID		(VALID<<6)
 #define RADARCFG_STOREINNVM_VALID		(VALID<<7)
-#define RADARCFG_MAXDISTANCE 				(2)
-#define RADARCFG_SENSORID 					(1)
+#define RADARCFG_MAXDISTANCE 				(200)
+#define RADARCFG_SENSORID 					(0)
 #define RADARCFG_OUTPUTTYPE_NONE		(0<<3)
 #define RADARCFG_OUTPUTTYPE_OBJ			(1<<3)
 #define RADARCFG_OUTPUTTYPE_CLUSTER	(2<<3)
@@ -54,15 +75,15 @@
 #define RADARCFG_RADARPOWER_3dB			(1<<5)
 #define RADARCFG_RADARPOWER_6dB			(2<<5)
 #define RADARCFG_RADARPOWER_9dB			(3<<5)
-#define RADARCFG_CTRLRELEY_VALID		(VALID<<0)
-#define RADARCFG_CTRLRELEY 					(VALID<<1)
-#define RADARCFG_SENDQUALITY 				(VALID<<2)
-#define RADARCFG_SENDEXTINFO 				(VALID<<3)
+#define RADARCFG_CTRLRELEY_VALID		(INVALID<<0)
+#define RADARCFG_CTRLRELEY 					(INVALID<<1)
+#define RADARCFG_SENDQUALITY 				(INVALID<<2)
+#define RADARCFG_SENDEXTINFO 				(INVALID<<3)
 #define RADARCFG_SORTINDEX_NONE			(0<<4)
 #define RADARCFG_SORTINDEX_RANGE		(1<<4)
 #define RADARCFG_SORTINDEX_RCS			(2<<4)
 #define RADARCFG_STOREINNVM					(VALID<<7)
-#define RADARCFG_RCS_THRES_VALID		(VALID<<0)
+#define RADARCFG_RCS_THRES_VALID		(INVALID<<0)
 #define RADARCFG_RCSTHRES_STD				(0<<1)
 #define RADARCFG_RCSTHRES_HIGHSENSE	(1<<1)
 
@@ -90,25 +111,26 @@ typedef struct
 	uint8_t RCS_Threshold;				//设置雷达散射截面积(radar cross section)检测灵敏度 0x00标准； 0x01 高灵敏度
 } MW_RadarConfig;	
 
-#define FILTERCFG_VALID (VALID<<1)
-#define FILTERCFG_FILTERACTIVE_VALID (VALID<<2)
-#define FILTERCFG_INDEX_NOFOBJ 			(0<<3)
-#define FILTERCFG_INDEX_DISTANCE 		(1<<3)
-#define FILTERCFG_INDEX_AZIMUTH 		(2<<3)
-#define FILTERCFG_INDEX_VRELONCOME 	(3<<3)
-#define FILTERCFG_INDEX_VRELDEPART	(4<<3)
-#define FILTERCFG_INDEX_RCS 				(5<<3)
-#define FILTERCFG_INDEX_LIFETIME 		(6<<3)
-#define FILTERCFG_INDEX_SIZE 				(7<<3)
-#define FILTERCFG_INDEX_PROBEXIST 	(8<<3)
-#define FILTERCFG_INDEX_Y 					(9<<3)
-#define FILTERCFG_INDEX_X 					(10<<3)
-#define FILTERCFG_INDEX_VYRIGHTLEFT (11<<3)
-#define FILTERCFG_INDEX_VXONCOME 		(12<<3)
-#define FILTERCFG_INDEX_VYLEFTRIGHT (13<<3)
-#define FILTERCFG_INDEX_VXDEPART 		(14<<3)
-#define FILTERCFG_TYPE_CLUSTER 			(0<<7)
-#define FILTERCFG_TYPE_OBJ 					(1<<7)
+#define FILTERCFG_VALID								(VALID<<1)
+#define FILTERCFG_FILTERACTIVE_VALID	(VALID<<2)
+#define FILTERCFG_INDEX_NOFOBJ 				(0<<3)
+#define FILTERCFG_INDEX_DISTANCE 			(1<<3)
+#define FILTERCFG_INDEX_AZIMUTH 			(2<<3)
+#define FILTERCFG_INDEX_VRELONCOME 		(3<<3)
+#define FILTERCFG_INDEX_VRELDEPART		(4<<3)
+#define FILTERCFG_INDEX_RCS 					(5<<3)
+#define FILTERCFG_INDEX_LIFETIME 			(6<<3)
+#define FILTERCFG_INDEX_SIZE 					(7<<3)
+#define FILTERCFG_INDEX_PROBEXIST 		(8<<3)
+#define FILTERCFG_INDEX_Y 						(9<<3)
+#define FILTERCFG_INDEX_X 						(10<<3)
+#define FILTERCFG_INDEX_VYRIGHTLEFT 	(11<<3)
+#define FILTERCFG_INDEX_VXONCOME 			(12<<3)
+#define FILTERCFG_INDEX_VYLEFTRIGHT 	(13<<3)
+#define FILTERCFG_INDEX_VXDEPART 			(14<<3)
+#define FILTERCFG_INDEX_OBJCLASS			(0xF<<3)
+#define FILTERCFG_TYPE_CLUSTER 				(0<<7)
+#define FILTERCFG_TYPE_OBJ 						(1<<7)
 
 
 typedef struct
@@ -124,8 +146,8 @@ typedef struct
 
 typedef struct
 {
-	uint16_t FilterCfg_Min_NofObj;			//最大目标或集群检测数量
-	uint16_t FilterCfg_Max_NofObj;			//此值已忽略
+	uint16_t FilterCfg_Min_NofObj;			//最小目标或集群检测数量
+	uint16_t FilterCfg_Max_NofObj;			//最大目标或集群检测数量
 	uint16_t FilterCfg_Min_Distance;		//最小过滤半径
 	uint16_t FilterCfg_Max_Distance;		//最大过滤半径
 	uint16_t FilterCfg_Min_Azimuth;			//最小过滤航向角度
@@ -135,17 +157,27 @@ typedef struct
 	uint16_t FilterCfg_Min_VrelDepart;	//最小相对远离速度
 	uint16_t FilterCfg_Max_VrelDepart;	//最大相对远离速度
 	uint16_t FilterCfg_Min_RCS;					//最小反射截面积
+	uint16_t FilterCfg_Max_RCS;					//最大反射截面积
 	uint16_t FilterCfg_Min_Lifetime;		//最小被探测时间
+	uint16_t FilterCfg_Max_Lifetime;		//最大被探测时间
 	uint16_t FilterCfg_Min_Size;				//最小探测尺寸
+	uint16_t FilterCfg_Max_Size;				//最大探测尺寸
 	uint16_t FilterCfg_Min_ProbExists;	//最小物体存在概率
+	uint16_t FilterCfg_Max_ProbExists;	//最大物体存在概率
 	uint16_t FilterCfg_Min_Y;						//Y轴方向最小距离
 	uint16_t FilterCfg_Max_Y;						//Y轴方向最大距离
 	uint16_t FilterCfg_Min_X;						//X轴方向最小距离
 	uint16_t FilterCfg_Max_X;						//X轴方向最大距离
-	uint16_t FilterCfg_Min_VYRightLeft;	//Y轴横向移动最小速度
-	uint16_t FilterCfg_Max_VYRightLeft;	//Y轴横向移动最大速度
+	uint16_t FilterCfg_Min_VYRightLeft;	//Y轴右向左移动最小速度
+	uint16_t FilterCfg_Max_VYRightLeft;	//Y轴右向左移动最大速度
 	uint16_t FilterCfg_Min_VXOncome;		//X轴相对驶来最小速度
+	uint16_t FilterCfg_Max_VXOncome;		//X轴相对驶来最大速度
+	uint16_t FilterCfg_Min_VYLeftRight;	//Y轴左向右移动最小速度
+	uint16_t FilterCfg_Max_VYLeftRight;	//Y轴左向右移动最大速度
+	uint16_t FilterCfg_Min_VXDepart;		//X轴相互离开最小速度
 	uint16_t FilterCfg_Max_VXDepart;		//X轴相互离开最大速度
+	uint16_t FilterCfg_Min_Object_Class;//最小物体等级
+	uint16_t FilterCfg_Max_Object_Class;//最大物体等级
 }MW_RadarFilterIndexContent;
 	
 typedef struct
@@ -193,13 +225,11 @@ typedef struct
 	uint8_t Obj_RCS;
 }MW_RadarGeneral;
 
-extern MW_RadarConfig RadarConfig;
-extern MW_RadarFilterConfig RadarFilterConfig;
-extern MW_RadarObjStatus RadarObjStatus;
 
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan);
+void ARS_GetRadarObjStatus(uint8_t* pCANRxBuf, MW_RadarObjStatus *pRadarObjStatus);
 void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral);
 
 #endif

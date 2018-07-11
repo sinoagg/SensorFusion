@@ -4,14 +4,26 @@
  * ARS_Init(hcan): start CAN2 for radar & (optional) config Radadr and RadarFilter
  * ARS_ConfigRadar(hcan): config Radar through can2
  * ARS_ConfigFilter(hcan): config Radar filter through can2
+ * 
+ * RadarConfig_func(): fill RadarConfig struct with #define in ARS408.h
+ * RadarFilterConfig_func(index): fill RadarFilterConfig struct with #define in ARS408.h
+ * FilterContentCfg_func(hcan, index, filter_min, filter_max): fill CANTxBuf[] && send 1 content of filter to can2
+ * 
  * ---read Radar data
  * ARS_GetRadarObjStatus(...): read Radar Obj Status from can2, need to config can2 first
- * ARS_GetRadarObjGeneral(...): read Radar Obj General(distance, velocity...) from can2
+ * ARS_GetRadarObjGeneral(...): read Radar Obj General(distance, relVelocity...) from can2
  */
 #include "ARS408.h"
 
+#define CONFIG_ARS408_RADAR 1
+#define CONFIG_ARS408_FILTER 1
+
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
-CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};	
+CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
+
+MW_RadarConfig RadarConfig;
+MW_RadarFilterConfig RadarFilterConfig;
+MW_RadarFilterIndexContent FilterContent;
 
 
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
@@ -23,11 +35,11 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 	
-	#ifdef CONFIG_ARS408_RADAR
+	#if CONFIG_ARS408_RADAR
 		ARS_ConfigRadar(hcan);
 		HAL_Delay(100);
 	#endif
-	#ifdef CONFIG_ARS408_FILTER
+	#if CONFIG_ARS408_FILTER
 		ARS_ConfigFilter(hcan);
 		HAL_Delay(100);
 	#endif
@@ -35,7 +47,7 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 	return 0;
 }
 
-void deRadarConfig()
+void RadarConfig_func()
 {
 	RadarConfig.MaxDistance_valid = RADARCFG_MAXDISTANCE_VALID;
   RadarConfig.SensorID_valid = RADARCFG_SENSORID_VALID;
@@ -48,7 +60,7 @@ void deRadarConfig()
   RadarConfig.MaxDistance = RADARCFG_MAXDISTANCE;
   RadarConfig.SensorID = RADARCFG_SENSORID;
   RadarConfig.OutputType = RADARCFG_OUTPUTTYPE_OBJ;
-  RadarConfig.RadarPower = RADARCFG_RADARPOWER_3dB;
+  RadarConfig.RadarPower = RADARCFG_RADARPOWER_STD;
   RadarConfig.CtrlRelay_valid = RADARCFG_CTRLRELEY_VALID;
   RadarConfig.CtrlRelay = RADARCFG_CTRLRELEY;
   RadarConfig.SendQuality = RADARCFG_SENDQUALITY;
@@ -56,22 +68,27 @@ void deRadarConfig()
   RadarConfig.SortIndex = RADARCFG_SORTINDEX_RANGE;
   RadarConfig.StoreInNVM = RADARCFG_STOREINNVM;
   RadarConfig.RCS_Threshold_valid = RADARCFG_RCS_THRES_VALID;
-  RadarConfig.RCS_Threshold = RADARCFG_RCSTHRES_HIGHSENSE;
+  RadarConfig.RCS_Threshold = RADARCFG_RCSTHRES_STD;
 }
 
-void deRadarFilterConfig()
+void RadarFilterConfig_func(uint8_t index)
 {
   RadarFilterConfig.FilterCfg_Valid = FILTERCFG_VALID;
   RadarFilterConfig.FilterCfg_Active = FILTERCFG_FILTERACTIVE_VALID;
-  RadarFilterConfig.FilterCfg_Index = FILTERCFG_INDEX_DISTANCE;
+  RadarFilterConfig.FilterCfg_Index = index;
   RadarFilterConfig.FilterCfg_Type = FILTERCFG_TYPE_OBJ;
 }
 
+/**
+ * [ARS_ConfigRadar config Radar]
+ * @param  hcan [hcan index]
+ * @return      [ok]
+ */
 uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan)
 {
 	uint32_t CAN_TxMailBox=CAN_TX_MAILBOX0;
 	uint8_t CANTxBuf[8]={0};
-  deRadarConfig();
+  RadarConfig_func();
   //if change RadarConfig struct, add RadarConfig.*** = someValue here
 	CANTxBuf[0]=RadarConfig.StoreInNVM_valid|RadarConfig.SortIndex_valid|RadarConfig.SendExtInfo_valid|RadarConfig.SendQuality_valid|\
 		RadarConfig.OutputType_valid|RadarConfig.RadarPower_valid|RadarConfig.SensorID_valid|RadarConfig.MaxDistance_valid;
@@ -85,26 +102,90 @@ uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan)
 	return 0;
 }
 
-uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
+/**
+ * [FilterContentCfg_func config content of filter]
+ * @param  hcan       [hcan index]
+ * @param  index      [filter index]
+ * @param  filter_min [content min]
+ * @param  filter_max [content max]
+ * @return            [ok]
+ */
+uint8_t FilterContentCfg_func(CAN_HandleTypeDef *hcan, uint8_t index, uint16_t filter_min, uint16_t filter_max)
 {
 	uint32_t CAN_TxMailBox=CAN_TX_MAILBOX0;
 	uint8_t CANTxBuf[8]={0};
-  deRadarFilterConfig();
-  //if change FilterConfig struct, add RadarFilterConfig.*** = someValue here
-	CANTxBuf[0]=RadarFilterConfig.FilterCfg_Type|RadarFilterConfig.FilterCfg_Index|RadarFilterConfig.FilterCfg_Active|RadarFilterConfig.FilterCfg_Valid;
-	CANTxBuf[1]=RadarFilterConfig.FilterCfg_Min_XXX>>8 & 0x1F;
-	CANTxBuf[2]=RadarFilterConfig.FilterCfg_Min_XXX&0xFF;
-	CANTxBuf[3]=RadarFilterConfig.FilterCfg_Max_XXX>>8 & 0x1F;
-	CANTxBuf[4]=RadarFilterConfig.FilterCfg_Max_XXX&0xFF;
+  RadarFilterConfig_func(index);
+	CANTxBuf[0]= RadarFilterConfig.FilterCfg_Type|RadarFilterConfig.FilterCfg_Index|RadarFilterConfig.FilterCfg_Active|RadarFilterConfig.FilterCfg_Valid;
+	CANTxBuf[1]= filter_min>>8 & 0x1F;
+	CANTxBuf[2]= filter_min & 0xFF;
+	CANTxBuf[3]= filter_max>>8 & 0x1F;
+	CANTxBuf[4]= filter_max & 0xFF;
 	//CAN◊‹œﬂ∑¢ÀÕ≈‰÷√
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxConfigFilterHeader, CANTxBuf, &CAN_TxMailBox);
 	return 0;
 }
 
-void ARS_GetRadarObjStatus(uint8_t* pCANRxBuf)
+uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
 {
-	RadarObjStatus.Obj_NofObjects=*pCANRxBuf;
-	RadarObjStatus.Obj_MeasCounter=((uint16_t)*(pCANRxBuf+1))<<8|*(pCANRxBuf+2);
+  FilterContent.FilterCfg_Min_NofObj = 0;
+  FilterContent.FilterCfg_Max_NofObj = 1;
+  FilterContent.FilterCfg_Min_Distance = (uint16_t)((0 - 0) / 0.1);     //0~200m, offset 0, Res 0.1
+  FilterContent.FilterCfg_Max_Distance = (uint16_t)((200 - 0) / 0.1);
+  FilterContent.FilterCfg_Min_Azimuth = (uint16_t)((-9 + 50) / 0.025);  //-9°„~9°„£¨offset -50, Res 0.025
+  FilterContent.FilterCfg_Max_Azimuth = (uint16_t)((9 + 50) / 0.025);
+  FilterContent.FilterCfg_Min_VrelOncome = (uint16_t)((0.1 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VrelOncome = (uint16_t)((100 - 0) / 0.0315);
+  FilterContent.FilterCfg_Min_VrelDepart = (uint16_t)((0.1 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VrelDepart = (uint16_t)((100 - 0) / 0.0315);
+  FilterContent.FilterCfg_Min_RCS = (uint16_t)((0.025 + 50) / 0.025);   //0.025~30dBm2, offset -50, Res 0.025
+  FilterContent.FilterCfg_Max_RCS = (uint16_t)((30 + 50) / 0.025);
+  FilterContent.FilterCfg_Min_Lifetime = (uint16_t)((0.1 - 0) / 0.1);   //0.1~409.5s, offset 0, Res 0.1
+  FilterContent.FilterCfg_Max_Lifetime = (uint16_t)((409.5 - 0) / 0.1);
+  FilterContent.FilterCfg_Min_Size = (uint16_t)((0.025 - 0) / 0.025);   //0.025~20m2, offset 0, Res 0.025
+  FilterContent.FilterCfg_Max_Size = (uint16_t)((20 - 0) / 0.025);
+  FilterContent.FilterCfg_Min_ProbExists = 0x5;//99%~100%, 0x0: 0%, 0x1: 25%, 0x2: 50%
+  FilterContent.FilterCfg_Max_ProbExists = 0x7;//0x3: 75%, 0x4: 90%, 0x5: 99%, 0x6: 99.9%, 0x7: 100%
+  FilterContent.FilterCfg_Min_Y = (uint16_t)((-1.5 + 409.5) / 0.2);     //-1.5~1.5m, offset -409.5, Res 0.2
+  FilterContent.FilterCfg_Max_Y = (uint16_t)((1.5 + 409.5) / 0.2);
+  FilterContent.FilterCfg_Min_X = (uint16_t)((0 + 500) / 0.2);          //0~200m, offset -500, Res 0.2
+  FilterContent.FilterCfg_Max_X = (uint16_t)((200 + 500) / 0.2);
+  FilterContent.FilterCfg_Min_VYRightLeft = (uint16_t)((0.1 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VYRightLeft = (uint16_t)(100 - 0) / 0.0315;
+  FilterContent.FilterCfg_Min_VXOncome = (uint16_t)((0.1 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VXOncome = (uint16_t)((100 - 0) / 0.0315);
+  FilterContent.FilterCfg_Min_VYLeftRight = (uint16_t)((0.1 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VYLeftRight = (uint16_t)((100 - 0) / 0.0315);
+  FilterContent.FilterCfg_Min_VXDepart = (uint16_t)((0.1 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VXDepart = (uint16_t)((100 - 0) / 0.0315);
+  FilterContent.FilterCfg_Min_Object_Class = 0x5;//0x0: point, 0x1: car, 0x2: truck, 0x3: not used
+  FilterContent.FilterCfg_Max_Object_Class = 0x2;//0x4: motorcyc, 0x5: bicycle, 0x6: wide, 0x7: reserved
+
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_NOFOBJ, FilterContent.FilterCfg_Min_NofObj, FilterContent.FilterCfg_Max_NofObj);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_DISTANCE, FilterContent.FilterCfg_Min_Distance, FilterContent.FilterCfg_Max_Distance);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_AZIMUTH, FilterContent.FilterCfg_Min_Azimuth, FilterContent.FilterCfg_Max_Azimuth);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_VRELONCOME, FilterContent.FilterCfg_Min_VrelOncome, FilterContent.FilterCfg_Max_VrelOncome);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_VRELDEPART, FilterContent.FilterCfg_Min_VrelDepart, FilterContent.FilterCfg_Max_VrelDepart);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_RCS, FilterContent.FilterCfg_Min_RCS, FilterContent.FilterCfg_Max_RCS);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_LIFETIME, FilterContent.FilterCfg_Min_Lifetime, FilterContent.FilterCfg_Max_Lifetime);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_SIZE, FilterContent.FilterCfg_Min_Size, FilterContent.FilterCfg_Max_Size);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_PROBEXIST, FilterContent.FilterCfg_Min_ProbExists, FilterContent.FilterCfg_Max_ProbExists);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_Y, FilterContent.FilterCfg_Min_Y, FilterContent.FilterCfg_Max_Y);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_X, FilterContent.FilterCfg_Min_X, FilterContent.FilterCfg_Max_X);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_VYRIGHTLEFT, FilterContent.FilterCfg_Min_VYRightLeft, FilterContent.FilterCfg_Max_VYRightLeft);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_VXONCOME, FilterContent.FilterCfg_Min_VXOncome, FilterContent.FilterCfg_Max_VXOncome);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_VYLEFTRIGHT, FilterContent.FilterCfg_Min_VYLeftRight, FilterContent.FilterCfg_Max_VYLeftRight);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_VXDEPART, FilterContent.FilterCfg_Min_VXDepart, FilterContent.FilterCfg_Max_VXDepart);
+  FilterContentCfg_func(hcan, FILTERCFG_INDEX_OBJCLASS, FilterContent.FilterCfg_Min_Object_Class, FilterContent.FilterCfg_Max_Object_Class);
+
+  return 0;
+}
+
+//void ARS_GetRadarCfg(uint8_t* pCANRxBuf, )
+
+void ARS_GetRadarObjStatus(uint8_t* pCANRxBuf, MW_RadarObjStatus *pRadarObjStatus)
+{
+	pRadarObjStatus->Obj_NofObjects=*pCANRxBuf;
+	pRadarObjStatus->Obj_MeasCounter=((uint16_t)*(pCANRxBuf+1))<<8|*(pCANRxBuf+2);
 }
 
 void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral)
