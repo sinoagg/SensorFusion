@@ -1,5 +1,5 @@
 # SensorFusion
- * [AEBS](https://en.wikipedia.org/wiki/AEBS) & ADAS
+ * [AEBS](https://en.wikipedia.org/wiki/AEBS) & [ADAS](https://en.wikipedia.org/wiki/ADAS)
 ## platforms
  * FreeRTOS on STM32F413
 ## peripherals
