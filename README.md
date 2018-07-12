@@ -2,6 +2,11 @@
  * [AEBS](https://en.wikipedia.org/wiki/AEBS) & [ADAS](https://en.wikipedia.org/wiki/ADAS)
 ## platform
  * FreeRTOS on STM32F413
+## version
+ * 20180711: Radar filter configed
+ * 20180524: **ADAS warning** then Radar FCW(added switches of DBC, Radar uart send, ADAS, Radar&filter config)
+ * 20180522: ADAS merged, usart3 tx&rx
+ * 20180514: test in ChongQing
 ## peripherals
 * CAN
     * CAN1 to send distance received from Radar(**DBC**)
