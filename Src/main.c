@@ -122,7 +122,6 @@ osSemaphoreId bSemRadarDataTxSigHandle;
 MW_RadarObjStatus RadarObjStatus;
 MW_RadarGeneral RadarGeneral[16];
 
-
 Cmd_RadarData RadarData;
 
 CAN_TxHeaderTypeDef CAN_TxDBCHeader={DBC_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
@@ -143,7 +142,8 @@ uint8_t VehicleCANRxBuf[6]={0};
 uint8_t CrashWarningLv=WARNING_NONE;
 uint8_t VehicleSpeed = 0;
 
-float yaw = 0;
+float yaw = 0.0;
+float yawRate = 0.0;
 float VrelLong = 0.0;
 float MinRangeLong = 0.0;
 float TimetoCrash = 0.0;
@@ -1043,13 +1043,19 @@ void StartGyroCommTask(void const * argument)
     uint8_t i = 0;
     uint16_t yawH = 0;
     uint16_t yawL = 0;
+    uint16_t yawRateH = 0;
+    uint16_t yawRateL = 0;
     for(; i < 5; i++)
       sum += VehicleCANRxBuf[i];
     if(VehicleCANRxBuf[5] == sum)   //校验和
     {
-      yawH = VehicleCANRxBuf[2];
       yawL = VehicleCANRxBuf[1];
-      yaw = ((float)((yawH<<8)|yawL))/32768.0f*180;  //单位是°
+      yawH = VehicleCANRxBuf[2];
+      yawRateL = VehicleCANRxBuf[3];
+      yawRateH = VehicleCANRxBuf[4];
+      yaw = ((float)((yawH<<8) | yawL)) / 32768.0f * 180;  //单位是°
+      yawRate = ((float)((yawRateH<<8) | yawRateL)) / 32768.0f * 2000;  //单位是°/s
+      ARS_SendVehicleYaw(&hcan2, yawRate);  //send VehicleYaw to Radar
     }
 		osDelay(10);
   }
@@ -1066,7 +1072,8 @@ void StartCANSpeedReadTask(void const * argument)
     osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);
     if(0xD1 == VehicleCANRxBuf[0] && 0xD1 == VehicleCANRxBuf[2])
     {
-      VehicleSpeed = VehicleCANRxBuf[1];//车速16进制,km/h
+      VehicleSpeed = VehicleCANRxBuf[1];	//车速16进制,km/h
+			ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);	//send VehicleSpeed to Radar
     }
 		osDelay(10);
   }

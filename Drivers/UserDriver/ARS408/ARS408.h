@@ -201,6 +201,10 @@ typedef struct
 	uint8_t RadarState_RCS_Threshold;		//为真时传感器开启高敏感模式
 }MW_RadarState;
 
+#define STANDSTILL	0x0
+#define FORWARD			0x1
+#define BACKWORD		0x2
+
 typedef struct
 {
 	uint8_t RadarDevice_SpeedDirection;
@@ -231,6 +235,8 @@ uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan);
 void ARS_GetRadarObjStatus(uint8_t* pCANRxBuf, MW_RadarObjStatus *pRadarObjStatus);
 void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral);
+void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan, uint16_t VehicleSpeed);
+void ARS_SendVehicleYaw(CAN_HandleTypeDef *hcan,float YawRate);
 
 #endif
 
