@@ -69,9 +69,9 @@ void EMRR_GetRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral
 				{
 					rad = 3.14 * fabs((pRadarGeneral + i)->trackAngle) / 180;	//角度换算成弧度
 					(pRadarGeneral + i)->trackCrossRange = (float)((pRadarGeneral + i)->trackRange * sin(rad));
-					if((pRadarGeneral + i)->trackCrossRange < 1.8f)	//左右距离＜1.8米，在车道线内
+					if((pRadarGeneral + i)->trackCrossRange < 1.5f)	//左右距离＜1.8米，在车道线内
 					{
-						if((pRadarGeneral + i)->trackPower> -50)	//功率
+						if((pRadarGeneral + i)->trackPower> - 35)	//功率
 						{
 							if(min > (pRadarGeneral + i)->trackRange)	//当前目标距离小于min
 							{

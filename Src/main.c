@@ -1151,12 +1151,12 @@ void StartCalculateTask(void const * argument)
 
 		if(MinRange < LIMIT_RANGE && MinRange != 0 && relSpeed != 0)	//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
     {
-      TimetoCrash = MinRange / relSpeed;
-      if(TimetoCrash < 3)
+      TimetoCrash = - MinRange / relSpeed;
+      if(TimetoCrash < 3 && relSpeed < 0 && MinRange > 0)
       {
         CrashWarningLv=WARNING_HIGH;
       }
-      else if(TimetoCrash < 3.5f)
+      else if(TimetoCrash < 3.5f && relSpeed < 0 && MinRange > 0)
       {
         CrashWarningLv=WARNING_LOW;
       }
