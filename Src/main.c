@@ -57,6 +57,7 @@
 #include "WTN6040.h"
 #include "ARS408.h"
 #include "cmd.h"
+#include "EMRR.h"
 
 #define MAX_OBJ_NUM	4										//最大目标识别数量
 #define LANEWIDTH 2											//车道线宽度
@@ -66,7 +67,14 @@
 #define VEHICLE_SPEED_ADDR_HIGH 0x18FE
 #define VEHICLE_SPEED_ADDR_LOW 0x6E0B
 #define DBC_ADDR 0x509
+
 //switches
+/**
+ * RADAR_TYPE
+ * 0  EMRR
+ * 1  ARS408
+*/
+#define RADAR_TYPE 0
 #define DBC_SEND 0
 #define ADAS_COMM 0
 #define RADAR_DATA_SEND 0
@@ -118,9 +126,12 @@ osSemaphoreId bSemRadarDataTxSigHandle;
 #define WARNING_MID 2
 #define	WARNING_HIGH 3
 
-
+//ARS408
 MW_RadarObjStatus RadarObjStatus;
 MW_RadarGeneral RadarGeneral[16];
+//EMRR
+EMRR_RadarGeneral aRadarGeneral[64];	//接受到的64组数据
+EMRR_RadarGeneral RadarGeneral_closet;//距离最近的目标
 
 Cmd_RadarData RadarData;
 
@@ -130,6 +141,7 @@ CAN_RxHeaderTypeDef VehicleCANRxHeader;
 
 ADAS_HandleTypeDef ADAS_dev;
 uint8_t MW_RadarRxComplete=0;
+uint8_t EMRR_RadarRxComplete=0;
 uint8_t ADASRxComplete=0;
 uint8_t UART1RxComplete=0;
 uint8_t SpeedRxComplete=0;
@@ -346,7 +358,13 @@ int main(void)
 
   //hcan1~hcan3 init, start
 	DBC_Init(&hcan1);
+	//ARS408
+	#if RADAR_TYPE
   ARS_Init(&hcan2);//hcan2 must use hcan1
+	//EMRR
+	#else
+	EMRR_Init(&hcan2);
+	#endif
   #if CAN_READ_VEHICLE
   Vehicle_CAN_Init(&hcan3); 
   #endif
@@ -744,6 +762,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   {
   	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
   	osSemaphoreRelease(bSemRadarCANRxSigHandle);
+		#if RADAR_TYPE
+		
+		#else
+		EMRR_RadarRxComplete = 1;
+		#endif
   	//__HAL_CAN_CLEAR_FLAG(hcan, CAN_FLAG_FF0);
 		//HAL_CAN_DeactivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);		// 关闭中断
   }
@@ -845,12 +868,17 @@ void StartDefaultTask(void const * argument)
 void StartRadarCommTask(void const * argument)
 {
   /* USER CODE BEGIN StartRadarCommTask */
+	//ARS408
+	#if RADAR_TYPE
 	uint8_t minRadarDistFlag = 0;
+	#endif
   /* Infinite loop */
   for(;;)
   {
 		osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);
 		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
+    //ARS408
+		#if RADAR_TYPE
 		if(RadarCANRxHeader.StdId==0x60A)												//60B的之前都读取完毕，开始计算
 		{
 			minRadarDistFlag = 1;
@@ -863,9 +891,14 @@ void StartRadarCommTask(void const * argument)
 				ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);//获取最近目标数据，即收到的第一个目标
 				osSemaphoreRelease(bSemCalculateSigHandle);
 			}
-			
 		}
-		//HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);		//再次打开中断	
+		
+    //EMRR
+		#else
+		EMRR_GetRaderObjCloset(RadarCANRxBuf, aRadarGeneral, &RadarGeneral_closet);
+		if(RadarGeneral_closet.trackRange != 0)
+			osSemaphoreRelease(bSemCalculateSigHandle);
+		#endif
 		osDelay(1);
   }
   /* USER CODE END StartRadarCommTask */
@@ -920,7 +953,7 @@ void StartRadarDataTxTask(void const * argument)
       FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
       HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
       DBC_SendDist(&hcan1, MinRangeLong);
-			//使用RS85时需要让EN = 0;//转换接收状态
+			//使用RS485时需要让EN = 0;//转换接收状态
     }
     else
     {
@@ -1085,6 +1118,8 @@ void StartCalculateTask(void const * argument)
 	for(;;)
 	{
 		osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);
+    //ARS408
+		#if RADAR_TYPE
 		uint16_t MinRange=255;									//初始化为最大距离
 		uint32_t relSpeed=0;
 		MinRange = RadarGeneral[0].Obj_DistLong;
@@ -1095,12 +1130,10 @@ void StartCalculateTask(void const * argument)
 			VrelLong = 0.25 * relSpeed - 128;						//获取真实相对速度
 			MinRangeLong = 0.2 * MinRange - 500;				//获取真实距离
 			TimetoCrash = -(float)MinRangeLong/VrelLong;//相对速度为负
-			//if(TimetoCrash<0.8f)
 			if(TimetoCrash<3 && VrelLong < 0 && MinRangeLong > 0)
 			{
 				CrashWarningLv=WARNING_HIGH;
 			}
-			//else if(TimetoCrash<1)
 			else if(TimetoCrash<3.5f && VrelLong < 0 && MinRangeLong > 0)
 			{
 				CrashWarningLv=WARNING_LOW;
@@ -1108,7 +1141,29 @@ void StartCalculateTask(void const * argument)
 			else
 				CrashWarningLv=WARNING_NONE;
 		}
-		//DBC_SendDist(&hcan1, MinRangeLong);
+
+    //EMRR
+		#else
+		float MinRange=255.0f;									//初始化为最大距离
+		float relSpeed=0.0f;
+		MinRange = RadarGeneral_closet.trackRange;
+    relSpeed = RadarGeneral_closet.trackSpeed;
+
+		if(MinRange < LIMIT_RANGE && MinRange != 0 && relSpeed != 0)	//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
+    {
+      TimetoCrash = MinRange / relSpeed;
+      if(TimetoCrash < 3)
+      {
+        CrashWarningLv=WARNING_HIGH;
+      }
+      else if(TimetoCrash < 3.5f)
+      {
+        CrashWarningLv=WARNING_LOW;
+      }
+      else
+        CrashWarningLv=WARNING_NONE;
+    }
+		#endif
 		osSemaphoreRelease(bSemSoundWarningSigHandle);
 		osDelay(2);
 	}
