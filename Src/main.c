@@ -76,7 +76,7 @@
 */
 #define RADAR_TYPE 0
 #define DBC_SEND 0
-#define ADAS_COMM 0
+#define ADAS_COMM 1
 //labview
 #define RADAR_DATA_SEND 0
 #define CAN_READ_VEHICLE 0
