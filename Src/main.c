@@ -77,8 +77,9 @@
 #define RADAR_TYPE 0
 #define DBC_SEND 0
 #define ADAS_COMM 0
+//labview
 #define RADAR_DATA_SEND 0
-#define CAN_READ_VEHICLE 1
+#define CAN_READ_VEHICLE 0
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -762,8 +763,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   {
   	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
   	osSemaphoreRelease(bSemRadarCANRxSigHandle);
+		//ARS408
 		#if RADAR_TYPE
 		
+		//EMRR
 		#else
 		EMRR_RadarRxComplete = 1;
 		#endif
@@ -1144,19 +1147,17 @@ void StartCalculateTask(void const * argument)
 
     //EMRR
 		#else
-		float MinRange=255.0f;									//初始化为最大距离
-		float relSpeed=0.0f;
-		MinRange = RadarGeneral_closet.trackRange;
-    relSpeed = RadarGeneral_closet.trackSpeed;
+		MinRangeLong = RadarGeneral_closet.trackRange;
+    VrelLong = RadarGeneral_closet.trackSpeed;
 
-		if(MinRange < LIMIT_RANGE && MinRange != 0 && relSpeed != 0)	//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
+		if(MinRangeLong < LIMIT_RANGE && MinRangeLong != 0 && VrelLong != 0)	//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
     {
-      TimetoCrash = - MinRange / relSpeed;
-      if(TimetoCrash < 3 && relSpeed < 0 && MinRange > 0)
+      TimetoCrash = - MinRangeLong / VrelLong;
+      if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
       {
         CrashWarningLv=WARNING_HIGH;
       }
-      else if(TimetoCrash < 3.5f && relSpeed < 0 && MinRange > 0)
+      else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
       {
         CrashWarningLv=WARNING_LOW;
       }
