@@ -54,7 +54,7 @@ void GetRadarObjGeneral_func(uint8_t* pCANRxBuf, EMRR_RadarGeneral *pRadarGenera
 	}
 }
 
-void EMRR_GetRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral, EMRR_RadarGeneral *pRadarGeneral_closet)
+void EMRR_GetRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral, EMRR_RadarGeneral *pRadarGeneral_Closet)
 {
 	if(EMRR_RadarRxComplete)	//接收标志
 	{
@@ -69,7 +69,7 @@ void EMRR_GetRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral
 				{
 					rad = 3.14 * fabs((pRadarGeneral + i)->trackAngle) / 180;	//角度换算成弧度
 					(pRadarGeneral + i)->trackCrossRange = (float)((pRadarGeneral + i)->trackRange * sin(rad));
-					if((pRadarGeneral + i)->trackCrossRange < 1.5f)	//左右距离＜1.8米，在车道线内
+					if((pRadarGeneral + i)->trackCrossRange < 1.5f)	//左右距离＜1.5米，在车道线内
 					{
 						if((pRadarGeneral + i)->trackPower> - 35)	//功率
 						{
@@ -82,12 +82,12 @@ void EMRR_GetRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral
 					}
 				}
 			}
-			pRadarGeneral_closet->trackId = (pRadarGeneral + min_lable)->trackId;
-			pRadarGeneral_closet->trackCrossRange = (pRadarGeneral + min_lable)->trackCrossRange;
-			pRadarGeneral_closet->trackRange = (pRadarGeneral + min_lable)->trackRange;
-			pRadarGeneral_closet->trackSpeed = (pRadarGeneral + min_lable)->trackSpeed;
-			pRadarGeneral_closet->trackAngle = (pRadarGeneral + min_lable)->trackAngle;
-			pRadarGeneral_closet->trackPower = (pRadarGeneral + min_lable)->trackPower;
+			pRadarGeneral_Closet->trackId = (pRadarGeneral + min_lable)->trackId;
+			pRadarGeneral_Closet->trackCrossRange = (pRadarGeneral + min_lable)->trackCrossRange;
+			pRadarGeneral_Closet->trackRange = (pRadarGeneral + min_lable)->trackRange;
+			pRadarGeneral_Closet->trackSpeed = (pRadarGeneral + min_lable)->trackSpeed;
+			pRadarGeneral_Closet->trackAngle = (pRadarGeneral + min_lable)->trackAngle;
+			pRadarGeneral_Closet->trackPower = (pRadarGeneral + min_lable)->trackPower;
 		}
 		EMRR_RadarRxComplete = 0;
 	}

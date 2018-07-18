@@ -60,12 +60,12 @@
 #include "EMRR.h"
 
 #define MAX_OBJ_NUM	4										//最大目标识别数量
-#define LANEWIDTH 2											//车道线宽度
-#define MAX_DECELARATION 0.4*9.8				//制动系统最大减速度
-#define DELAY_TIME	0.4									//系统延迟时间
+#define LANEWIDTH 1.5f									//车道线宽度
+#define MAX_DECELARATION 0.4*9.8f				//制动系统最大减速度
+#define DELAY_TIME	0.4f								//系统延迟时间
 #define LIMIT_RANGE 200									//计算碰撞时间的极限距离/m
 #define VEHICLE_SPEED_ADDR_HIGH 0x18FE
-#define VEHICLE_SPEED_ADDR_LOW 0x6E0B
+#define VEHICLE_SPEED_ADDR_LOW	0x6E0B
 #define DBC_ADDR 0x509
 
 //switches
@@ -79,6 +79,7 @@
 #define ADAS_COMM 1
 //labview
 #define RADAR_DATA_SEND 0
+//Vehicle Speed & gyro via CAN3
 #define CAN_READ_VEHICLE 0
 /* USER CODE END Includes */
 
@@ -131,8 +132,8 @@ osSemaphoreId bSemRadarDataTxSigHandle;
 MW_RadarObjStatus RadarObjStatus;
 MW_RadarGeneral RadarGeneral[16];
 //EMRR
-EMRR_RadarGeneral aRadarGeneral[64];	//接受到的64组数据
-EMRR_RadarGeneral RadarGeneral_closet;//距离最近的目标
+EMRR_RadarGeneral aEMRRGeneral[64];	//接受到的64组数据
+EMRR_RadarGeneral EMRRGeneral_Closet;//距离最近的目标
 
 Cmd_RadarData RadarData;
 
@@ -152,7 +153,7 @@ uint8_t CmdRxBuf[4]={0};
 uint8_t CmdRadarDataTxBuf[11];
 uint8_t RadarCANRxBuf[8]={0};
 uint8_t VehicleCANRxBuf[6]={0};
-uint8_t CrashWarningLv=WARNING_NONE;
+uint8_t CrashWarningLv = WARNING_NONE;
 uint8_t VehicleSpeed = 0;
 
 float yaw = 0.0;
@@ -898,8 +899,8 @@ void StartRadarCommTask(void const * argument)
 		
     //EMRR
 		#else
-		EMRR_GetRaderObjCloset(RadarCANRxBuf, aRadarGeneral, &RadarGeneral_closet);
-		if(RadarGeneral_closet.trackRange != 0)
+		EMRR_GetRaderObjCloset(RadarCANRxBuf, aEMRRGeneral, &EMRRGeneral_Closet);
+		if(EMRRGeneral_Closet.trackRange != 0)
 			osSemaphoreRelease(bSemCalculateSigHandle);
 		#endif
 		osDelay(1);
@@ -1109,7 +1110,12 @@ void StartCANSpeedReadTask(void const * argument)
     if(0xD1 == VehicleCANRxBuf[0] && 0xD1 == VehicleCANRxBuf[2])
     {
       VehicleSpeed = VehicleCANRxBuf[1];	//车速16进制,km/h
+			//ARS408
+			#if RADAR_TYPE
 			ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);	//send VehicleSpeed to Radar
+			//EMRR
+			#else
+			#endif
     }
 		osDelay(10);
   }
@@ -1133,36 +1139,36 @@ void StartCalculateTask(void const * argument)
 			VrelLong = 0.25 * relSpeed - 128;						//获取真实相对速度
 			MinRangeLong = 0.2 * MinRange - 500;				//获取真实距离
 			TimetoCrash = -(float)MinRangeLong/VrelLong;//相对速度为负
-			if(TimetoCrash<3 && VrelLong < 0 && MinRangeLong > 0)
+			if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
 			{
-				CrashWarningLv=WARNING_HIGH;
+				CrashWarningLv = WARNING_HIGH;
 			}
-			else if(TimetoCrash<3.5f && VrelLong < 0 && MinRangeLong > 0)
+			else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
 			{
-				CrashWarningLv=WARNING_LOW;
+				CrashWarningLv = WARNING_LOW;
 			}
 			else
-				CrashWarningLv=WARNING_NONE;
+				CrashWarningLv = WARNING_NONE;
 		}
 
     //EMRR
 		#else
-		MinRangeLong = RadarGeneral_closet.trackRange;
-    VrelLong = RadarGeneral_closet.trackSpeed;
+		MinRangeLong = EMRRGeneral_Closet.trackRange;
+    VrelLong = EMRRGeneral_Closet.trackSpeed;
 
-		if(MinRangeLong < LIMIT_RANGE && MinRangeLong != 0 && VrelLong != 0)	//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
+		if(MinRangeLong < LIMIT_RANGE && MinRangeLong != 0 && VrelLong != 0)
     {
       TimetoCrash = - MinRangeLong / VrelLong;
       if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
       {
-        CrashWarningLv=WARNING_HIGH;
+        CrashWarningLv = WARNING_HIGH;
       }
       else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
       {
-        CrashWarningLv=WARNING_LOW;
+        CrashWarningLv = WARNING_LOW;
       }
       else
-        CrashWarningLv=WARNING_NONE;
+        CrashWarningLv = WARNING_NONE;
     }
 		#endif
 		osSemaphoreRelease(bSemSoundWarningSigHandle);
