@@ -79,7 +79,7 @@
 #define VEHICLE_MODEL YUTONG
 
 /* Defines -------------------------------------------------------------------*/
-#define MAX_OBJ_NUM	4										//最大目标识别数量
+#define RADAR_OFFSET	0.4f							//雷达偏移量
 #define LANEWIDTH 1.5f									//车道线宽度
 #define MAX_DECELARATION 0.4*9.8f				//制动系统最大减速度
 #define DELAY_TIME	0.4f								//系统延迟时间
@@ -837,7 +837,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 uint8_t DBC_SendDist(CAN_HandleTypeDef *hcan, float Dist)
 {
   uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
-  uint32_t Dist_mm = (Dist - 0.4f) * 1000;   //以毫米为单位的距离
+  uint32_t Dist_mm = (Dist - RADAR_OFFSET) * 1000;   //以毫米为单位的距离
   uint8_t CANTxBuf[4] = {0};
   CANTxBuf[3] = Dist_mm;
   CANTxBuf[2] = Dist_mm >> 8;
