@@ -87,12 +87,15 @@
 #if VEHICLE_MODEL == YUTONG
 	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
 	#define VEHICLE_SPEED_ADDR_LOW	0x6E0B
+	#define VEHICLE_SPEED_ADDR 0x18FE6E0B
 #elif VEHICLE_MODEL == KINGLONG
 	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
 	#define VEHICLE_SPEED_ADDR_LOW	0x6E0B
+	#define VEHICLE_SPEED_ADDR 0x18FE6E0B
 #else	//BYD
 	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
 	#define VEHICLE_SPEED_ADDR_LOW	0xF100
+	#define VEHICLE_SPEED_ADDR 0x18FEF100
 #endif
 #define DBC_ADDR 0x509
 
@@ -797,18 +800,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     if(0x18FF0DE6 == VehicleCANRxHeader.ExtId)      //gyroscope ID
       //start gyro semaphore
       osSemaphoreRelease(bSemGyroCommSigHandle);
-      
-      #if VEHICLE_MODEL == BYD
-    else if(0x18FEF100 == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
-      osSemaphoreRelease(bSemSpeedRxSigHandle);
-      #elif VEHICLE_MODEL == YUTONG
-    else if(0x18FE6E0B == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
-      osSemaphoreRelease(bSemSpeedRxSigHandle);
-      #elif VEHICLE_MODEL == KINGLONG
-    else if(0x18FE6E0B == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
-      osSemaphoreRelease(bSemSpeedRxSigHandle);
-      #endif
 
+    else if(VEHICLE_SPEED_ADDR == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
+      osSemaphoreRelease(bSemSpeedRxSigHandle);
     #endif
 	}
 	
