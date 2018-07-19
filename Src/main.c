@@ -61,22 +61,23 @@
 
 /* Switches ------------------------------------------------------------------*/
 /**
- * ARS408
- * EMRR
+ * ARS408 1
+ * EMRR 0
 */
-#define RADAR_TYPE EMRR
+#define RADAR_TYPE 0
+/**
+ * BYD			2
+ * YUTONG		1
+ * KINGLONG	0
+*/
+#define VEHICLE_MODEL 0
+
 #define DBC_SEND 0
 #define ADAS_COMM 1
 //	labview
 #define RADAR_DATA_SEND 0
 //	Vehicle Speed & gyro via CAN3
 #define CAN_READ_VEHICLE 0
-/**
- * BYD
- * YUTONG
- * KINGLONG
-*/
-#define VEHICLE_MODEL YUTONG
 
 /* Defines -------------------------------------------------------------------*/
 #define RADAR_OFFSET	0.4f							//雷达偏移量
@@ -84,19 +85,21 @@
 #define MAX_DECELARATION 0.4*9.8f				//制动系统最大减速度
 #define DELAY_TIME	0.4f								//系统延迟时间
 #define LIMIT_RANGE 200									//计算碰撞时间的极限距离/m
-#if VEHICLE_MODEL == YUTONG
-	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
-	#define VEHICLE_SPEED_ADDR_LOW	0x6E0B
-	#define VEHICLE_SPEED_ADDR 0x18FE6E0B
-#elif VEHICLE_MODEL == KINGLONG
-	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
-	#define VEHICLE_SPEED_ADDR_LOW	0x6E0B
-	#define VEHICLE_SPEED_ADDR 0x18FE6E0B
-#else	//BYD
+
+#if VEHICLE_MODEL == 2		//BYD
 	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
 	#define VEHICLE_SPEED_ADDR_LOW	0xF100
 	#define VEHICLE_SPEED_ADDR 0x18FEF100
+#elif VEHICLE_MODEL == 1	//YUTONG
+	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
+	#define VEHICLE_SPEED_ADDR_LOW	0x6E0B
+	#define VEHICLE_SPEED_ADDR 0x18FE6E0B
+#else	//KINGLONG
+	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
+	#define VEHICLE_SPEED_ADDR_LOW	0x6E0B
+	#define VEHICLE_SPEED_ADDR 0x18FE6E0B
 #endif
+
 #define DBC_ADDR 0x509
 
 /* USER CODE END Includes */
@@ -379,10 +382,10 @@ int main(void)
   //hcan1~hcan3 init, start
 	DBC_Init(&hcan1);
 	//ARS408
-	#if RADAR_TYPE == ARS408
+	#if RADAR_TYPE
   ARS_Init(&hcan2);//hcan2 must use hcan1
 	//EMRR
-	#elif RADAR_TYPE == EMRR
+	#else
 	EMRR_Init(&hcan2);
 	#endif
   #if CAN_READ_VEHICLE
@@ -783,10 +786,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
   	osSemaphoreRelease(bSemRadarCANRxSigHandle);
 		//ARS408
-		#if RADAR_TYPE == ARS408
+		#if RADAR_TYPE
 		
 		//EMRR
-		#elif RADAR_TYPE == EMRR
+		#else
 		EMRR_RadarRxComplete = 1;
 		#endif
   	//__HAL_CAN_CLEAR_FLAG(hcan, CAN_FLAG_FF0);
@@ -892,7 +895,7 @@ void StartRadarCommTask(void const * argument)
 {
   /* USER CODE BEGIN StartRadarCommTask */
 	//ARS408
-	#if RADAR_TYPE == ARS408
+	#if RADAR_TYPE
 	uint8_t minRadarDistFlag = 0;
 	#endif
   /* Infinite loop */
@@ -901,7 +904,7 @@ void StartRadarCommTask(void const * argument)
 		osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);
 		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
     //ARS408
-		#if RADAR_TYPE == ARS408
+		#if RADAR_TYPE
 		if(RadarCANRxHeader.StdId==0x60A)												//60B的之前都读取完毕，开始计算
 		{
 			minRadarDistFlag = 1;
@@ -917,7 +920,7 @@ void StartRadarCommTask(void const * argument)
 		}
 		
     //EMRR
-		#elif RADAR_TYPE == EMRR
+		#else
 		EMRR_GetRaderObjCloset(RadarCANRxBuf, aEMRRGeneral, &EMRRGeneral_Closet);
 		if(EMRRGeneral_Closet.trackRange != 0)
 			osSemaphoreRelease(bSemCalculateSigHandle);
@@ -1130,10 +1133,10 @@ void StartCANSpeedReadTask(void const * argument)
     {
       VehicleSpeed = VehicleCANRxBuf[1];	//车速16进制,km/h
 			//ARS408
-			#if RADAR_TYPE == ARS408
+			#if RADAR_TYPE
 			ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);	//send VehicleSpeed to Radar
 			//EMRR
-			#elif RADAR_TYPE == EMRR
+			#else
 			#endif
     }
 		osDelay(10);
@@ -1147,7 +1150,7 @@ void StartCalculateTask(void const * argument)
 	{
 		osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);
     //ARS408
-		#if RADAR_TYPE == ARS408
+		#if RADAR_TYPE
 		uint16_t MinRange=255;									//初始化为最大距离
 		uint32_t relSpeed=0;
 		MinRange = RadarGeneral[0].Obj_DistLong;
@@ -1171,7 +1174,7 @@ void StartCalculateTask(void const * argument)
 		}
 
     //EMRR
-		#elif RADAR_TYPE == EMRR
+		#else
 		MinRangeLong = EMRRGeneral_Closet.trackRange;
     VrelLong = EMRRGeneral_Closet.trackSpeed;
 
