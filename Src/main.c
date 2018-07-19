@@ -89,16 +89,20 @@
 #if VEHICLE_MODEL == 2		//BYD
 	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
 	#define VEHICLE_SPEED_ADDR_LOW	0xF100
-	#define VEHICLE_SPEED_ADDR 0x18FEF100
+	#define VEHICLE_SPEED_ADDR	0x18FEF100
 #elif VEHICLE_MODEL == 1	//YUTONG
 	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
 	#define VEHICLE_SPEED_ADDR_LOW	0x6E0B
-	#define VEHICLE_SPEED_ADDR 0x18FE6E0B
+	#define VEHICLE_SPEED_ADDR	0x18FE6E0B
 #else	//KINGLONG
 	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
-	#define VEHICLE_SPEED_ADDR_LOW	0x6E0B
-	#define VEHICLE_SPEED_ADDR 0x18FE6E0B
+	#define VEHICLE_SPEED_ADDR_LOW	0x6C0B
+	#define VEHICLE_SPEED_ADDR	0x18FE6C0B
 #endif
+
+#define GYRO_ADDR_HIGH	0x18FE
+#define GYRO_ADDR_LOW		0x0DE6
+#define GYRO_ADDR		0x18FF0DE6
 
 #define DBC_ADDR 0x509
 
@@ -800,7 +804,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     #if CAN_READ_VEHICLE
 		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
 		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
-    if(0x18FF0DE6 == VehicleCANRxHeader.ExtId)      //gyroscope ID
+    if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
       //start gyro semaphore
       osSemaphoreRelease(bSemGyroCommSigHandle);
 
@@ -825,12 +829,13 @@ uint8_t DBC_Init(CAN_HandleTypeDef *hcan)
 
 uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 {
-	//配置CAN3滤波器接收车速信息
-	CAN_FilterTypeDef VehicleCANFilter={VEHICLE_SPEED_ADDR_HIGH<<3,VEHICLE_SPEED_ADDR_LOW<<3 | 0x4,0xF66<<3,0<<3,CAN_FILTER_FIFO0, 1, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1};
-	//CAN_FilterTypeDef VehicleCANFilter = {0xC7F3, 0x706C, 0, 0, CAN_FilterFIFO1, 15, CAN_FILTERMODE_IDMASK, CAN_FILTERSCALE_32BIT, ENABLE, 15};
-	//CAN_FilterTypeDef VehicleCANFilter = {0x0000, 0x0, 0, 0, CAN_FilterFIFO1, 1, CAN_FILTERMODE_IDMASK, CAN_FILTERSCALE_32BIT, ENABLE, 1};
-
+	//配置CAN3过滤器接收车速信息
+	CAN_FilterTypeDef VehicleCANFilter={VEHICLE_SPEED_ADDR_HIGH<<3,VEHICLE_SPEED_ADDR_LOW<<3 | 0x4,0xFF<<3,0xFF00<<3,CAN_FILTER_FIFO0, 0, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1};
 	HAL_CAN_ConfigFilter(hcan, &VehicleCANFilter);
+	//配置CAN3过滤器接收陀螺仪信息
+	CAN_FilterTypeDef GyroCANFilter={GYRO_ADDR_HIGH<<3,GYRO_ADDR_LOW<<3 | 0x4,0xFF<<3,0xFF00<<3,CAN_FILTER_FIFO0, 1, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1};
+	HAL_CAN_ConfigFilter(hcan, &GyroCANFilter);
+	
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 
