@@ -1147,7 +1147,8 @@ void StartCANSpeedReadTask(void const * argument)
 			#endif
     }
     #else   //KINGLONG
-    VehicleSpeed = VehicleCANRxBuf[7];  //车速16进制,km/h
+    VehicleSpeed = VehicleCANRxBuf[7];  	//车速16进制,km/h
+			//ARS408
       #if RADAR_TYPE
       ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);	//send VehicleSpeed to Radar
       //EMRR
