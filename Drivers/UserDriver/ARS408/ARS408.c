@@ -41,8 +41,13 @@ MW_RadarSpeed RadarSpeed;
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 {
 	//配置CAN滤波器接收Objct_General信息，即相对目标的距离、速度等
-	CAN_FilterTypeDef MW_RadarCANFilter={OBJ_GENERAL_ADDR<<5,0,0xEFE<<5,0,CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B 和 0x60A同时检测
-	//CAN_FilterTypeDef MW_RadarCANFilter = {0,OBJ_GENERAL_ADDR,0,0xEFF,CAN_FILTER_FIFO0,CAN_FILTERMODE_IDLIST,CAN_FILTERSCALE_32BIT,ENABLE,0};
+	//ID_HIGH, ID_LOW,\
+	MASK_HIGH, MASK_LOW,\
+	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
+	CAN_FilterTypeDef MW_RadarCANFilter={
+		OBJ_GENERAL_ADDR<<5, 0,\
+		0xEFE<<5, 0,\
+		CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B 和 0x60A同时检测
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);

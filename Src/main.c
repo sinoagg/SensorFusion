@@ -78,7 +78,7 @@
 //	labview
 #define RADAR_DATA_SEND 0
 //	Vehicle Speed & gyro via CAN3
-#define CAN_READ_VEHICLE 0
+#define CAN_READ_VEHICLE 1
 
 /* Defines -------------------------------------------------------------------*/
 #define RADAR_OFFSET	0.4f							//雷达偏移量
@@ -88,21 +88,13 @@
 #define LIMIT_RANGE 200									//计算碰撞时间的极限距离/m
 //	can3 id, vehicle
 #if VEHICLE_MODEL == 2		//BYD
-	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
-	#define VEHICLE_SPEED_ADDR_LOW	0xF100
 	#define VEHICLE_SPEED_ADDR	0x18FEF100
 #elif VEHICLE_MODEL == 1	//YUTONG
-	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
-	#define VEHICLE_SPEED_ADDR_LOW	0x6E0B
 	#define VEHICLE_SPEED_ADDR	0x18FE6E0B
 #else	//KINGLONG
-	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
-	#define VEHICLE_SPEED_ADDR_LOW	0x6C0B
 	#define VEHICLE_SPEED_ADDR	0x18FE6C0B
 #endif
 //	can3 id, gyro
-#define GYRO_ADDR_HIGH	0x18FE
-#define GYRO_ADDR_LOW		0x0DE6
 #define GYRO_ADDR		0x18FF0DE6
 //	can1 id, dbc
 #define DBC_ADDR 0x509
@@ -831,10 +823,31 @@ uint8_t DBC_Init(CAN_HandleTypeDef *hcan)
 uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 {
 	//配置CAN3过滤器接收车速信息
-	CAN_FilterTypeDef VehicleCANFilter={VEHICLE_SPEED_ADDR_HIGH<<3,VEHICLE_SPEED_ADDR_LOW<<3 | 0x4,0xFF<<3,0xFF00<<3,CAN_FILTER_FIFO0, 0, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1};
+	//ID_HIGH,\
+	ID_LOW,\
+	MASK_HIGH,\
+	MASK_LOW,\
+	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
+	CAN_FilterTypeDef VehicleCANFilter={
+		VEHICLE_SPEED_ADDR>>13 & 0xFFFF,\
+		((VEHICLE_SPEED_ADDR & 0xFFFF) <<3) | 0x4,\
+		0xFF<<3 | 0xF,\
+		0xFF00<<3,\
+		CAN_FILTER_FIFO0, 0, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
+	};
 	HAL_CAN_ConfigFilter(hcan, &VehicleCANFilter);
 	//配置CAN3过滤器接收陀螺仪信息
-	CAN_FilterTypeDef GyroCANFilter={GYRO_ADDR_HIGH<<3,GYRO_ADDR_LOW<<3 | 0x4,0xFF<<3,0xFF00<<3,CAN_FILTER_FIFO0, 1, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1};
+	//ID_HIGH,\
+	ID_LOW,\
+	MASK_HIGH,\
+	MASK_LOW,\
+	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
+	CAN_FilterTypeDef GyroCANFilter={
+		(GYRO_ADDR>>13) & 0xFFFF,\
+		((GYRO_ADDR & 0xFFFF) <<3) | 0x4,\
+		0xFF<<3 | 0xF,\
+		0xFF00<<3,CAN_FILTER_FIFO0, 1, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
+	};
 	HAL_CAN_ConfigFilter(hcan, &GyroCANFilter);
 	
 	HAL_CAN_Start(hcan);
@@ -1122,6 +1135,9 @@ void StartCANSpeedReadTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);
+    #if VEHICLE_MODEL == 2    //BYD
+
+    #elif VEHICLE_MODEL == 1  //YUTONG
     if(0xD1 == VehicleCANRxBuf[0] && 0xD1 == VehicleCANRxBuf[2])
     {
       VehicleSpeed = VehicleCANRxBuf[1];	//车速16进制,km/h
@@ -1132,6 +1148,10 @@ void StartCANSpeedReadTask(void const * argument)
 			#else
 			#endif
     }
+    #else   //KINGLONG
+    
+    #endif
+    
 		osDelay(10);
   }
   /* USER CODE END StartCANSpeedReadTask */
