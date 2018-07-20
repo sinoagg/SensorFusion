@@ -44,7 +44,7 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 	//ID_HIGH, ID_LOW,\
 	MASK_HIGH, MASK_LOW,\
 	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
-	CAN_FilterTypeDef MW_RadarCANFilter={
+	CAN_FilterTypeDef MW_RadarCANFilter = {
 		OBJ_GENERAL_ADDR<<5, 0,\
 		0xEFE<<5, 0,\
 		CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B ºÍ 0x60AÍ¬Ê±¼ì²â

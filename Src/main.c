@@ -92,7 +92,8 @@
 #elif VEHICLE_MODEL == 1	//YUTONG
 	#define VEHICLE_SPEED_ADDR	0x18FE6E0B
 #else	//KINGLONG
-	#define VEHICLE_SPEED_ADDR	0x18FE6C0B
+	#define VEHICLE_SPEED_ADDR	0x18FE6C00
+	#define VEHICLE_SWTICH_ADDR	0x18FA0500
 #endif
 //	can3 id, gyro
 #define GYRO_ADDR		0x18FF0DE6
@@ -801,7 +802,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
       //start gyro semaphore
       osSemaphoreRelease(bSemGyroCommSigHandle);
 
-    else if(VEHICLE_SPEED_ADDR == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
+    else if((VEHICLE_SPEED_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSpeed ID
       osSemaphoreRelease(bSemSpeedRxSigHandle);
     #endif
 	}
@@ -828,7 +829,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 	MASK_HIGH,\
 	MASK_LOW,\
 	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
-	CAN_FilterTypeDef VehicleCANFilter={
+	CAN_FilterTypeDef VehicleCANFilter = {
 		VEHICLE_SPEED_ADDR>>13 & 0xFFFF,\
 		((VEHICLE_SPEED_ADDR & 0xFFFF) <<3) | 0x4,\
 		0xFF<<3 | 0xF,\
@@ -842,7 +843,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 	MASK_HIGH,\
 	MASK_LOW,\
 	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
-	CAN_FilterTypeDef GyroCANFilter={
+	CAN_FilterTypeDef GyroCANFilter = {
 		(GYRO_ADDR>>13) & 0xFFFF,\
 		((GYRO_ADDR & 0xFFFF) <<3) | 0x4,\
 		0xFF<<3 | 0xF,\
@@ -900,10 +901,7 @@ void StartDefaultTask(void const * argument)
     #if DBC_SEND
     DBC_SendDist(&hcan1, MinRangeLong);
     #endif
-		/*
-		uint32_t CAN_TxMailBox = CAN_TX_MAILBOX1;
-		uint8_t CAN3TxBuf[8]={3};
-		HAL_CAN_AddTxMessage(&hcan3, &CAN_TxDBCHeader, CAN3TxBuf, &CAN_TxMailBox);*/
+
 		osDelay(20);
   }
   /* USER CODE END 5 */ 
@@ -1149,7 +1147,12 @@ void StartCANSpeedReadTask(void const * argument)
 			#endif
     }
     #else   //KINGLONG
-    
+    VehicleSpeed = VehicleCANRxBuf[7];
+      #if RADAR_TYPE
+      ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);	//send VehicleSpeed to Radar
+      //EMRR
+      #else
+      #endif
     #endif
     
 		osDelay(10);
