@@ -58,6 +58,7 @@
 #include "ARS408.h"
 #include "cmd.h"
 #include "EMRR.h"
+#include "MPU6050.h"
 
 /* Switches ------------------------------------------------------------------*/
 /**
@@ -324,7 +325,7 @@ int main(void)
   osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
   #if RADAR_DATA_SEND
   osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever);	//Radar Data Tx at the beginning of the system
+  //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever);	//Radar Data Tx at the beginning of the system, then suspend & resume
   #endif
 
 	/* USER CODE END RTOS_SEMAPHORES */
@@ -983,7 +984,7 @@ void StartRadarDataTxTask(void const * argument)
       RadarData.Sys_State = RADAR_OK;			//雷达数据发送系统正常工作
       FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
       HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
-      DBC_SendDist(&hcan1, MinRangeLong);
+      //DBC_SendDist(&hcan1, MinRangeLong);
 			//使用RS485时需要让EN = 0;//转换接收状态
     }
     else
@@ -991,7 +992,7 @@ void StartRadarDataTxTask(void const * argument)
       RadarData.Sys_State = RADAR_ERROR;	//雷达数据发送系统错误
       FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
       HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
-      DBC_SendDist(&hcan1, MinRangeLong);
+      //DBC_SendDist(&hcan1, MinRangeLong);
 			//使用RS485时需要让EN = 0;//转换接收状态
     }
     osDelay(100);
@@ -1103,22 +1104,9 @@ void StartGyroCommTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);
-    uint8_t sum = 0;
-    uint8_t i = 0;
-    uint16_t yawH = 0;
-    uint16_t yawL = 0;
-    uint16_t yawRateH = 0;
-    uint16_t yawRateL = 0;
-    for(; i < 5; i++)
-      sum += VehicleCANRxBuf[i];
-    if(VehicleCANRxBuf[5] == sum)   //校验和
+    if(MPU_CheckSum(VehicleCANRxBuf))  //校验和通过
     {
-      yawL = VehicleCANRxBuf[1];
-      yawH = VehicleCANRxBuf[2];
-      yawRateL = VehicleCANRxBuf[3];
-      yawRateH = VehicleCANRxBuf[4];
-      yaw = ((float)((yawH<<8) | yawL)) / 32768.0f * 180;  //单位是°
-      yawRate = ((float)((yawRateH<<8) | yawRateL)) / 32768.0f * 2000;  //单位是°/s
+      yawRate =  MPU_GetYawRate(VehicleCANRxBuf);
       ARS_SendVehicleYaw(&hcan2, yawRate);  //send VehicleYaw to Radar
     }
 		osDelay(10);

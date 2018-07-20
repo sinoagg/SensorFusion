@@ -3,8 +3,8 @@
 ## platform
  * FreeRTOS on STM32F413
 ## version
- * 20180719: **macro defines** changed to switch RADAR & VEHICLE, can3(vehicle & gyro) filter using multi channel
- * 20180716: **Radar(EMRR)** test in car, not with ADAS
+ * 20180719: **Radar(EMRR)** test on car, with ADAS
+ * 20180716: **Radar(EMRR)** test on car, not with ADAS
  * 20180711: **gyro** read from stm32f1, mpu6050, via can3 
  * 20180524: **ADAS warning** then Radar FCW(macro defines to switch off DBC, Radar, uart send, ADAS, Radar & filter config)
  * 20180523: Radar & filter config

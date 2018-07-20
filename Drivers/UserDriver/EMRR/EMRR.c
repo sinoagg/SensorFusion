@@ -2,7 +2,7 @@
  * microwave radar - EMRR by Electronic Radar(WuHu) 
  * 
  * EMRR_***() functions are entries of this driver
- * ***_func() functions are practical functions called by ARS_***() functions
+ * ***_func() functions are practical functions called by EMRR_***() functions
  * 
  * ---init & config
  * EMRR_Init(hcan): start CAN2 for radar
