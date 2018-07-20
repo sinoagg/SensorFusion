@@ -171,7 +171,7 @@ uint8_t ADASRxBuf[32]={0};
 uint8_t CmdRxBuf[4]={0};
 uint8_t CmdRadarDataTxBuf[11];
 uint8_t RadarCANRxBuf[8]={0};
-uint8_t VehicleCANRxBuf[6]={0};
+uint8_t VehicleCANRxBuf[8]={0};
 uint8_t CrashWarningLv = WARNING_NONE;
 uint8_t VehicleSpeed = 0;
 
