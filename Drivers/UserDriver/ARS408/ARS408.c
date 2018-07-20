@@ -1,10 +1,15 @@
 /**
  * microwave radar - ARS408 by Continental
+ * 
+ * ARS_***() functions are entries of this driver
+ * ***_func() functions are practical functions called by ARS_***() functions
+ * 
  * ---init & config
  * ARS_Init(hcan): start CAN2 for radar & (optional) config Radadr and RadarFilter
  * ARS_ConfigRadar(hcan): config Radar through can2
  * ARS_ConfigFilter(hcan): config Radar filter through can2
  * 
+ * //called by ARS_***() functions mentioned above, no entry outside this file
  * RadarConfig_func(): fill RadarConfig struct with #define in ARS408.h
  * RadarFilterConfig_func(index): fill RadarFilterConfig struct with #define in ARS408.h
  * FilterContentCfg_func(hcan, index, filter_min, filter_max): fill CANTxBuf[] && send 1 content of filter to can2
@@ -12,6 +17,10 @@
  * ---read Radar data
  * ARS_GetRadarObjStatus(...): read Radar Obj Status from can2, need to config can2 first
  * ARS_GetRadarObjGeneral(...): read Radar Obj General(distance, relVelocity...) from can2
+ * 
+ * ---send Vehicle speed & yaw
+ * ARS_SendVehicleSpeed(...): send VehicleSpeed through can2, speed read from can3 
+ * ARS_SendVehicleYaw(...): send VehicleYaw through can2, yaw read from can3
  */
 #include "ARS408.h"
 
@@ -20,17 +29,25 @@
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
+CAN_TxHeaderTypeDef CAN_TxYawHeader={YAW_INFO_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
+CAN_TxHeaderTypeDef CAN_TxSpeedHeader={SPEED_INFO_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 
 MW_RadarConfig RadarConfig;
 MW_RadarFilterConfig RadarFilterConfig;
 MW_RadarFilterIndexContent FilterContent;
+MW_RadarSpeed RadarSpeed;
 
 
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 {
 	//配置CAN滤波器接收Objct_General信息，即相对目标的距离、速度等
-	CAN_FilterTypeDef MW_RadarCANFilter={OBJ_GENERAL_ADDR<<5,0,0xEFE<<5,0,CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B 和 0x60A同时检测
-	//CAN_FilterTypeDef MW_RadarCANFilter = {0,OBJ_GENERAL_ADDR,0,0xEFF,CAN_FILTER_FIFO0,CAN_FILTERMODE_IDLIST,CAN_FILTERSCALE_32BIT,ENABLE,0};
+	//ID_HIGH, ID_LOW,\
+	MASK_HIGH, MASK_LOW,\
+	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
+	CAN_FilterTypeDef MW_RadarCANFilter = {
+		OBJ_GENERAL_ADDR<<5, 0,\
+		0xEFE<<5, 0,\
+		CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B 和 0x60A同时检测
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
@@ -49,7 +66,7 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 
 void RadarConfig_func()
 {
-	RadarConfig.MaxDistance_valid = RADARCFG_MAXDISTANCE_VALID;
+  RadarConfig.MaxDistance_valid = RADARCFG_MAXDISTANCE_VALID;
   RadarConfig.SensorID_valid = RADARCFG_SENSORID_VALID;
   RadarConfig.RadarPower_valid = RADARCFG_RADARPOWER_VALID;
   RadarConfig.OutputType_valid = RADARCFG_OUTPUTTYPE_VALID;
@@ -73,10 +90,10 @@ void RadarConfig_func()
 
 void RadarFilterConfig_func(uint8_t index)
 {
-  RadarFilterConfig.FilterCfg_Valid = FILTERCFG_VALID;
-  RadarFilterConfig.FilterCfg_Active = FILTERCFG_FILTERACTIVE_VALID;
-  RadarFilterConfig.FilterCfg_Index = index;
-  RadarFilterConfig.FilterCfg_Type = FILTERCFG_TYPE_OBJ;
+	RadarFilterConfig.FilterCfg_Valid = FILTERCFG_VALID;
+	RadarFilterConfig.FilterCfg_Active = FILTERCFG_FILTERACTIVE_VALID;
+	RadarFilterConfig.FilterCfg_Index = index;
+	RadarFilterConfig.FilterCfg_Type = FILTERCFG_TYPE_OBJ;
 }
 
 /**
@@ -115,11 +132,11 @@ uint8_t FilterContentCfg_func(CAN_HandleTypeDef *hcan, uint8_t index, uint16_t f
 	uint32_t CAN_TxMailBox=CAN_TX_MAILBOX0;
 	uint8_t CANTxBuf[8]={0};
   RadarFilterConfig_func(index);
-	CANTxBuf[0]= RadarFilterConfig.FilterCfg_Type|RadarFilterConfig.FilterCfg_Index|RadarFilterConfig.FilterCfg_Active|RadarFilterConfig.FilterCfg_Valid;
-	CANTxBuf[1]= filter_min>>8 & 0x1F;
-	CANTxBuf[2]= filter_min & 0xFF;
-	CANTxBuf[3]= filter_max>>8 & 0x1F;
-	CANTxBuf[4]= filter_max & 0xFF;
+	CANTxBuf[0] = RadarFilterConfig.FilterCfg_Type|RadarFilterConfig.FilterCfg_Index|RadarFilterConfig.FilterCfg_Active|RadarFilterConfig.FilterCfg_Valid;
+	CANTxBuf[1] = filter_min>>8 & 0x1F;
+	CANTxBuf[2] = filter_min & 0xFF;
+	CANTxBuf[3] = filter_max>>8 & 0x1F;
+	CANTxBuf[4] = filter_max & 0xFF;
 	//CAN总线发送配置
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxConfigFilterHeader, CANTxBuf, &CAN_TxMailBox);
 	return 0;
@@ -180,98 +197,55 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   return 0;
 }
 
-//void ARS_GetRadarCfg(uint8_t* pCANRxBuf, )
-
 void ARS_GetRadarObjStatus(uint8_t* pCANRxBuf, MW_RadarObjStatus *pRadarObjStatus)
 {
-	pRadarObjStatus->Obj_NofObjects=*pCANRxBuf;
-	pRadarObjStatus->Obj_MeasCounter=((uint16_t)*(pCANRxBuf+1))<<8|*(pCANRxBuf+2);
+	pRadarObjStatus->Obj_NofObjects = *pCANRxBuf;
+	pRadarObjStatus->Obj_MeasCounter = ((uint16_t)*(pCANRxBuf+1))<<8|*(pCANRxBuf+2);
 }
 
 void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral)
 {
-	(pRadarGeneral)->Obj_ID=*pCANRxBuf;	//OBJ_ID
-	(pRadarGeneral)->Obj_DistLong= (((uint16_t)*(pCANRxBuf+1))<<8|*(pCANRxBuf+2))>>3;
-	(pRadarGeneral)->Obj_DistLat= ((uint16_t)*(pCANRxBuf+2)&0x07)<<8|(*(pCANRxBuf+3));
-	(pRadarGeneral)->Obj_VrelLong= (((uint16_t)*(pCANRxBuf+4))<<8|*(pCANRxBuf+5))>>6;//纵向相对速度
-	(pRadarGeneral)->Obj_VrelLat= (((uint16_t)*(pCANRxBuf+5)&0x3F)<<8|(*(pCANRxBuf+6)&0xE0))>>5;;//横向相对速度
-	(pRadarGeneral)->Obj_DynProp= *(pCANRxBuf+6)&0x07;		//目标动态特性（运动还是静止）
-	(pRadarGeneral)->Obj_RCS= *(pCANRxBuf+7);
+	(pRadarGeneral)->Obj_ID = *pCANRxBuf;	//OBJ_ID
+	(pRadarGeneral)->Obj_DistLong = (((uint16_t)*(pCANRxBuf+1))<<8 | *(pCANRxBuf+2))>>3;
+	(pRadarGeneral)->Obj_DistLat = ((uint16_t)*(pCANRxBuf+2)&0x07)<<8 | (*(pCANRxBuf+3));
+	(pRadarGeneral)->Obj_VrelLong = (((uint16_t)*(pCANRxBuf+4))<<8 | *(pCANRxBuf+5))>>6;//纵向相对速度
+	(pRadarGeneral)->Obj_VrelLat = (((uint16_t)*(pCANRxBuf+5)&0x3F)<<8 | (*(pCANRxBuf+6)&0xE0))>>5;;//横向相对速度
+	(pRadarGeneral)->Obj_DynProp = *(pCANRxBuf+6)&0x07;		//目标动态特性（运动还是静止）
+	(pRadarGeneral)->Obj_RCS = *(pCANRxBuf+7);
 }
 
-/*
---> Find mostImportantObject  <--
- # Safe (green): There is no car in the ego lane (no MIO), the MIO is
-   moving away from the car, or the distance is maintained constant.
- # Caution (yellow): The MIO is moving closer to the car, but is still at
-   a distance above the FCW distance. FCW distance is calculated using the
-   Euro NCAP AEB Test Protocol. Note that this distance varies with the
-   relative speed between the MIO and the car, and is greater when the
-   closing speed is higher.
- # Warn (red): The MIO is moving closer to the car, and its distance is
-   less than the FCW distance.
-*/
-/*
-uint8_t FindMIObj(MW_RadarGeneral *pRadarGeneral)
+void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan,uint16_t VehicleSpeed)
 {
-	uint8_t FCW = 0;
-	uint8_t Find0x60B = 0;
-	uint16_t i = 0;
-    float MinRange = 0.0;
-    float MaxRange = MAX_RANGE;
-    float gAccel = 9.8;
-    float maxDeceleration = 0.4 * gAccel;		//假设车辆最大减速度是0.4g
-    float delayTime = 1.2;
-    float relSpeed = 0.0;
+	uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
+	uint8_t CANTxBuf[2] = {0};
+  if(0 == VehicleSpeed)
+  {
+    RadarSpeed.RadarDevice_SpeedDirection = STANDSTILL;
+    RadarSpeed.RadarDevice_Speed = 0;
+  }
+  if(VehicleSpeed > 0)
+  {
+    RadarSpeed.RadarDevice_SpeedDirection = FORWARD;
+    RadarSpeed.RadarDevice_Speed = (uint16_t)((((float)VehicleSpeed / 3.6f) - 0) / 0.02f);    //km/h to m/s, offset 0, Res 0.02
+  }
+  if(VehicleSpeed < 0)
+  {
+    RadarSpeed.RadarDevice_SpeedDirection = BACKWORD;
+    RadarSpeed.RadarDevice_Speed = (uint16_t)((((float)(-VehicleSpeed) / 3.6f) - 0) / 0.02f); //km/h to m/s, offset 0, Res 0.02
+  }
+  CANTxBuf[0] = (RadarSpeed.RadarDevice_SpeedDirection<<6 | ((RadarSpeed.RadarDevice_Speed>>8) & 0x1F));
+	CANTxBuf[1] = RadarSpeed.RadarDevice_Speed & 0xFF;
+	//CAN总线发送配置
+	HAL_CAN_AddTxMessage(hcan, &CAN_TxSpeedHeader, CANTxBuf, &CAN_TxMailBox);
+}
 
-    //ARS_GetRadarObjStatus(CANRxBuf);
-    //ARS_GetRadarObjGeneral(CANRxBuf, RadarGeneral);
-    
-    for(i = 0; i < taskMsg->TaskMsgNum.Index[isRead] ; i++) //    for(i = 0; i < taskMsg->TaskMsgNum.Index[isRead] + 1; i++)
-    {
-        if(taskMsg->RxMessage[isRead][i].StdId == 0x60B)
-        {
-        	ARS_GetRadarObjGeneral(CANRxBuf, RadarGeneral);
-            //ARS_ObjList = ARS_Obj_Handle(&ARSCANmsg.RxMessage[isRead][i]);
-            //if(RadarGeneral.Obj_DynProp == 0x2)//0x2 means oncoming
-            if( ARS_ObjList.Obj_LongDispl != 0 &&((ABS((ARS_ObjList.Obj_LatDispl) * 2.0)) < LANEWIDTH ) &&//是否在车道内
-                    ARS_ObjList.Obj_LongDispl < MaxRange)//
-            {
-                MinRange = RadarGeneral.Obj_LongDispl;						//MaxRange赋值纵向最小距离
-                MaxRange = MinRange;
-                relSpeed = RadarGeneral.Obj_VrelLong;
-            }
-        }
-    }
-
-    Segment_Num = MinRange;
-    if(MinRange == 0)
-    {
-        return FCW = 0;			//如果这个距离为0，则没有FCW报警
-    }
-    else if(MinRange > 0)		//如果此距离大于0，说明有可能有报警
-    {
-        if(relSpeed < 0)		//如果距离在靠近
-        {
-        	//计算刹车距离
-            float distance = relSpeed * (-1)  * delayTime +  relSpeed * relSpeed / 2 / maxDeceleration;//物理公式-vt+v*v/2/a 计算距离
-
-            if(MinRange <= distance)
-            {
-                return  FCW = 2; //red			//如果太近，红色警报		
-            }
-            else
-            {
-                return  FCW = 1; //yellow		//否则以最大减速度能刹住，但也是在报警距离范围之内了
-            }
-        }
-        else
-        {
-            //there is a stationary object in front of the vehilce .//如果远离或者静止的障碍物
-            return FCW = 0;
-        }
-    }
-}*/
-
-
-
+void ARS_SendVehicleYaw(CAN_HandleTypeDef *hcan, float YawRate)
+{
+	uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
+	uint8_t CANTxBuf[2] = {0};
+  uint16_t YawRate_int = (uint16_t)((YawRate - 327.68f) / 0.01f);     //offset +327.68, Res 0.01
+  CANTxBuf[0] = (YawRate_int >> 8) & 0xFF;
+	CANTxBuf[1] = YawRate_int & 0xFF;
+	//CAN总线发送配置
+	HAL_CAN_AddTxMessage(hcan, &CAN_TxYawHeader, CANTxBuf, &CAN_TxMailBox);
+}
