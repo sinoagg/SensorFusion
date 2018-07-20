@@ -85,7 +85,7 @@
 #define MAX_DECELARATION 0.4*9.8f				//制动系统最大减速度
 #define DELAY_TIME	0.4f								//系统延迟时间
 #define LIMIT_RANGE 200									//计算碰撞时间的极限距离/m
-
+//	can3 id, vehicle
 #if VEHICLE_MODEL == 2		//BYD
 	#define VEHICLE_SPEED_ADDR_HIGH 0x18FE
 	#define VEHICLE_SPEED_ADDR_LOW	0xF100
@@ -99,11 +99,11 @@
 	#define VEHICLE_SPEED_ADDR_LOW	0x6C0B
 	#define VEHICLE_SPEED_ADDR	0x18FE6C0B
 #endif
-
+//	can3 id, gyro
 #define GYRO_ADDR_HIGH	0x18FE
 #define GYRO_ADDR_LOW		0x0DE6
 #define GYRO_ADDR		0x18FF0DE6
-
+//	can1 id, dbc
 #define DBC_ADDR 0x509
 
 /* USER CODE END Includes */

@@ -10,8 +10,7 @@
  *
  * ===#defines:
  * ADDR: (can id, std)
- * (write)config addr 0x200 ~ 0x408
- * (read) obj & cluster addr 0x600~0x60E
+ * (read) obj addr 0x500~0x53F
  * 
  * ===struct:
  * EMRR_RadarGeneral

@@ -21,7 +21,7 @@ extern CAN_RxHeaderTypeDef RadarCANRxHeader;
 uint8_t EMRR_Init(CAN_HandleTypeDef *hcan)
 {
 	//配置CAN滤波器接收Objct_General信息，即相对目标的距离、速度等
-	CAN_FilterTypeDef MW_RadarCANFilter={EMRR_OBJ_ADDR<<5,0,0xFFC0<<5,0,CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B 和 0x60A同时检测
+	CAN_FilterTypeDef MW_RadarCANFilter={EMRR_OBJ_ADDR<<5,0,0xFFC0<<5,0,CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
