@@ -85,7 +85,7 @@
 #define LANEWIDTH 1.5f
 #define MAX_DECELARATION 0.4*9.8f
 #define DELAY_TIME	0.4f
-#define LIMIT_RANGE 200									//meter
+#define LIMIT_RANGE 200		//meter
 //	can3 id, vehicle
 #if VEHICLE_MODEL == 2		//BYD
 	#define VEHICLE_SPEED_ADDR	0x18FEF100
@@ -401,6 +401,7 @@ int main(void)
   #endif
   /* USER CODE END RTOS_QUEUES */
 
+
   /* Start scheduler */
   osKernelStart();
   
@@ -489,13 +490,13 @@ static void MX_ADC1_Init(void)
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.ScanConvMode = DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.ScanConvMode = ENABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.NbrOfConversion = 2;
   hadc1.Init.DMAContinuousRequests = DISABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -512,6 +513,15 @@ static void MX_ADC1_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+
+    /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+    */
+  sConfig.Channel = ADC_CHANNEL_5;
+  sConfig.Rank = 2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+}
 
 }
 
@@ -789,13 +799,15 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(BELL_BUSY_GPIO_Port, BELL_BUSY_Pin, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LED0_Pin|LED1_Pin|LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOE, BUZZER_Pin|LED3_Pin|LED4_Pin|LED5_Pin|LED6_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, VALVE_FRONT_Pin|VALVE_REAR_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : BELL_DATA_Pin */
   GPIO_InitStruct.Pin = BELL_DATA_Pin;
@@ -810,8 +822,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(BELL_BUSY_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PC8 PC9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
+  /*Configure GPIO pins : VALVE_FRONT_Pin VALVE_REAR_Pin */
+  GPIO_InitStruct.Pin = VALVE_FRONT_Pin|VALVE_REAR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

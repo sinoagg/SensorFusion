@@ -59,6 +59,10 @@
 
 /* Private define ------------------------------------------------------------*/
 
+#define ATM_REAR_Pin GPIO_PIN_4
+#define ATM_REAR_GPIO_Port GPIOA
+#define ATM_FRONT_Pin GPIO_PIN_5
+#define ATM_FRONT_GPIO_Port GPIOA
 #define BELL_DATA_Pin GPIO_PIN_7
 #define BELL_DATA_GPIO_Port GPIOA
 #define BELL_BUSY_Pin GPIO_PIN_4
@@ -77,8 +81,10 @@
 #define LED5_GPIO_Port GPIOE
 #define LED6_Pin GPIO_PIN_10
 #define LED6_GPIO_Port GPIOE
-#define BUZZER_GPIO_Port GPIOE
-#define BUZZER_Pin GPIO_PIN_2
+#define VALVE_FRONT_Pin GPIO_PIN_8
+#define VALVE_FRONT_GPIO_Port GPIOC
+#define VALVE_REAR_Pin GPIO_PIN_9
+#define VALVE_REAR_GPIO_Port GPIOC
 
 /* ########################## Assert Selection ############################## */
 /**
