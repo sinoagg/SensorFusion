@@ -40,14 +40,14 @@ MW_RadarSpeed RadarSpeed;
 
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 {
-	//配置CAN滤波器接收Objct_General信息，即相对目标的距离、速度等
+	//config CAN filter to receive Objct_General(distance & relSpeed
 	//ID_HIGH, ID_LOW,\
 	MASK_HIGH, MASK_LOW,\
 	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
 	CAN_FilterTypeDef MW_RadarCANFilter = {
 		OBJ_GENERAL_ADDR<<5, 0,\
 		0xEFE<<5, 0,\
-		CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B 和 0x60A同时检测
+		CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B & 0x60A at the same time
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
@@ -137,7 +137,6 @@ uint8_t FilterContentCfg_func(CAN_HandleTypeDef *hcan, uint8_t index, uint16_t f
 	CANTxBuf[2] = filter_min & 0xFF;
 	CANTxBuf[3] = filter_max>>8 & 0x1F;
 	CANTxBuf[4] = filter_max & 0xFF;
-	//CAN总线发送配置
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxConfigFilterHeader, CANTxBuf, &CAN_TxMailBox);
 	return 0;
 }
@@ -235,7 +234,6 @@ void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan,uint16_t VehicleSpeed)
   }
   CANTxBuf[0] = (RadarSpeed.RadarDevice_SpeedDirection<<6 | ((RadarSpeed.RadarDevice_Speed>>8) & 0x1F));
 	CANTxBuf[1] = RadarSpeed.RadarDevice_Speed & 0xFF;
-	//CAN总线发送配置
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxSpeedHeader, CANTxBuf, &CAN_TxMailBox);
 }
 
@@ -246,6 +244,5 @@ void ARS_SendVehicleYaw(CAN_HandleTypeDef *hcan, float YawRate)
   uint16_t YawRate_int = (uint16_t)((YawRate - 327.68f) / 0.01f);     //offset +327.68, Res 0.01
   CANTxBuf[0] = (YawRate_int >> 8) & 0xFF;
 	CANTxBuf[1] = YawRate_int & 0xFF;
-	//CAN总线发送配置
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxYawHeader, CANTxBuf, &CAN_TxMailBox);
 }

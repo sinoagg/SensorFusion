@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-<<<<<<< HEAD
 <ProjectName>E:\CodesCircuits\AEBS\SensorFusion\\SensorFusion</ProjectName>
 <ProjectNature>C</ProjectNature> 
 <CMSIS>..\Drivers\CMSIS</CMSIS>
 <HAL_Driver>C:\Users\Thinkpad\STM32Cube\Repository\STM32Cube_FW_F4_V1.21.0\Drivers\CMSIS</HAL_Driver>
-=======
-<ProjectName>E:\Automotive\AEBS\Code\SensorFusion\\SensorFusion</ProjectName>
-<ProjectNature>C</ProjectNature> 
-<CMSIS>..\Drivers\CMSIS</CMSIS>
-<HAL_Driver>C:\Users\ThinkPad\STM32Cube\Repository\STM32Cube_FW_F4_V1.21.0\Drivers\CMSIS</HAL_Driver>
->>>>>>> b9538d349fd546088ac1698e0a00b98b0def318e
 <Toolchain>MDK-ARM</Toolchain>
 	<Toolversion>5</Toolversion>
 <Version>0</Version>
@@ -116,6 +109,12 @@
 	    <name>Drivers</name> 
 		   <group>
 		 		<name>STM32F4xx_HAL_Driver</name>
+						<file>
+							<name>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c</name>
+						</file>
+						<file>
+							<name>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.c</name>
+						</file>
 						<file>
 							<name>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_can.c</name>
 						</file>
