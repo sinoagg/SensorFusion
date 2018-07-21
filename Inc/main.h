@@ -81,6 +81,8 @@
 #define LED5_GPIO_Port GPIOE
 #define LED6_Pin GPIO_PIN_10
 #define LED6_GPIO_Port GPIOE
+#define BUZZER_GPIO_Port GPIOE
+#define BUZZER_Pin GPIO_PIN_2
 #define VALVE_FRONT_Pin GPIO_PIN_8
 #define VALVE_FRONT_GPIO_Port GPIOC
 #define VALVE_REAR_Pin GPIO_PIN_9
