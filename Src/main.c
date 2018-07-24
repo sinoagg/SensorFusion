@@ -66,6 +66,8 @@
  * EMRR 0
 */
 #define RADAR_TYPE 0
+//	Vehicle Speed & gyro via CAN3
+#define CAN_READ_VEHICLE 1
 /**
  * BYD			2
  * YUTONG		1
@@ -77,8 +79,7 @@
 #define ADAS_COMM 1
 //	labview
 #define RADAR_DATA_SEND 0
-//	Vehicle Speed & gyro via CAN3
-#define CAN_READ_VEHICLE 1
+#define ATM_READ 1
 
 /* Defines -------------------------------------------------------------------*/
 #define RADAR_OFFSET	0.4f
@@ -178,12 +179,15 @@ uint8_t RadarCANRxBuf[8]={0};
 uint8_t VehicleCANRxBuf[8]={0};
 uint8_t CrashWarningLv = WARNING_NONE;
 uint8_t VehicleSpeed = 0;
+uint16_t ADC_ConvertedValue[2] = {0};
+uint32_t DMA_Transfer_Complete_Count=0;
 
 float yaw = 0.0;
 float yawRate = 0.0;
 float VrelLong = 0.0;
 float MinRangeLong = 0.0;
 float TimetoCrash = 0.0;
+__IO float ADC_ConvertedValueF[2];
 
 /* USER CODE END PV */
 
@@ -255,6 +259,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
+	HAL_Delay(100);
   MX_CAN1_Init();
   MX_CAN2_Init();
   MX_CAN3_Init();
@@ -399,6 +404,10 @@ int main(void)
   #if CAN_READ_VEHICLE
   Vehicle_CAN_Init(&hcan3);
   #endif
+	
+	#if ATM_READ
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADC_ConvertedValue, 2);
+	#endif
   /* USER CODE END RTOS_QUEUES */
 
 
@@ -497,7 +506,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc1.Init.NbrOfConversion = 2;
-  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
@@ -508,7 +517,7 @@ static void MX_ADC1_Init(void)
     */
   sConfig.Channel = ADC_CHANNEL_4;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -521,7 +530,7 @@ static void MX_ADC1_Init(void)
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
-}
+	}
 
 }
 
@@ -747,7 +756,7 @@ static void MX_USART3_UART_Init(void)
 }
 
 /** 
-  * Enable DMA controller clock
+  * Enable m controller clock
   */
 static void MX_DMA_Init(void) 
 {
@@ -766,8 +775,8 @@ static void MX_DMA_Init(void)
   HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
   /* DMA2_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
+  //HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
   /* DMA2_Stream2_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
@@ -876,6 +885,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	
 }
 
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	DMA_Transfer_Complete_Count++; 
+}
+
 uint8_t DBC_Init(CAN_HandleTypeDef *hcan)
 {
   HAL_CAN_Start(hcan);
@@ -963,7 +977,19 @@ void StartDefaultTask(void const * argument)
     #if DBC_SEND
     DBC_SendDist(&hcan1, MinRangeLong);
     #endif
-
+		
+		#if ATM_READ
+		HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADC_ConvertedValue, 2);
+		/* 3.3为AD转换的参考电压值，stm32的AD转换为12bit，2^12=4096，
+       即当输入为3.3V时，AD转换结果为4096 */    
+    ADC_ConvertedValueF[0] =(double)(ADC_ConvertedValue[0]&0xFFF)*3.3/4096; 	// ADC_ConvertedValue只取最低12有效数据
+		ADC_ConvertedValueF[1] =(double)(ADC_ConvertedValue[1]&0xFFF)*3.3/4096; 	// ADC_ConvertedValue只取最低12有效数据
+		//printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue[0]&0xFFF);     // ADC_ConvertedValue只取最低12有效数据
+		//printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueF); 
+    //printf("已经完成AD转换次数：%d\n",DMA_Transfer_Complete_Count);
+    DMA_Transfer_Complete_Count=0;
+		#endif
+		
 		osDelay(20);
   }
   /* USER CODE END 5 */ 
@@ -1308,8 +1334,12 @@ void _Error_Handler(char *file, int line)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+	char *file1;
+	int line1;
   while(1)
   {
+		file1 = file;
+		line1 = line;
   }
   /* USER CODE END Error_Handler_Debug */
 }
