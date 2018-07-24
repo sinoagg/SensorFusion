@@ -979,14 +979,11 @@ void StartDefaultTask(void const * argument)
     #endif
 		
 		#if ATM_READ
-		HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADC_ConvertedValue, 2);
+		//HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADC_ConvertedValue, 2);
 		/* 3.3为AD转换的参考电压值，stm32的AD转换为12bit，2^12=4096，
        即当输入为3.3V时，AD转换结果为4096 */    
     ADC_ConvertedValueF[0] =(double)(ADC_ConvertedValue[0]&0xFFF)*3.3/4096; 	// ADC_ConvertedValue只取最低12有效数据
 		ADC_ConvertedValueF[1] =(double)(ADC_ConvertedValue[1]&0xFFF)*3.3/4096; 	// ADC_ConvertedValue只取最低12有效数据
-		//printf("AD转换原始值 = 0x%04X \r\n", ADC_ConvertedValue[0]&0xFFF);     // ADC_ConvertedValue只取最低12有效数据
-		//printf("计算得出电压值 = %f V \r\n",ADC_ConvertedValueF); 
-    //printf("已经完成AD转换次数：%d\n",DMA_Transfer_Complete_Count);
     DMA_Transfer_Complete_Count=0;
 		#endif
 		

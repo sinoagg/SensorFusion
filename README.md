@@ -3,6 +3,7 @@
 ## platform
  * FreeRTOS on STM32F413
 ## version
+ * 20180724: **ATM(adc)** read in DMA
  * 20180719: **Radar(EMRR)** test on car, with ADAS
  * 20180716: **Radar(EMRR)** test on car, not with ADAS
  * 20180711: **gyro** read from stm32f1, mpu6050, via can3 
@@ -16,6 +17,8 @@
     * CAN1 to send distance received from Radar(**DBC**)
     * CAN2 to receive **Radar** data & config Radar
     * CAN3(250kbps) to communicate with **vehicle & gyroscope**
+* ADC
+    * ADC1 in DMA2_stream0 to read ATM
 * USART
     * USART1(RS232) to receive cmd from **labview** & send Radar data to labview(not using)
     * USART3(TTL) to receive **ADAS** warnings
