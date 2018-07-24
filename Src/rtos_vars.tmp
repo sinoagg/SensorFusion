@@ -1,6 +1,0 @@
-osThreadId defaultTaskHandle;
-osThreadId RadarCommHandle;
-osThreadId ADASCommHandle;
-osThreadId SoundWarningHandle;
-osThreadId LightWarningHandle;
-osThreadId CANSpeedReadHandle;

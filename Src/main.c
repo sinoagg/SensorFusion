@@ -66,6 +66,8 @@
  * EMRR 0
 */
 #define RADAR_TYPE 0
+//	Vehicle Speed & gyro via CAN3
+#define CAN_READ_VEHICLE 1
 /**
  * BYD			2
  * YUTONG		1
@@ -77,15 +79,14 @@
 #define ADAS_COMM 1
 //	labview
 #define RADAR_DATA_SEND 0
-//	Vehicle Speed & gyro via CAN3
-#define CAN_READ_VEHICLE 1
+#define ATM_READ 1
 
 /* Defines -------------------------------------------------------------------*/
-#define RADAR_OFFSET	0.4f							//雷达偏移量
-#define LANEWIDTH 1.5f									//车道线宽度
-#define MAX_DECELARATION 0.4*9.8f				//制动系统最大减速度
-#define DELAY_TIME	0.4f								//系统延迟时间
-#define LIMIT_RANGE 200									//计算碰撞时间的极限距离/m
+#define RADAR_OFFSET	0.4f
+#define LANEWIDTH 1.5f
+#define MAX_DECELARATION 0.4*9.8f
+#define DELAY_TIME	0.4f
+#define LIMIT_RANGE 200		//meter
 //	can3 id, vehicle
 #if VEHICLE_MODEL == 2		//BYD
 	#define VEHICLE_SPEED_ADDR	0x18FEF100
@@ -103,6 +104,9 @@
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
+ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
+
 CAN_HandleTypeDef hcan1;
 CAN_HandleTypeDef hcan2;
 CAN_HandleTypeDef hcan3;
@@ -130,6 +134,7 @@ osThreadId CANSpeedReadHandle;
 osThreadId StartCalculateHandle;
 osThreadId UART1RxHandle;
 osThreadId RadarDataTxHandle;
+osSemaphoreId bSemCANRxSigHandle;
 osSemaphoreId bSemRadarCANRxSigHandle;
 osSemaphoreId bSemADASRxSigHandle;
 osSemaphoreId bSemSoundWarningSigHandle;
@@ -151,8 +156,8 @@ osSemaphoreId bSemRadarDataTxSigHandle;
 MW_RadarObjStatus RadarObjStatus;
 MW_RadarGeneral RadarGeneral[16];
 //EMRR
-EMRR_RadarGeneral aEMRRGeneral[64];	//接受到的64组数据
-EMRR_RadarGeneral EMRRGeneral_Closet;//距离最近的目标
+EMRR_RadarGeneral aEMRRGeneral[64];
+EMRR_RadarGeneral EMRRGeneral_Closet;
 
 Cmd_RadarData RadarData;
 
@@ -174,12 +179,15 @@ uint8_t RadarCANRxBuf[8]={0};
 uint8_t VehicleCANRxBuf[8]={0};
 uint8_t CrashWarningLv = WARNING_NONE;
 uint8_t VehicleSpeed = 0;
+uint16_t ADC_ConvertedValue[2] = {0};
+uint32_t DMA_Transfer_Complete_Count=0;
 
 float yaw = 0.0;
 float yawRate = 0.0;
 float VrelLong = 0.0;
 float MinRangeLong = 0.0;
 float TimetoCrash = 0.0;
+__IO float ADC_ConvertedValueF[2];
 
 /* USER CODE END PV */
 
@@ -197,6 +205,7 @@ static void MX_UART5_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_ADC1_Init(void);
 void StartDefaultTask(void const * argument);
 void StartRadarCommTask(void const * argument);
 void StartADASCommTask(void const * argument);
@@ -250,6 +259,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
+	HAL_Delay(100);
   MX_CAN1_Init();
   MX_CAN2_Init();
   MX_CAN3_Init();
@@ -260,17 +270,18 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 	delay_init(100);
 	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
   #if ADAS_COMM
-	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS串口接收使能
+	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS
   #endif
   #if RADAR_DATA_SEND
-  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //雷达数据发送串口接收使能
+  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);  //RADAR
   #endif
 
-	WTN6_Broadcast(BELL_LOUDEST);									//设置喇叭为最大音量
+	WTN6_Broadcast(BELL_LOUDEST);
 	delay_ms(100);
 	WTN6_Broadcast(BELL_ADAS_START);
 	delay_ms(5000);
@@ -280,6 +291,11 @@ int main(void)
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* definition and creation of bSemCANRxSig */
+  osSemaphoreDef(bSemCANRxSig);
+  bSemCANRxSigHandle = osSemaphoreCreate(osSemaphore(bSemCANRxSig), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -306,22 +322,22 @@ int main(void)
   bSemRadarDataTxSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarDataTxSig), 1);
   #endif
 
-	osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);		//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+	osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);		//read once to disable
   #if ADAS_COMM
-  osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);				//read once to disable
   #endif
-  osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);	//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);	//read once to disable
   #if CAN_READ_VEHICLE
-  osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);	    //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
-  osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);	    //read once to disable
+  osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);				//read once to disable
   #endif
-  osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);			//read once to disable
   #if RADAR_DATA_SEND
-  osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //老版本默认信号量创建时是有效的，所以需要读一遍使其无效
+  osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);       //read once to disable
   //osSemaphoreWait(bSemRadarDataTxSigHandle, osWaitForever);	//Radar Data Tx at the beginning of the system, then suspend & resume
   #endif
 
-	/* USER CODE END RTOS_SEMAPHORES */
+  /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -368,14 +384,13 @@ int main(void)
   osThreadDef(RadarDataTxTask, StartRadarDataTxTask, osPriorityNormal, 0, 128);
   RadarDataTxHandle = osThreadCreate(osThread(RadarDataTxTask), NULL);
 	
-	osThreadSuspend(RadarDataTxHandle);		//挂起串口发送雷达数据线程
+	osThreadSuspend(RadarDataTxHandle);		//suspend Radar data send task
   #endif
 
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
 
   //hcan1~hcan3 init, start
 	DBC_Init(&hcan1);
@@ -387,8 +402,12 @@ int main(void)
 	EMRR_Init(&hcan2);
 	#endif
   #if CAN_READ_VEHICLE
-  Vehicle_CAN_Init(&hcan3); 
+  Vehicle_CAN_Init(&hcan3);
   #endif
+	
+	#if ATM_READ
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADC_ConvertedValue, 2);
+	#endif
   /* USER CODE END RTOS_QUEUES */
 
 
@@ -467,6 +486,52 @@ void SystemClock_Config(void)
 
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 15, 0);
+}
+
+/* ADC1 init function */
+static void MX_ADC1_Init(void)
+{
+
+  ADC_ChannelConfTypeDef sConfig;
+
+    /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
+    */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc1.Init.ScanConvMode = ENABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 2;
+  hadc1.Init.DMAContinuousRequests = ENABLE;
+  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+    */
+  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+    */
+  sConfig.Channel = ADC_CHANNEL_5;
+  sConfig.Rank = 2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+	}
+
 }
 
 /* CAN1 init function */
@@ -691,7 +756,7 @@ static void MX_USART3_UART_Init(void)
 }
 
 /** 
-  * Enable DMA controller clock
+  * Enable m controller clock
   */
 static void MX_DMA_Init(void) 
 {
@@ -709,6 +774,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream5_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+  /* DMA2_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
+  //HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
   /* DMA2_Stream2_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
@@ -747,6 +815,9 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOE, BUZZER_Pin|LED3_Pin|LED4_Pin|LED5_Pin|LED6_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, VALVE_FRONT_Pin|VALVE_REAR_Pin, GPIO_PIN_SET);
+
   /*Configure GPIO pin : BELL_DATA_Pin */
   GPIO_InitStruct.Pin = BELL_DATA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -755,10 +826,17 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(BELL_DATA_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : BELL_BUSY_Pin */
-	GPIO_InitStruct.Pin = BELL_BUSY_Pin;
+  GPIO_InitStruct.Pin = BELL_BUSY_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(BELL_BUSY_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : VALVE_FRONT_Pin VALVE_REAR_Pin */
+  GPIO_InitStruct.Pin = VALVE_FRONT_Pin|VALVE_REAR_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED0_Pin LED1_Pin LED2_Pin */
   GPIO_InitStruct.Pin = LED0_Pin|LED1_Pin|LED2_Pin;
@@ -790,8 +868,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		#else
 		EMRR_RadarRxComplete = 1;
 		#endif
-  	//__HAL_CAN_CLEAR_FLAG(hcan, CAN_FLAG_FF0);
-		//HAL_CAN_DeactivateNotification(&hcan2, CAN_IT_RX_FIFO0_MSG_PENDING);		// 关闭中断
   }
 	if(hcan->Instance == hcan3.Instance)
 	{
@@ -809,21 +885,21 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	
 }
 
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	DMA_Transfer_Complete_Count++; 
+}
+
 uint8_t DBC_Init(CAN_HandleTypeDef *hcan)
 {
-  //配置CAN滤波器接收Objct_General信息，即相对目标的距离、速度等
-  //CAN_FilterTypeDef MW_RadarCANFilter={OBJ_GENERAL_ADDR<<5,0,0xEFE<<5,0,CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};   //0x60B 和 0x60A同时检测
-  //CAN_FilterTypeDef MW_RadarCANFilter = {0,OBJ_GENERAL_ADDR,0,0xEFF,CAN_FILTER_FIFO0,CAN_FILTERMODE_IDLIST,CAN_FILTERSCALE_32BIT,ENABLE,0};
-  //HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
   HAL_CAN_Start(hcan);
-  //HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
   
   return 0;
 }
 
 uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 {
-	//配置CAN3过滤器接收车速信息
+	//config CAN3 filter to receive Vehicle Speed
 	//ID_HIGH,\
 	ID_LOW,\
 	MASK_HIGH,\
@@ -837,7 +913,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 		CAN_FILTER_FIFO0, 0, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
 	};
 	HAL_CAN_ConfigFilter(hcan, &VehicleCANFilter);
-	//配置CAN3过滤器接收陀螺仪信息
+	//config CAN3 filter to receive Gyro
 	//ID_HIGH,\
 	ID_LOW,\
 	MASK_HIGH,\
@@ -860,7 +936,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 uint8_t DBC_SendDist(CAN_HandleTypeDef *hcan, float Dist)
 {
   uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
-  uint32_t Dist_mm = (Dist - RADAR_OFFSET) * 1000;   //以毫米为单位的距离
+  uint32_t Dist_mm = (Dist - RADAR_OFFSET) * 1000;   //distance /mm
   uint8_t CANTxBuf[4] = {0};
   CANTxBuf[3] = Dist_mm;
   CANTxBuf[2] = Dist_mm >> 8;
@@ -881,7 +957,7 @@ void StartDefaultTask(void const * argument)
   for(;;)
   {
     #if RADAR_DATA_SEND
-		HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//接收指令信息
+		HAL_UART_Receive_DMA(&huart1, CmdRxBuf, 4);//receive cmd from labview
 		if(UART1RxComplete==1)
 		{
 			UART1RxComplete=0;
@@ -890,7 +966,7 @@ void StartDefaultTask(void const * argument)
     #endif
 
     #if ADAS_COMM
-    HAL_UART_Receive_DMA(&huart3, ADASRxBuf, 32);//接收指令信息
+    HAL_UART_Receive_DMA(&huart3, ADASRxBuf, 32);//receive ADAS warning
 		if(ADASRxComplete==1)
 		{
       ADASRxComplete=0;
@@ -901,7 +977,16 @@ void StartDefaultTask(void const * argument)
     #if DBC_SEND
     DBC_SendDist(&hcan1, MinRangeLong);
     #endif
-
+		
+		#if ATM_READ
+		//HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADC_ConvertedValue, 2);
+		/* 3.3ΪADת���Ĳο���ѹֵ��stm32��ADת��Ϊ12bit��2^12=4096��
+       ��������Ϊ3.3Vʱ��ADת�����Ϊ4096 */    
+    ADC_ConvertedValueF[0] =(double)(ADC_ConvertedValue[0]&0xFFF)*3.3/4096; 	// ADC_ConvertedValueֻȡ���12��Ч����
+		ADC_ConvertedValueF[1] =(double)(ADC_ConvertedValue[1]&0xFFF)*3.3/4096; 	// ADC_ConvertedValueֻȡ���12��Ч����
+    DMA_Transfer_Complete_Count=0;
+		#endif
+		
 		osDelay(20);
   }
   /* USER CODE END 5 */ 
@@ -922,16 +1007,16 @@ void StartRadarCommTask(void const * argument)
 		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
     //ARS408
 		#if RADAR_TYPE
-		if(RadarCANRxHeader.StdId==0x60A)												//60B的之前都读取完毕，开始计算
+		if(RadarCANRxHeader.StdId==0x60A)												//read all messages before 60B, start calculate
 		{
 			minRadarDistFlag = 1;
 		}
-		else																										//0x60B时读取目标距离、速度信息
+		else																										//0x60B, read distance & relVelocity
 		{
 			if(minRadarDistFlag)
 			{
 				minRadarDistFlag = 0;
-				ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);//获取最近目标数据，即收到的第一个目标
+				ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);//get closet obj data
 				osSemaphoreRelease(bSemCalculateSigHandle);
 			}
 		}
@@ -957,15 +1042,15 @@ void StartUART1RxTask(void const * argument)
       
 		HAL_GPIO_TogglePin(LED3_GPIO_Port,LED3_Pin);
 		osDelay(1000);
-		if(0x01 == CmdRxBuf[0] && 0xA5 == CmdRxBuf[2] && 0x5A == CmdRxBuf[3]) //接收到启动或停止指令
+		if(0x01 == CmdRxBuf[0] && 0xA5 == CmdRxBuf[2] && 0x5A == CmdRxBuf[3]) //cmd from labview via UART1 to start/stop sending radar data
 		{
 			switch(CmdRxBuf[1])
 			{
-				case 0x12:  //启动输出数据
-					//RS485需要让EN = 1; //发送状态
+				case 0x12:  //start sending radar data
+					//RS485 EN = 1;
 					osThreadResume(RadarDataTxHandle);
 					break;
-				case 0x13:  //停止发送数据
+				case 0x13:  //stop sending radar data
 					osThreadSuspend(RadarDataTxHandle);
 					break;
 				default:
@@ -990,21 +1075,21 @@ void StartRadarDataTxTask(void const * argument)
   {
     HAL_GPIO_TogglePin(LED5_GPIO_Port,LED5_Pin);
     uint8_t speed = (uint8_t)VrelLong;
-    if(GetRadarData(CrashWarningLv, speed, MinRangeLong, TimetoCrash) == 0)	//获取雷达数据成功
+    if(GetRadarData(CrashWarningLv, speed, MinRangeLong, TimetoCrash) == 0)	//get radar data successed
     {
-      RadarData.Sys_State = RADAR_OK;			//雷达数据发送系统正常工作
+      RadarData.Sys_State = RADAR_OK;			//radar data sending sys ok
       FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
       HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
       //DBC_SendDist(&hcan1, MinRangeLong);
-			//使用RS485时需要让EN = 0;//转换接收状态
+			//if using RS485, EN = 0;
     }
     else
     {
-      RadarData.Sys_State = RADAR_ERROR;	//雷达数据发送系统错误
+      RadarData.Sys_State = RADAR_ERROR;	//radar data sending sys error
       FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
       HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
       //DBC_SendDist(&hcan1, MinRangeLong);
-			//使用RS485时需要让EN = 0;//转换接收状态
+			//if using RS485, EN = 0;
     }
     osDelay(100);
   }
@@ -1021,9 +1106,9 @@ void StartADASCommTask(void const * argument)
 		osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);
 		HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
 		CalADASData(&ADAS_dev, ADASRxBuf);
-		if(ADAS_dev.LDW_warning==0x01 || ADAS_dev.LDW_warning == 0x02)//左侧或右侧车道偏移报警
+		if(ADAS_dev.LDW_warning==0x01 || ADAS_dev.LDW_warning == 0x02)//Lane departure warning(left/right)
 		{
-      //报警
+      //start warning task
 			osSemaphoreRelease(bSemSoundWarningSigHandle);
     }
     osDelay(10);
@@ -1039,7 +1124,7 @@ void StartSoundWarningTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);
-    switch(CrashWarningLv)				//前向碰撞
+    switch(CrashWarningLv)				//forward collision warning
     {
       case WARNING_HIGH:
 				#if ADAS_COMM
@@ -1078,7 +1163,7 @@ void StartSoundWarningTask(void const * argument)
     }
 
     #if ADAS_COMM
-    switch(ADAS_dev.LDW_warning)	//车道偏移
+    switch(ADAS_dev.LDW_warning)	//Lane departure warning
     {
       case 0x01:	//left
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
@@ -1115,7 +1200,7 @@ void StartGyroCommTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);
-    if(MPU_CheckSum(VehicleCANRxBuf))  //校验和通过
+    if(MPU_CheckSum(VehicleCANRxBuf))  //checksum ok
     {
       yawRate =  MPU_GetYawRate(VehicleCANRxBuf);
       ARS_SendVehicleYaw(&hcan2, yawRate);  //send VehicleYaw to Radar
@@ -1138,7 +1223,7 @@ void StartCANSpeedReadTask(void const * argument)
     #elif VEHICLE_MODEL == 1  //YUTONG
     if(0xD1 == VehicleCANRxBuf[0] && 0xD1 == VehicleCANRxBuf[2])
     {
-      VehicleSpeed = VehicleCANRxBuf[1];	//车速16进制,km/h
+      VehicleSpeed = VehicleCANRxBuf[1];	//vehicle speed in hex,km/h
 			//ARS408
 			#if RADAR_TYPE
 			ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);	//send VehicleSpeed to Radar
@@ -1147,7 +1232,7 @@ void StartCANSpeedReadTask(void const * argument)
 			#endif
     }
     #else   //KINGLONG
-    VehicleSpeed = VehicleCANRxBuf[7];  	//车速16进制,km/h
+    VehicleSpeed = VehicleCANRxBuf[7];  	//vehicle speed in hex,km/h
 			//ARS408
       #if RADAR_TYPE
       ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);	//send VehicleSpeed to Radar
@@ -1168,16 +1253,16 @@ void StartCalculateTask(void const * argument)
 		osSemaphoreWait(bSemCalculateSigHandle, osWaitForever);
     //ARS408
 		#if RADAR_TYPE
-		uint16_t MinRange=255;									//初始化为最大距离
+		uint16_t MinRange=255;
 		uint32_t relSpeed=0;
 		MinRange = RadarGeneral[0].Obj_DistLong;
 		relSpeed = RadarGeneral[0].Obj_VrelLong;
 		
-		if((0.2*MinRange-500) < LIMIT_RANGE && MinRange != 0)	//如果此距离小于一个足够小的距离，再开始计算，否则浪费时间		
+		if((0.2*MinRange-500) < LIMIT_RANGE && MinRange != 0)	//calculate when dist is near enough
 		{
-			VrelLong = 0.25 * relSpeed - 128;						//获取真实相对速度
-			MinRangeLong = 0.2 * MinRange - 500;				//获取真实距离
-			TimetoCrash = -(float)MinRangeLong/VrelLong;//相对速度为负
+			VrelLong = 0.25 * relSpeed - 128;						//get real relative speed
+			MinRangeLong = 0.2 * MinRange - 500;				//get real range(longitude)
+			TimetoCrash = -(float)MinRangeLong/VrelLong;//relative Velocity is minus
 			if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
 			{
 				CrashWarningLv = WARNING_HIGH;
@@ -1246,8 +1331,12 @@ void _Error_Handler(char *file, int line)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+	char *file1;
+	int line1;
   while(1)
   {
+		file1 = file;
+		line1 = line;
   }
   /* USER CODE END Error_Handler_Debug */
 }
