@@ -1,4 +1,3 @@
-
 /**
   ******************************************************************************
   * @file           : main.c
@@ -82,8 +81,14 @@
 #define ATM_READ 1
 
 /* Defines -------------------------------------------------------------------*/
-#define RADAR_OFFSET	0.4f
-#define LANEWIDTH 1.5f
+//  ARS408
+#if RADAR_TYPE
+  #define RADAR_OFFSET	0.4f
+//  EMRR
+#else
+  #define RADAR_OFFSET  0.0f
+#endif
+#define LANEWIDTH   1.5f
 #define MAX_DECELARATION 0.4*9.8f
 #define DELAY_TIME	0.4f
 #define LIMIT_RANGE 200		//meter
@@ -97,9 +102,9 @@
 	#define VEHICLE_SWTICH_ADDR	0x18FA0500
 #endif
 //	can3 id, gyro
-#define GYRO_ADDR		0x18FF0DE6
+#define GYRO_ADDR 0x18FF0DE6
 //	can1 id, dbc
-#define DBC_ADDR 0x509
+#define DBC_ADDR  0x509
 
 /* USER CODE END Includes */
 
@@ -855,45 +860,9 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
-{
-  if(hcan->Instance == hcan2.Instance)
-  {
-  	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
-  	osSemaphoreRelease(bSemRadarCANRxSigHandle);
-		//ARS408
-		#if RADAR_TYPE
-		
-		//EMRR
-		#else
-		EMRR_RadarRxComplete = 1;
-		#endif
-  }
-	if(hcan->Instance == hcan3.Instance)
-	{
-    #if CAN_READ_VEHICLE
-		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
-		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
-    if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
-      //start gyro semaphore
-      osSemaphoreRelease(bSemGyroCommSigHandle);
-
-    else if((VEHICLE_SPEED_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSpeed ID
-      osSemaphoreRelease(bSemSpeedRxSigHandle);
-    #endif
-	}
-	
-}
-
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
-	DMA_Transfer_Complete_Count++; 
-}
-
 uint8_t DBC_Init(CAN_HandleTypeDef *hcan)
 {
   HAL_CAN_Start(hcan);
-  
   return 0;
 }
 
@@ -931,6 +900,37 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 
 	return 0;
+}
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+  if(hcan->Instance == hcan2.Instance)
+  {
+  	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
+  	osSemaphoreRelease(bSemRadarCANRxSigHandle);
+		//ARS408
+		#if RADAR_TYPE
+		
+		//EMRR
+		#else
+		EMRR_RadarRxComplete = 1;
+		#endif
+  }
+	if(hcan->Instance == hcan3.Instance)
+	{
+    #if CAN_READ_VEHICLE
+		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
+		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
+    if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
+      //start gyro semaphore
+      osSemaphoreRelease(bSemGyroCommSigHandle);
+      
+    //  2 bytes(mid)must fit
+    else if((VEHICLE_SPEED_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSpeed ID
+      osSemaphoreRelease(bSemSpeedRxSigHandle);
+    #endif
+	}
+	
 }
 
 uint8_t DBC_SendDist(CAN_HandleTypeDef *hcan, float Dist)
@@ -979,12 +979,10 @@ void StartDefaultTask(void const * argument)
     #endif
 		
 		#if ATM_READ
-		//HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADC_ConvertedValue, 2);
-		/* 3.3为AD转换的参考电压值，stm32的AD转换为12bit，2^12=4096，
-       即当输入为3.3V时，AD转换结果为4096 */    
-    ADC_ConvertedValueF[0] =(double)(ADC_ConvertedValue[0]&0xFFF)*3.3/4096; 	// ADC_ConvertedValue只取最低12有效数据
-		ADC_ConvertedValueF[1] =(double)(ADC_ConvertedValue[1]&0xFFF)*3.3/4096; 	// ADC_ConvertedValue只取最低12有效数据
-    DMA_Transfer_Complete_Count=0;
+		/* Vref = 3.3(fullscale), 2^12=4096(scale),
+       when input is 3.3V, the result is 4096 */    
+    ADC_ConvertedValueF[0] =(double)(ADC_ConvertedValue[0]&0xFFF)*3.3/4096; 	// ADC_ConvertedValue only lowest 12bit
+		ADC_ConvertedValueF[1] =(double)(ADC_ConvertedValue[1]&0xFFF)*3.3/4096; 	// ADC_ConvertedValue only lowest 12bit
 		#endif
 		
 		osDelay(20);
