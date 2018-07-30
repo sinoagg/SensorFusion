@@ -67,26 +67,6 @@
 #include "EMRR.h"
 #include "MPU6050.h"
 
-/* Switches ------------------------------------------------------------------*/
-/**
- * ARS408 1
- * EMRR 0
-*/
-#define RADAR_TYPE 0
-//	Vehicle Speed & gyro via CAN3
-#define CAN_READ_VEHICLE 1
-/**
- * BYD			2
- * YUTONG		1
- * KINGLONG	0
-*/
-#define VEHICLE_MODEL 0
-
-#define DBC_SEND 0
-#define ADAS_COMM 1
-//	labview
-#define RADAR_DATA_SEND 0
-#define ATM_READ 1
 
 /* Defines -------------------------------------------------------------------*/
 //  ARS408
@@ -99,7 +79,6 @@
 #define LANEWIDTH   1.5f
 #define MAX_DECELARATION 0.4*9.8f
 #define DELAY_TIME	0.4f
-#define LIMIT_RANGE 200		//meter
 //	can3 id, vehicle
 #if VEHICLE_MODEL == 2		//BYD
 	#define VEHICLE_SPEED_ADDR	0x18FEF100
@@ -120,11 +99,6 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
-#define	WARNING_NONE 0
-#define	WARNING_LOW 1
-#define WARNING_MID 2
-#define	WARNING_HIGH 3
 
 //ARS408
 MW_RadarObjStatus RadarObjStatus;

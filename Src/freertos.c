@@ -51,8 +51,16 @@
 #include "task.h"
 #include "cmsis_os.h"
 
-/* USER CODE BEGIN Includes */     
+/* USER CODE BEGIN Includes */
+#include "ADAS.h"
+#include "adc.h"
+#include "ARS408.h"
 #include "can.h"
+#include "cmd.h"
+#include "EMRR.h"
+#include "main.h"
+#include "MPU6050.h"
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -62,9 +70,9 @@ osThreadId ADASCommHandle;
 osThreadId SoundWarningHandle;
 osThreadId GyroCommHandle;
 osThreadId CANSpeedReadHandle;
-osThreadId RadarCalcTaskHandle;
-osThreadId UART1RxTaskHandle;
-osThreadId RadarDataTxTaskHandle;
+osThreadId RadarCalcHandle;
+osThreadId UART1RxHandle;
+osThreadId RadarDataTxHandle;
 osSemaphoreId bSemRadarCANRxSigHandle;
 osSemaphoreId bSemADASRxSigHandle;
 osSemaphoreId bSemSoundWarningSigHandle;
@@ -74,7 +82,28 @@ osSemaphoreId bSemRadarCalcSigHandle;
 osSemaphoreId bSemUART1RxSigHandle;
 
 /* USER CODE BEGIN Variables */
-
+extern CAN_RxHeaderTypeDef RadarCANRxHeader;
+extern ADAS_HandleTypeDef ADAS_dev;
+extern uint8_t ADASRxBuf[];
+extern uint8_t RadarCANRxBuf[];
+extern uint8_t CrashWarningLv;
+extern uint8_t VehicleCANRxBuf[];
+extern uint8_t VehicleSpeed;
+extern uint8_t CmdRxBuf[];
+extern uint8_t CmdRadarDataTxBuf[];
+extern uint8_t ADASRxComplete;
+extern uint16_t ADC_ConvertedValue[];
+//ARS408
+extern MW_RadarObjStatus RadarObjStatus;
+extern MW_RadarGeneral RadarGeneral[16];
+//EMRR
+extern EMRR_RadarGeneral aEMRRGeneral[];
+extern EMRR_RadarGeneral EMRRGeneral_Closet;
+extern float yawRate;
+extern float MinRangeLong;
+extern float VrelLong;
+extern float TimetoCrash;
+extern __IO float ADC_ConvertedValueF[2];
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
@@ -188,16 +217,16 @@ void MX_FREERTOS_Init(void) {
 
   /* definition and creation of RadarCalcTask */
   osThreadDef(RadarCalcTask, StartRadarCalcTask, osPriorityIdle, 0, 128);
-  RadarCalcTaskHandle = osThreadCreate(osThread(RadarCalcTask), NULL);
+  RadarCalcHandle = osThreadCreate(osThread(RadarCalcTask), NULL);
 
 	#if RADAR_DATA_SEND
   /* definition and creation of UART1RxTask */
   osThreadDef(UART1RxTask, StartUART1RxTask, osPriorityIdle, 0, 64);
-  UART1RxTaskHandle = osThreadCreate(osThread(UART1RxTask), NULL);
+  UART1RxHandle = osThreadCreate(osThread(UART1RxTask), NULL);
 
   /* definition and creation of RadarDataTxTask */
   osThreadDef(RadarDataTxTask, StartRadarDataTxTask, osPriorityIdle, 0, 128);
-  RadarDataTxTaskHandle = osThreadCreate(osThread(RadarDataTxTask), NULL);
+  RadarDataTxHandle = osThreadCreate(osThread(RadarDataTxTask), NULL);
 	
 	osThreadSuspend(RadarDataTxHandle);		//suspend Radar data send task
 	#endif
@@ -275,9 +304,38 @@ void StartRadarCommTask(void const * argument)
 {
   /* USER CODE BEGIN StartRadarCommTask */
   /* Infinite loop */
+ 	//ARS408
+	#if RADAR_TYPE
+	uint8_t minRadarDistFlag = 0;
+	#endif
+  /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+		osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);
+		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
+    //ARS408
+		#if RADAR_TYPE
+		if(RadarCANRxHeader.StdId==0x60A)												//read all messages before 60B, start calculate
+		{
+			minRadarDistFlag = 1;
+		}
+		else																										//0x60B, read distance & relVelocity
+		{
+			if(minRadarDistFlag)
+			{
+				minRadarDistFlag = 0;
+				ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);//get closet obj data
+				osSemaphoreRelease(bSemRadarCalcSigHandle);
+			}
+		}
+		
+    //EMRR
+		#else
+		EMRR_GetRaderObjCloset(RadarCANRxBuf, aEMRRGeneral, &EMRRGeneral_Closet);
+		if(EMRRGeneral_Closet.trackRange != 0)
+			osSemaphoreRelease(bSemRadarCalcSigHandle);
+		#endif
+		osDelay(1);
   }
   /* USER CODE END StartRadarCommTask */
 }
@@ -289,7 +347,15 @@ void StartADASCommTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osSemaphoreWait(bSemADASRxSigHandle, osWaitForever);
+		HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
+		CalADASData(&ADAS_dev, ADASRxBuf);
+		if(ADAS_dev.LDW_warning==0x01 || ADAS_dev.LDW_warning == 0x02)//Lane departure warning(left/right)
+		{
+      //start warning task
+			osSemaphoreRelease(bSemSoundWarningSigHandle);
+    }
+    osDelay(10);
   }
   /* USER CODE END StartADASCommTask */
 }
@@ -301,7 +367,71 @@ void StartSoundWarningTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);
+    switch(CrashWarningLv)				//forward collision warning
+    {
+      case WARNING_HIGH:
+				#if ADAS_COMM
+				if(0 != ADAS_dev.crash_level)
+				{
+				#endif
+					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+					HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+					//WTN6_Broadcast(BELL_BB_500MS);
+					osDelay(1000);
+					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+					HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+				#if ADAS_COMM
+				}
+				#endif
+        break;
+      case WARNING_LOW:
+				#if ADAS_COMM
+				if(0 != ADAS_dev.crash_level)
+				{
+				#endif
+					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+					HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+					//WTN6_Broadcast(BELL_BB_1000MS);
+					osDelay(500);
+					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+					HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+				#if ADAS_COMM
+				}
+				#endif
+        break;
+      default:
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_SET);
+        break;
+    }
+
+    #if ADAS_COMM
+    switch(ADAS_dev.LDW_warning)	//Lane departure warning
+    {
+      case 0x01:	//left
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+        //WTN6_Broadcast(BELL_BB_500MS);
+        osDelay(2000);
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+        break;
+      case 0x02:	//right
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+        //WTN6_Broadcast(BELL_BB_1000MS);
+        osDelay(2000);
+        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+        break;
+      default:
+				HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_SET);
+        break;
+    }
+    #endif
+		osDelay(10);
   }
   /* USER CODE END StartSoundWarningTask */
 }
@@ -313,7 +443,13 @@ void StartGyroCommTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);
+    if(MPU_CheckSum(VehicleCANRxBuf))  //checksum ok
+    {
+      yawRate =  MPU_GetYawRate(VehicleCANRxBuf);
+      ARS_SendVehicleYaw(&hcan2, yawRate);  //send VehicleYaw to Radar
+    }
+		osDelay(10);
   }
   /* USER CODE END StartGyroCommTask */
 }
@@ -325,7 +461,31 @@ void StartCANSpeedReadTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);
+    #if VEHICLE_MODEL == 2    //BYD
+
+    #elif VEHICLE_MODEL == 1  //YUTONG
+    if(0xD1 == VehicleCANRxBuf[0] && 0xD1 == VehicleCANRxBuf[2])
+    {
+      VehicleSpeed = VehicleCANRxBuf[1];	//vehicle speed in hex,km/h
+			//ARS408
+			#if RADAR_TYPE
+			ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);	//send VehicleSpeed to Radar
+			//EMRR
+			#else
+			#endif
+    }
+    #else   //KINGLONG
+    VehicleSpeed = VehicleCANRxBuf[7];  	//vehicle speed in hex,km/h
+			//ARS408
+      #if RADAR_TYPE
+      ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);	//send VehicleSpeed to Radar
+      //EMRR
+      #else
+      #endif
+    #endif
+    
+		osDelay(10);
   }
   /* USER CODE END StartCANSpeedReadTask */
 }
@@ -337,7 +497,53 @@ void StartRadarCalcTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osSemaphoreWait(bSemRadarCalcSigHandle, osWaitForever);
+    //ARS408
+		#if RADAR_TYPE
+		uint16_t MinRange=255;
+		uint32_t relSpeed=0;
+		MinRange = RadarGeneral[0].Obj_DistLong;
+		relSpeed = RadarGeneral[0].Obj_VrelLong;
+		
+		if((0.2*MinRange-500) < LIMIT_RANGE && MinRange != 0)	//calculate when dist is near enough
+		{
+			VrelLong = 0.25 * relSpeed - 128;						//get real relative speed
+			MinRangeLong = 0.2 * MinRange - 500;				//get real range(longitude)
+			TimetoCrash = -(float)MinRangeLong/VrelLong;//relative Velocity is minus
+			if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
+			{
+				CrashWarningLv = WARNING_HIGH;
+			}
+			else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
+			{
+				CrashWarningLv = WARNING_LOW;
+			}
+			else
+				CrashWarningLv = WARNING_NONE;
+		}
+
+    //EMRR
+		#else
+		MinRangeLong = EMRRGeneral_Closet.trackRange;
+    VrelLong = EMRRGeneral_Closet.trackSpeed;
+
+		if(MinRangeLong < LIMIT_RANGE && MinRangeLong != 0 && VrelLong != 0)
+    {
+      TimetoCrash = - MinRangeLong / VrelLong;
+      if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
+      {
+        CrashWarningLv = WARNING_HIGH;
+      }
+      else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
+      {
+        CrashWarningLv = WARNING_LOW;
+      }
+      else
+        CrashWarningLv = WARNING_NONE;
+    }
+		#endif
+		osSemaphoreRelease(bSemSoundWarningSigHandle);
+		osDelay(2);
   }
   /* USER CODE END StartRadarCalcTask */
 }
@@ -349,7 +555,27 @@ void StartUART1RxTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osSemaphoreWait(bSemUART1RxSigHandle, osWaitForever);
+      
+		HAL_GPIO_TogglePin(LED3_GPIO_Port,LED3_Pin);
+		osDelay(1000);
+		if(0x01 == CmdRxBuf[0] && 0xA5 == CmdRxBuf[2] && 0x5A == CmdRxBuf[3]) //cmd from labview via UART1 to start/stop sending radar data
+		{
+			switch(CmdRxBuf[1])
+			{
+				case 0x12:  //start sending radar data
+					//RS485 EN = 1;
+					osThreadResume(RadarDataTxHandle);
+					break;
+				case 0x13:  //stop sending radar data
+					osThreadSuspend(RadarDataTxHandle);
+					break;
+				default:
+					break;
+			}   
+    }
+    //osSemaphoreRelease(bSemRadarDataTxSigHandle);
+    osDelay(10);
   }
   /* USER CODE END StartUART1RxTask */
 }
@@ -361,7 +587,25 @@ void StartRadarDataTxTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    HAL_GPIO_TogglePin(LED5_GPIO_Port,LED5_Pin);
+    uint8_t speed = (uint8_t)VrelLong;
+    if(GetRadarData(CrashWarningLv, speed, MinRangeLong, TimetoCrash) == 0)	//get radar data successed
+    {
+      RadarData.Sys_State = RADAR_OK;			//radar data sending sys ok
+      FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
+      HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
+      //DBC_SendDist(&hcan1, MinRangeLong);
+			//if using RS485, EN = 0;
+    }
+    else
+    {
+      RadarData.Sys_State = RADAR_ERROR;	//radar data sending sys error
+      FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
+      HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
+      //DBC_SendDist(&hcan1, MinRangeLong);
+			//if using RS485, EN = 0;
+    }
+    osDelay(100);
   }
   /* USER CODE END StartRadarDataTxTask */
 }
