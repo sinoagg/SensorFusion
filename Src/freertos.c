@@ -61,6 +61,7 @@
 #include "main.h"
 #include "MPU6050.h"
 #include "usart.h"
+#include "switch.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -128,7 +129,8 @@ extern uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan);
 
 /* Init FreeRTOS */
 
-void MX_FREERTOS_Init(void) {
+void MX_FREERTOS_Init(void) 
+{
   /* USER CODE BEGIN Init */
        
   /* USER CODE END Init */

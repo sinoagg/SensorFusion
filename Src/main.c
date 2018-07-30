@@ -66,6 +66,7 @@
 #include "cmd.h"
 #include "EMRR.h"
 #include "MPU6050.h"
+#include "switch.h"
 
 
 /* Defines -------------------------------------------------------------------*/

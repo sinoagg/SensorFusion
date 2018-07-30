@@ -97,27 +97,6 @@
 
 /* USER CODE BEGIN Private defines */
 
-/* Switches ------------------------------------------------------------------*/
-/**
- * ARS408 1
- * EMRR 0
-*/
-#define RADAR_TYPE 0
-//	Vehicle Speed & gyro via CAN3
-#define CAN_READ_VEHICLE 1
-/**
- * BYD			2
- * YUTONG		1
- * KINGLONG	0
-*/
-#define VEHICLE_MODEL 0
-
-#define DBC_SEND 0
-#define ADAS_COMM 0
-//	labview
-#define RADAR_DATA_SEND 0
-#define ATM_READ 0
-
 /* Defines ------------------------------------------------------------------*/
 #define	WARNING_NONE 0
 #define	WARNING_LOW 1
