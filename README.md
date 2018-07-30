@@ -3,6 +3,7 @@
 ## platform
  * FreeRTOS on STM32F413
 ## version
+ * 20180730: init periphrals in separate files to simplify code structure
  * 20180724: **ATM(adc)** read in DMA
  * 20180719: **Radar(EMRR)** test on car, with ADAS
  * 20180716: **Radar(EMRR)** test on car, not with ADAS
