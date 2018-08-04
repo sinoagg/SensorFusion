@@ -232,7 +232,7 @@ void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan,uint16_t VehicleSpeed)
     RadarSpeed.RadarDevice_SpeedDirection = BACKWORD;
     RadarSpeed.RadarDevice_Speed = (uint16_t)((((float)(-VehicleSpeed) / 3.6f) - 0) / 0.02f); //km/h to m/s, offset 0, Res 0.02
   }
-  CANTxBuf[0] = (RadarSpeed.RadarDevice_SpeedDirection<<6 | ((RadarSpeed.RadarDevice_Speed>>8) & 0x1F));
+  CANTxBuf[0] = (RadarSpeed.RadarDevice_SpeedDirection<<6) | ((RadarSpeed.RadarDevice_Speed>>8) & 0x1F);
 	CANTxBuf[1] = RadarSpeed.RadarDevice_Speed & 0xFF;
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxSpeedHeader, CANTxBuf, &CAN_TxMailBox);
 }

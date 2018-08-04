@@ -464,8 +464,7 @@ void StartGyroCommTask(void const * argument)
 			{
 				yawRate = (yawRate>327.68f) ? 327.68f: yawRate;
 			}
-			//yawRate = 327.68;
-      ARS_SendVehicleYaw(&hcan2, yawRate);  //send VehicleYaw to Radar
+      ARS_SendVehicleYaw(&hcan2, -yawRate);  //send VehicleYaw to Radar
     }
 		osDelay(10);
   }
