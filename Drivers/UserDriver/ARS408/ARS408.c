@@ -110,7 +110,7 @@ uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan)
 	CANTxBuf[0]=RadarConfig.StoreInNVM_valid|RadarConfig.SortIndex_valid|RadarConfig.SendExtInfo_valid|RadarConfig.SendQuality_valid|\
 		RadarConfig.OutputType_valid|RadarConfig.RadarPower_valid|RadarConfig.SensorID_valid|RadarConfig.MaxDistance_valid;
 	CANTxBuf[1]=RadarConfig.MaxDistance>>2;
-	CANTxBuf[2]=RadarConfig.MaxDistance<<6 & 0xC0;
+	CANTxBuf[2]=(RadarConfig.MaxDistance<<6) & 0xC0;
 	CANTxBuf[4]=RadarConfig.RadarPower|RadarConfig.OutputType|RadarConfig.SensorID;
 	CANTxBuf[5]=RadarConfig.StoreInNVM|RadarConfig.SortIndex|RadarConfig.SendExtInfo|RadarConfig.SendQuality|RadarConfig.CtrlRelay|RadarConfig.CtrlRelay_valid;
 	CANTxBuf[6]=RadarConfig.RCS_Threshold|RadarConfig.RCS_Threshold_valid;
@@ -133,9 +133,9 @@ uint8_t FilterContentCfg_func(CAN_HandleTypeDef *hcan, uint8_t index, uint16_t f
 	uint8_t CANTxBuf[8]={0};
   RadarFilterConfig_func(index);
 	CANTxBuf[0] = RadarFilterConfig.FilterCfg_Type|RadarFilterConfig.FilterCfg_Index|RadarFilterConfig.FilterCfg_Active|RadarFilterConfig.FilterCfg_Valid;
-	CANTxBuf[1] = filter_min>>8 & 0x1F;
+	CANTxBuf[1] = (filter_min>>8) & 0x1F;
 	CANTxBuf[2] = filter_min & 0xFF;
-	CANTxBuf[3] = filter_max>>8 & 0x1F;
+	CANTxBuf[3] = (filter_max>>8) & 0x1F;
 	CANTxBuf[4] = filter_max & 0xFF;
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxConfigFilterHeader, CANTxBuf, &CAN_TxMailBox);
 	return 0;
@@ -199,17 +199,17 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
 void ARS_GetRadarObjStatus(uint8_t* pCANRxBuf, MW_RadarObjStatus *pRadarObjStatus)
 {
 	pRadarObjStatus->Obj_NofObjects = *pCANRxBuf;
-	pRadarObjStatus->Obj_MeasCounter = ((uint16_t)*(pCANRxBuf+1))<<8|*(pCANRxBuf+2);
+	pRadarObjStatus->Obj_MeasCounter = (uint16_t)(((*(pCANRxBuf+1))<<8)|(*(pCANRxBuf+2)));
 }
 
 void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral)
 {
 	(pRadarGeneral)->Obj_ID = *pCANRxBuf;	//OBJ_ID
-	(pRadarGeneral)->Obj_DistLong = (((uint16_t)*(pCANRxBuf+1))<<8 | *(pCANRxBuf+2))>>3;
-	(pRadarGeneral)->Obj_DistLat = ((uint16_t)*(pCANRxBuf+2)&0x07)<<8 | (*(pCANRxBuf+3));
-	(pRadarGeneral)->Obj_VrelLong = (((uint16_t)*(pCANRxBuf+4))<<8 | *(pCANRxBuf+5))>>6;//纵向相对速度
-	(pRadarGeneral)->Obj_VrelLat = (((uint16_t)*(pCANRxBuf+5)&0x3F)<<8 | (*(pCANRxBuf+6)&0xE0))>>5;;//横向相对速度
-	(pRadarGeneral)->Obj_DynProp = *(pCANRxBuf+6)&0x07;		//目标动态特性（运动还是静止）
+	(pRadarGeneral)->Obj_DistLong = (uint16_t)(((*(pCANRxBuf+1))<<5) | ((*(pCANRxBuf+2))>>3));
+	(pRadarGeneral)->Obj_DistLat = (uint16_t)((((*(pCANRxBuf+2))&0x07)<<8) | (*(pCANRxBuf+3)));
+	(pRadarGeneral)->Obj_VrelLong = (uint16_t)(((*(pCANRxBuf+4))<<2) | ((*(pCANRxBuf+5))>>6));//纵向相对速度
+	(pRadarGeneral)->Obj_VrelLat = (uint16_t)((((*(pCANRxBuf+5))&0x3F)<<3) | (((*(pCANRxBuf+6))&0xE0)>>5));//横向相对速度
+	(pRadarGeneral)->Obj_DynProp = (*(pCANRxBuf+6))&0x07;		//目标动态特性（运动还是静止）
 	(pRadarGeneral)->Obj_RCS = *(pCANRxBuf+7);
 }
 
@@ -241,7 +241,7 @@ void ARS_SendVehicleYaw(CAN_HandleTypeDef *hcan, float YawRate)
 {
 	uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
 	uint8_t CANTxBuf[2] = {0};
-  uint16_t YawRate_int = (uint16_t)((YawRate - 327.68f) / 0.01f);     //offset +327.68, Res 0.01
+  uint16_t YawRate_int = ((YawRate + 327.68f) / 0.01f);     //offset -327.68, Res 0.01
   CANTxBuf[0] = (YawRate_int >> 8) & 0xFF;
 	CANTxBuf[1] = YawRate_int & 0xFF;
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxYawHeader, CANTxBuf, &CAN_TxMailBox);

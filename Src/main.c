@@ -212,7 +212,7 @@ int main(void)
 	WTN6_Broadcast(BELL_LOUDEST);
 	delay_ms(100);
 	WTN6_Broadcast(BELL_ADAS_START);
-	delay_ms(5000);
+	delay_ms(500);
 	WTN6_Broadcast(BELL_BB_1000MS);
   /* USER CODE END 2 */
 

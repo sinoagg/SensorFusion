@@ -207,12 +207,12 @@ void MX_FREERTOS_Init(void)
   osThreadDef(SoundWarning, StartSoundWarningTask, osPriorityIdle, 0, 64);
   SoundWarningHandle = osThreadCreate(osThread(SoundWarning), NULL);
 
+  #if CAN_READ_VEHICLE
   /* definition and creation of GyroComm */
   osThreadDef(GyroComm, StartGyroCommTask, osPriorityIdle, 0, 128);
   GyroCommHandle = osThreadCreate(osThread(GyroComm), NULL);
 
   /* definition and creation of CANSpeedRead */
-  #if CAN_READ_VEHICLE
   osThreadDef(CANSpeedRead, StartCANSpeedReadTask, osPriorityIdle, 0, 128);
   CANSpeedReadHandle = osThreadCreate(osThread(CANSpeedRead), NULL);
   #endif
@@ -321,7 +321,7 @@ void StartRadarCommTask(void const * argument)
 		{
 			minRadarDistFlag = 1;
 		}
-		else																										//0x60B, read distance & relVelocity
+		else if(RadarCANRxHeader.StdId==0x60B)									//0x60B, read distance & relVelocity
 		{
 			if(minRadarDistFlag)
 			{
@@ -449,6 +449,22 @@ void StartGyroCommTask(void const * argument)
     if(MPU_CheckSum(VehicleCANRxBuf))  //checksum ok
     {
       yawRate =  MPU_GetYawRate(VehicleCANRxBuf);
+			if(yawRate > 2000)
+			{
+				if(yawRate < (4000 - 327.68))
+				{
+					yawRate = -327.68;
+				}
+				else
+				{
+					yawRate -= 4000;	//clockwise
+				}
+			}
+			else	//anticlockwise
+			{
+				yawRate = (yawRate>327.68f) ? 327.68f: yawRate;
+			}
+			//yawRate = 327.68;
       ARS_SendVehicleYaw(&hcan2, yawRate);  //send VehicleYaw to Radar
     }
 		osDelay(10);
