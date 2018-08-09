@@ -117,7 +117,6 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name></Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -149,25 +148,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>237</LineNumber>
+          <LineNumber>296</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134220430</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Drivers\UserDriver\ARS408\ARS408.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\SensorFusion\../Drivers/UserDriver/ARS408/ARS408.c\237</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>328</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134233466</Address>
+          <Address>134232756</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -176,7 +159,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Src/freertos.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SensorFusion\../Src/freertos.c\328</Expression>
+          <Expression>\\SensorFusion\../Src/freertos.c\296</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>

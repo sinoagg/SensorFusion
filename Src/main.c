@@ -80,6 +80,7 @@
 #define LANEWIDTH   1.5f
 #define MAX_DECELARATION 0.4*9.8f
 #define DELAY_TIME	0.4f
+
 //	can3 id, vehicle
 #if VEHICLE_MODEL == 2		//BYD
 	#define VEHICLE_SPEED_ADDR	0x18FEF100
@@ -90,7 +91,7 @@
 	#define VEHICLE_SWTICH_ADDR	0x18FA0500
 #endif
 //	can3 id, gyro
-#define GYRO_ADDR 0x18FF0DE6
+#define GYRO_ADDR 0x18FEE1D8
 //	can1 id, dbc
 #define DBC_ADDR  0x509
 

@@ -83,6 +83,8 @@ osSemaphoreId bSemRadarCalcSigHandle;
 osSemaphoreId bSemUART1RxSigHandle;
 
 /* USER CODE BEGIN Variables */
+#define YAWRATE_LIMIT 327.68f
+
 extern CAN_RxHeaderTypeDef RadarCANRxHeader;
 extern ADAS_HandleTypeDef ADAS_dev;
 extern uint8_t ADASRxBuf[];
@@ -446,26 +448,14 @@ void StartGyroCommTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);
-    if(MPU_CheckSum(VehicleCANRxBuf))  //checksum ok
-    {
-      yawRate =  MPU_GetYawRate(VehicleCANRxBuf);
-			if(yawRate > 2000)
-			{
-				if(yawRate < (4000 - 327.68))
-				{
-					yawRate = -327.68;
-				}
-				else
-				{
-					yawRate -= 4000;	//clockwise
-				}
-			}
-			else	//anticlockwise
-			{
-				yawRate = (yawRate>327.68f) ? 327.68f: yawRate;
-			}
-      ARS_SendVehicleYaw(&hcan2, -yawRate);  //send VehicleYaw to Radar
-    }
+    yawRate =  MPU_GetYawRate(VehicleCANRxBuf);
+		if(yawRate < 0)		//clockwise
+		{
+			yawRate = (yawRate < -YAWRATE_LIMIT) ? -YAWRATE_LIMIT : yawRate;
+		}
+		else
+			yawRate = (yawRate > YAWRATE_LIMIT) ? YAWRATE_LIMIT: yawRate;
+    ARS_SendVehicleYaw(&hcan2, -yawRate);  //send VehicleYaw to Radar
 		osDelay(10);
   }
   /* USER CODE END StartGyroCommTask */

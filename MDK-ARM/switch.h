@@ -5,7 +5,7 @@
 */
 #define RADAR_TYPE 1
 //	Vehicle Speed & gyro via CAN3
-#define CAN_READ_VEHICLE 1
+#define CAN_READ_VEHICLE 0
 /**
  * BYD			2
  * YUTONG		1
@@ -17,4 +17,4 @@
 #define ADAS_COMM 0
 //	labview
 #define RADAR_DATA_SEND 0
-#define ATM_READ 0
+#define ATM_READ 1

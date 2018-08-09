@@ -64,6 +64,7 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 	return 0;
 }
 
+/* Radar Config------------------------------------------------------------------*/
 void RadarConfig_func()
 {
   RadarConfig.MaxDistance_valid = RADARCFG_MAXDISTANCE_VALID;
@@ -88,16 +89,8 @@ void RadarConfig_func()
   RadarConfig.RCS_Threshold = RADARCFG_RCSTHRES_STD;
 }
 
-void RadarFilterConfig_func(uint8_t index)
-{
-	RadarFilterConfig.FilterCfg_Valid = FILTERCFG_VALID;
-	RadarFilterConfig.FilterCfg_Active = FILTERCFG_FILTERACTIVE_VALID;
-	RadarFilterConfig.FilterCfg_Index = index;
-	RadarFilterConfig.FilterCfg_Type = FILTERCFG_TYPE_OBJ;
-}
-
 /**
- * [ARS_ConfigRadar config Radar]
+ * [ars_configradar config radar]
  * @param  hcan [hcan index]
  * @return      [ok]
  */
@@ -117,6 +110,15 @@ uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan)
 	//CAN×ÜÏß·¢ËÍÅäÖÃ
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxConfigRadarHeader, CANTxBuf, &CAN_TxMailBox);
 	return 0;
+}
+
+/* Filter Config------------------------------------------------------------------*/
+void RadarFilterConfig_func(uint8_t index)
+{
+	RadarFilterConfig.FilterCfg_Valid = FILTERCFG_VALID;
+	RadarFilterConfig.FilterCfg_Active = FILTERCFG_FILTERACTIVE_VALID;
+	RadarFilterConfig.FilterCfg_Index = index;
+	RadarFilterConfig.FilterCfg_Type = FILTERCFG_TYPE_OBJ;
 }
 
 /**
@@ -196,12 +198,14 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   return 0;
 }
 
+/* Get Object Status------------------------------------------------------------------*/
 void ARS_GetRadarObjStatus(uint8_t* pCANRxBuf, MW_RadarObjStatus *pRadarObjStatus)
 {
 	pRadarObjStatus->Obj_NofObjects = *pCANRxBuf;
 	pRadarObjStatus->Obj_MeasCounter = (uint16_t)(((*(pCANRxBuf+1))<<8)|(*(pCANRxBuf+2)));
 }
 
+/* Get Object General-----------------------------------------------------------------*/
 void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral)
 {
 	(pRadarGeneral)->Obj_ID = *pCANRxBuf;	//OBJ_ID
@@ -213,7 +217,8 @@ void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral)
 	(pRadarGeneral)->Obj_RCS = *(pCANRxBuf+7);
 }
 
-void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan,uint16_t VehicleSpeed)
+/* Send Vehicle Speed & gyro yaw------------------------------------------------------*/
+void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan, uint16_t VehicleSpeed)
 {
 	uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
 	uint8_t CANTxBuf[2] = {0};
