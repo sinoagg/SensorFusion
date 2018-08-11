@@ -217,7 +217,7 @@ void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral)
 	(pRadarGeneral)->Obj_RCS = *(pCANRxBuf+7);
 }
 
-/* Send Vehicle Speed & gyro yaw------------------------------------------------------*/
+/* Send Vehicle Speed & gyro yawRate------------------------------------------------------*/
 void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan, uint16_t VehicleSpeed)
 {
 	uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
