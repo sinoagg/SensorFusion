@@ -3,7 +3,7 @@
 ## platform
  * FreeRTOS on STM32F413
 ## version
- * 20180811: led changed & EMRR
+ * 20180811: led 0 warning
  * 20180804: fix bug of getting Radar for the "<<" priority is low
  * 20180730: init periphrals in separate files to simplify code structure
  * 20180724: **ATM(adc)** read in DMA
