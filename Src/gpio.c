@@ -91,7 +91,9 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(BELL_BUSY_GPIO_Port, BELL_BUSY_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED0_Pin|LED1_Pin|LED2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LED1_Pin|LED2_Pin, GPIO_PIN_RESET);
+	
+	HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);	//warning led not shine at the sys start
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, VALVE_FRONT_Pin|VALVE_REAR_Pin, GPIO_PIN_SET);

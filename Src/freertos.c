@@ -372,7 +372,7 @@ void StartSoundWarningTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);
-    switch(CrashWarningLv)				//forward collision warning
+    switch(CrashWarningLv)				//Forward collision warning
     {
       case WARNING_HIGH:
 				#if ADAS_COMM
@@ -380,11 +380,11 @@ void StartSoundWarningTask(void const * argument)
 				{
 				#endif
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
-					HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 					//WTN6_Broadcast(BELL_BB_500MS);
 					osDelay(1000);
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-					HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 				#if ADAS_COMM
 				}
 				#endif
@@ -395,18 +395,18 @@ void StartSoundWarningTask(void const * argument)
 				{
 				#endif
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
-					HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 					//WTN6_Broadcast(BELL_BB_1000MS);
 					osDelay(500);
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-					HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 				#if ADAS_COMM
 				}
 				#endif
         break;
       default:
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_SET);
+        HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_SET);
         break;
     }
 
@@ -415,23 +415,23 @@ void StartSoundWarningTask(void const * argument)
     {
       case 0x01:	//left
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
-        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+				HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
         //WTN6_Broadcast(BELL_BB_500MS);
         osDelay(2000);
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+				HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
         break;
       case 0x02:	//right
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
-        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+				HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
         //WTN6_Broadcast(BELL_BB_1000MS);
         osDelay(2000);
         HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+				HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
         break;
       default:
 				HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_SET);
+        HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
         break;
     }
     #endif
@@ -455,7 +455,12 @@ void StartGyroCommTask(void const * argument)
 		}
 		else
 			yawRate = (yawRate > YAWRATE_LIMIT) ? YAWRATE_LIMIT: yawRate;
-    ARS_SendVehicleYaw(&hcan2, -yawRate);  //send VehicleYaw to Radar
+		//ARS408
+		#if RADAR_TYPE
+			ARS_SendVehicleYaw(&hcan2, -yawRate);  //send VehicleYaw to Radar
+		//EMRR
+		#else
+		#endif
 		osDelay(10);
   }
   /* USER CODE END StartGyroCommTask */

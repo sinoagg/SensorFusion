@@ -17,4 +17,4 @@
 #define ADAS_COMM 0
 //	labview
 #define RADAR_DATA_SEND 0
-#define ATM_READ 1
+#define ATM_READ 0

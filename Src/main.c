@@ -91,7 +91,7 @@
 	#define VEHICLE_SWTICH_ADDR	0x18FA0500
 #endif
 //	can3 id, gyro
-#define GYRO_ADDR 0x18FEE1D8
+#define GYRO_ADDR 0x18FEE0D8
 //	can1 id, dbc
 #define DBC_ADDR  0x509
 
@@ -202,7 +202,6 @@ int main(void)
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 	delay_init(100);
-	HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_RESET);
   #if ADAS_COMM
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);	//ADAS
   #endif

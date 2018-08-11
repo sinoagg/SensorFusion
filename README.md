@@ -25,11 +25,11 @@
     * USART1(RS232) to receive cmd from **labview** & send Radar data to labview(not using)
     * USART3(TTL) to receive **ADAS** warnings
 * LED
-    * LED0: system start
+    * LED0: Warning
     * LED1: **Radar** communication
     * LED2: **ADAS** communicatn
     * LED3: UART1(cmd) from **labview**
-    * LED4: sound warning
+    * LED4: Not using
     * LED5: Radar data Tx(**DBC**)
     * LED6: CAN Rx from **Vehicle**(speed & gyroscope)
 * BUZZER

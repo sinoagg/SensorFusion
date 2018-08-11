@@ -116,10 +116,6 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
-          <Key>DLGUARM</Key>
-        </SetRegEntry>
-        <SetRegEntry>
-          <Number>0</Number>
           <Key>ARMRTXEVENTFLAGS</Key>
           <Name>-L70 -Z18 -C0 -M0 -T1</Name>
         </SetRegEntry>
@@ -148,9 +144,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>296</LineNumber>
+          <LineNumber>458</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134232756</Address>
+          <Address>134232788</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -159,7 +155,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Src/freertos.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SensorFusion\../Src/freertos.c\296</Expression>
+          <Expression>\\SensorFusion\../Src/freertos.c\458</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -219,6 +215,11 @@
           <count>3</count>
           <WinNumber>2</WinNumber>
           <ItemText>RadarGeneral</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>-yawRate</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>
