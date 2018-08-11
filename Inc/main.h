@@ -58,6 +58,13 @@
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
+
+#define BUZZER_Pin GPIO_PIN_2
+#define BUZZER_GPIO_Port GPIOE
+#define ATM_REAR_Pin GPIO_PIN_4
+#define ATM_REAR_GPIO_Port GPIOA
+#define ATM_FRONT_Pin GPIO_PIN_5
+#define ATM_FRONT_GPIO_Port GPIOA
 #define BELL_DATA_Pin GPIO_PIN_7
 #define BELL_DATA_GPIO_Port GPIOA
 #define BELL_BUSY_Pin GPIO_PIN_4
@@ -76,8 +83,10 @@
 #define LED5_GPIO_Port GPIOE
 #define LED6_Pin GPIO_PIN_10
 #define LED6_GPIO_Port GPIOE
-#define BUZZER_GPIO_Port GPIOE
-#define BUZZER_Pin GPIO_PIN_2
+#define VALVE_FRONT_Pin GPIO_PIN_8
+#define VALVE_FRONT_GPIO_Port GPIOC
+#define VALVE_REAR_Pin GPIO_PIN_9
+#define VALVE_REAR_GPIO_Port GPIOC
 
 /* ########################## Assert Selection ############################## */
 /**
@@ -88,6 +97,13 @@
 
 /* USER CODE BEGIN Private defines */
 
+/* Defines ------------------------------------------------------------------*/
+#define	WARNING_NONE 0
+#define	WARNING_LOW 1
+#define WARNING_MID 2
+#define	WARNING_HIGH 3
+
+#define LIMIT_RANGE 200		//meter
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

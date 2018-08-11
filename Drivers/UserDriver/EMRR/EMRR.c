@@ -2,7 +2,7 @@
  * microwave radar - EMRR by Electronic Radar(WuHu) 
  * 
  * EMRR_***() functions are entries of this driver
- * ***_func() functions are practical functions called by ARS_***() functions
+ * ***_func() functions are practical functions called by EMRR_***() functions
  * 
  * ---init & config
  * EMRR_Init(hcan): start CAN2 for radar
@@ -21,7 +21,13 @@ extern CAN_RxHeaderTypeDef RadarCANRxHeader;
 uint8_t EMRR_Init(CAN_HandleTypeDef *hcan)
 {
 	//配置CAN滤波器接收Objct_General信息，即相对目标的距离、速度等
-	CAN_FilterTypeDef MW_RadarCANFilter={EMRR_OBJ_ADDR<<5,0,0xFFC0<<5,0,CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};
+	//ID_HIGH, ID_LOW,\
+	MASK_HIGH, MASK_LOW,\
+	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
+	CAN_FilterTypeDef MW_RadarCANFilter = {
+		EMRR_OBJ_ADDR<<5, 0,\
+		0xFFC0<<5, 0,\
+		CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
