@@ -457,9 +457,12 @@ void StartGyroCommTask(void const * argument)
 			yawRate = (yawRate > YAWRATE_LIMIT) ? YAWRATE_LIMIT: yawRate;
 		//ARS408
 		#if RADAR_TYPE
-			ARS_SendVehicleYaw(&hcan2, yawRate);  //send VehicleYaw to Radar
+			ARS_SendVehicleYaw(&hcan2, yawRate);  //send VehicleYaw to Radar-ARS408
 		//EMRR
 		#else
+			yawRate = 100;
+			VehicleSpeed = 20;
+			EMRR_CalcTurn(&EMRRGeneral_Closet, yawRate, VehicleSpeed);
 		#endif
 		osDelay(10);
   }

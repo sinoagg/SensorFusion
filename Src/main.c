@@ -358,11 +358,13 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     #if CAN_READ_VEHICLE
 		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
 		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
+		//Gyroscope
     if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
       //start gyro semaphore
       osSemaphoreRelease(bSemGyroCommSigHandle);
       
     //  2 bytes(mid)must fit
+		//	Vehicle Speed
     else if((VEHICLE_SPEED_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSpeed ID
       osSemaphoreRelease(bSemSpeedRxSigHandle);
     #endif

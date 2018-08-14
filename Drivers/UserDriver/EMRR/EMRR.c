@@ -12,8 +12,15 @@
  * 
  * ---read Radar data
  * EMRR_GetRadarObjGeneral(...): get closet Radar Obj General
+ *
+ * ---calc gyro data
+ * EMRR_CalcGyro(...): using gyro data to optimize collision warning
  */
 #include "EMRR.h"
+
+#define VEHICLE_CENTRE_LEN	3.5f
+#define VEHICLE_HALF_WIDTH	0.9f
+#define OBSTACLE_ERR				1.0f
 
 extern uint8_t EMRR_RadarRxComplete;
 extern CAN_RxHeaderTypeDef RadarCANRxHeader;
@@ -97,5 +104,23 @@ void EMRR_GetRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral
 		}
 		EMRR_RadarRxComplete = 0;
 	}
+}
+
+uint8_t EMRR_CalcTurn(EMRR_RadarGeneral *pRadargGeneral_Closet, float YawRate, float VehicleSpeed)
+{
+	float Rotate_R, Min_R, Max_R, Obstacle_X, Obstacle_Y, Obstacle_Dis;
+	Rotate_R = (VehicleSpeed * 180) / (YawRate * 3.14f);	//Rotate_R = V / ω
+	Min_R = Rotate_R - VEHICLE_HALF_WIDTH;
+	Max_R = sqrt((Rotate_R + VEHICLE_HALF_WIDTH) * (Rotate_R + VEHICLE_HALF_WIDTH) + \
+								 VEHICLE_CENTRE_LEN * VEHICLE_CENTRE_LEN);
+	//如果最近位置在最大+一个距离，最小-一个距离之间，就返回1，否则返回0
+	Obstacle_X = pRadargGeneral_Closet->trackRange + VEHICLE_CENTRE_LEN;
+	Obstacle_Y = -pRadargGeneral_Closet->trackCrossRange + Rotate_R;
+	Obstacle_Dis = sqrt(Obstacle_X * Obstacle_X + Obstacle_Y * Obstacle_Y);
+	
+	if((Obstacle_Dis < Max_R - OBSTACLE_ERR) && (Obstacle_Dis > Min_R - OBSTACLE_ERR))
+		return 1;
+	else
+		return 0;
 }
 

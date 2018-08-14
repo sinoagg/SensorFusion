@@ -5,7 +5,7 @@
 */
 #define RADAR_TYPE 0
 //	Vehicle Speed & gyro via CAN3
-#define CAN_READ_VEHICLE 0
+#define CAN_READ_VEHICLE 1
 /**
  * BYD			2
  * YUTONG		1
