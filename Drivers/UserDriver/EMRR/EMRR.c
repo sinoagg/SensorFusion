@@ -118,7 +118,7 @@ uint8_t EMRR_CalcTurn(EMRR_RadarGeneral *pRadargGeneral_Closet, float YawRate, f
 	Obstacle_Y = -pRadargGeneral_Closet->trackCrossRange + Rotate_R;
 	Obstacle_Dis = sqrt(Obstacle_X * Obstacle_X + Obstacle_Y * Obstacle_Y);
 	
-	if((Obstacle_Dis < Max_R - OBSTACLE_ERR) && (Obstacle_Dis > Min_R - OBSTACLE_ERR))
+	if((Obstacle_Dis < Max_R + OBSTACLE_ERR) && (Obstacle_Dis > Min_R - OBSTACLE_ERR))
 		return 1;
 	else
 		return 0;

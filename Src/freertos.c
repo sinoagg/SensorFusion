@@ -243,7 +243,10 @@ void MX_FREERTOS_Init(void)
   /* add queues, ... */
 	
 	//hcan1~hcan3 init, start
-	DBC_Init(&hcan1);
+	//DBC_Init(&hcan1);
+	#if CAN_READ_VEHICLE
+  Vehicle_CAN_Init(&hcan1);
+  #endif
 	//ARS408
 	#if RADAR_TYPE
   ARS_Init(&hcan2);//hcan2 must use hcan1
@@ -251,9 +254,7 @@ void MX_FREERTOS_Init(void)
 	#else
 	EMRR_Init(&hcan2);
 	#endif
-  #if CAN_READ_VEHICLE
-  Vehicle_CAN_Init(&hcan3);
-  #endif
+  
 	
 	#if ATM_READ
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADC_ConvertedValue, 2);
@@ -528,10 +529,12 @@ void StartRadarCalcTask(void const * argument)
 			if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
 			{
 				CrashWarningLv = WARNING_HIGH;
+				osSemaphoreRelease(bSemSoundWarningSigHandle);
 			}
 			else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
 			{
 				CrashWarningLv = WARNING_LOW;
+				osSemaphoreRelease(bSemSoundWarningSigHandle);
 			}
 			else
 				CrashWarningLv = WARNING_NONE;
@@ -548,16 +551,18 @@ void StartRadarCalcTask(void const * argument)
       if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
       {
         CrashWarningLv = WARNING_HIGH;
+				osSemaphoreRelease(bSemSoundWarningSigHandle);
       }
       else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
       {
         CrashWarningLv = WARNING_LOW;
+				osSemaphoreRelease(bSemSoundWarningSigHandle);
       }
       else
         CrashWarningLv = WARNING_NONE;
     }
 		#endif
-		osSemaphoreRelease(bSemSoundWarningSigHandle);
+		
 		osDelay(2);
   }
   /* USER CODE END StartRadarCalcTask */
