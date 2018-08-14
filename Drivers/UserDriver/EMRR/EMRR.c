@@ -110,6 +110,7 @@ uint8_t EMRR_CalcTurn(EMRR_RadarGeneral *pRadargGeneral_Closet, float YawRate, f
 {
 	float Rotate_R, Min_R, Max_R, Obstacle_X, Obstacle_Y, Obstacle_Dis;
 	Rotate_R = (VehicleSpeed * 180) / (YawRate * 3.14f);	//Rotate_R = V / ω
+	Rotate_R = (Rotate_R < 0) ? -Rotate_R : Rotate_R;
 	Min_R = Rotate_R - VEHICLE_HALF_WIDTH;
 	Max_R = sqrt((Rotate_R + VEHICLE_HALF_WIDTH) * (Rotate_R + VEHICLE_HALF_WIDTH) + \
 								 VEHICLE_CENTRE_LEN * VEHICLE_CENTRE_LEN);

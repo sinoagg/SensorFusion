@@ -96,6 +96,8 @@ extern uint8_t CmdRxBuf[];
 extern uint8_t CmdRadarDataTxBuf[];
 extern uint8_t ADASRxComplete;
 extern uint16_t ADC_ConvertedValue[];
+uint8_t Turning_Collision = 0;
+uint8_t Turning_Flag = 0;
 //ARS408
 extern MW_RadarObjStatus RadarObjStatus;
 extern MW_RadarGeneral RadarGeneral[16];
@@ -461,10 +463,16 @@ void StartGyroCommTask(void const * argument)
 			ARS_SendVehicleYaw(&hcan2, yawRate);  //send VehicleYaw to Radar-ARS408
 		//EMRR
 		#else
-			yawRate = 100;
-			VehicleSpeed = 20;
-			EMRR_CalcTurn(&EMRRGeneral_Closet, yawRate, VehicleSpeed);
-		#endif
+			//yawRate = 100;
+			VehicleSpeed = 10;
+      if(yawRate > 10 || yawRate < -10)
+      {
+        Turning_Flag = 1;
+		  	Turning_Collision = EMRR_CalcTurn(&EMRRGeneral_Closet, yawRate, VehicleSpeed);
+      }
+			else
+				Turning_Flag = 0;
+    #endif
 		osDelay(10);
   }
   /* USER CODE END StartGyroCommTask */
@@ -544,22 +552,24 @@ void StartRadarCalcTask(void const * argument)
 		#else
 		MinRangeLong = EMRRGeneral_Closet.trackRange;
     VrelLong = EMRRGeneral_Closet.trackSpeed;
-
-		if(MinRangeLong < LIMIT_RANGE && MinRangeLong != 0 && VrelLong != 0)
+    if(!Turning_Flag || (Turning_Flag && Turning_Collision))
     {
-      TimetoCrash = - MinRangeLong / VrelLong;
-      if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
+      if(MinRangeLong < LIMIT_RANGE && MinRangeLong != 0 && VrelLong != 0)
       {
-        CrashWarningLv = WARNING_HIGH;
-				osSemaphoreRelease(bSemSoundWarningSigHandle);
+        TimetoCrash = - MinRangeLong / VrelLong;
+        if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
+        {
+          CrashWarningLv = WARNING_HIGH;
+          osSemaphoreRelease(bSemSoundWarningSigHandle);
+        }
+        else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
+        {
+          CrashWarningLv = WARNING_LOW;
+          osSemaphoreRelease(bSemSoundWarningSigHandle);
+        }
+        else
+          CrashWarningLv = WARNING_NONE;
       }
-      else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
-      {
-        CrashWarningLv = WARNING_LOW;
-				osSemaphoreRelease(bSemSoundWarningSigHandle);
-      }
-      else
-        CrashWarningLv = WARNING_NONE;
     }
 		#endif
 		
