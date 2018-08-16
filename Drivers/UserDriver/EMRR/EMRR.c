@@ -74,7 +74,7 @@ void EMRR_GetRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral
 		GetRadarObjGeneral_func(pCANRxBuf, (pRadarGeneral + RadarCANRxHeader.StdId - 0x500));
 		if((RadarCANRxHeader.StdId - 0x500+1) == 64)	//收完64个目标数据
 		{
-			uint32_t i=0, min_lable;
+			uint32_t i=0, min_index;
 			float min=1000, rad;
 			for(i=0; i<64; i++)
 			{
@@ -89,18 +89,18 @@ void EMRR_GetRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral
 							if(min > (pRadarGeneral + i)->trackRange)	//当前目标距离小于min
 							{
 								min = (pRadarGeneral + i)->trackRange;
-								min_lable = i;
+								min_index = i;
 							}
 						}
 					}
 				}
 			}
-			pRadarGeneral_Closet->trackId = (pRadarGeneral + min_lable)->trackId;
-			pRadarGeneral_Closet->trackCrossRange = (pRadarGeneral + min_lable)->trackCrossRange;
-			pRadarGeneral_Closet->trackRange = (pRadarGeneral + min_lable)->trackRange;
-			pRadarGeneral_Closet->trackSpeed = (pRadarGeneral + min_lable)->trackSpeed;
-			pRadarGeneral_Closet->trackAngle = (pRadarGeneral + min_lable)->trackAngle;
-			pRadarGeneral_Closet->trackPower = (pRadarGeneral + min_lable)->trackPower;
+			pRadarGeneral_Closet->trackId = (pRadarGeneral + min_index)->trackId;
+			pRadarGeneral_Closet->trackCrossRange = (pRadarGeneral + min_index)->trackCrossRange;
+			pRadarGeneral_Closet->trackRange = (pRadarGeneral + min_index)->trackRange;
+			pRadarGeneral_Closet->trackSpeed = (pRadarGeneral + min_index)->trackSpeed;
+			pRadarGeneral_Closet->trackAngle = (pRadarGeneral + min_index)->trackAngle;
+			pRadarGeneral_Closet->trackPower = (pRadarGeneral + min_index)->trackPower;
 		}
 		EMRR_RadarRxComplete = 0;
 	}
@@ -114,7 +114,7 @@ uint8_t EMRR_CalcTurn(EMRR_RadarGeneral *pRadargGeneral_Closet, float YawRate, f
 	Min_R = Rotate_R - VEHICLE_HALF_WIDTH;
 	Max_R = sqrt((Rotate_R + VEHICLE_HALF_WIDTH) * (Rotate_R + VEHICLE_HALF_WIDTH) + \
 								 VEHICLE_CENTRE_LEN * VEHICLE_CENTRE_LEN);
-	//如果最近位置在最大+一个距离，最小-一个距离之间，就返回1，否则返回0
+	//如果最近位置在最大+一个距离，最小-一个距离之间，即转弯的车道内，就返回1，否则返回0
 	Obstacle_X = pRadargGeneral_Closet->trackRange + VEHICLE_CENTRE_LEN;
 	Obstacle_Y = -pRadargGeneral_Closet->trackCrossRange + Rotate_R;
 	Obstacle_Dis = sqrt(Obstacle_X * Obstacle_X + Obstacle_Y * Obstacle_Y);

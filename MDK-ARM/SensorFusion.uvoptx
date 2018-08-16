@@ -116,6 +116,11 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
+          <Key>DLGUARM</Key>
+          <Name></Name>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
           <Key>ARMRTXEVENTFLAGS</Key>
           <Name>-L70 -Z18 -C0 -M0 -T1</Name>
         </SetRegEntry>
@@ -144,9 +149,25 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>458</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134232788</Address>
+          <LineNumber>123</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134221116</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Drivers\UserDriver\EMRR\EMRR.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\SensorFusion\../Drivers/UserDriver/EMRR/EMRR.c\123</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>563</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134233906</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -155,7 +176,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Src/freertos.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SensorFusion\../Src/freertos.c\458</Expression>
+          <Expression>\\SensorFusion\../Src/freertos.c\563</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -199,27 +220,37 @@
         <Ww>
           <count>0</count>
           <WinNumber>2</WinNumber>
-          <ItemText>yawRate</ItemText>
+          <ItemText>Obstacle_Dis</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>2</WinNumber>
-          <ItemText>VrelLong</ItemText>
+          <ItemText>Max_R</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>2</WinNumber>
-          <ItemText>MinRangeLong</ItemText>
+          <ItemText>Min_R</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>2</WinNumber>
-          <ItemText>RadarGeneral</ItemText>
+          <ItemText>VrelLong</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>2</WinNumber>
-          <ItemText>-yawRate</ItemText>
+          <ItemText>MinRangeLong</ItemText>
+        </Ww>
+        <Ww>
+          <count>5</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>RadarCANRxBuf</ItemText>
+        </Ww>
+        <Ww>
+          <count>6</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>aEMRRGeneral</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>

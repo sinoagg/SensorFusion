@@ -471,7 +471,10 @@ void StartGyroCommTask(void const * argument)
 		  	Turning_Collision = EMRR_CalcTurn(&EMRRGeneral_Closet, yawRate, VehicleSpeed);
       }
 			else
+			{
 				Turning_Flag = 0;
+				Turning_Collision = 0;
+			}
     #endif
 		osDelay(10);
   }

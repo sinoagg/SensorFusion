@@ -191,7 +191,7 @@ int main(void)
   MX_DMA_Init();
   MX_CAN1_Init();
   MX_CAN2_Init();
-  MX_CAN3_Init();
+  //MX_CAN3_Init();
   MX_CRC_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();

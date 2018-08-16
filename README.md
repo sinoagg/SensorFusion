@@ -3,6 +3,7 @@
 ## platform
  * FreeRTOS on STM32F413
 ## version
+ * 20180816: gyro via CAN1(500kbps) & Turning warning, for Benz
  * 20180811: led 0 warning
  * 20180804: fix bug of getting Radar for the "<<" priority is low
  * 20180730: init periphrals in separate files to simplify code structure
@@ -17,9 +18,8 @@
  * 20180514: test in ChongQing
 ## peripherals
 * CAN
-    * CAN1 to send distance received from Radar(**DBC**)
+    * CAN1(500kbps) to communicate with **gyroscope**
     * CAN2 to receive **Radar** data & config Radar
-    * CAN3(250kbps) to communicate with **vehicle & gyroscope**
 * ADC
     * ADC1 in DMA2_stream0 to read ATM
 * USART
