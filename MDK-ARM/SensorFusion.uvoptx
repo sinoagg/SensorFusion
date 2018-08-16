@@ -162,22 +162,6 @@
           <ExecCommand></ExecCommand>
           <Expression>\\SensorFusion\../Drivers/UserDriver/EMRR/EMRR.c\123</Expression>
         </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>563</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134233906</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Src/freertos.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\SensorFusion\../Src/freertos.c\563</Expression>
-        </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>

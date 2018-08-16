@@ -89,10 +89,11 @@ void RadarConfig_func()
   RadarConfig.RCS_Threshold = RADARCFG_RCSTHRES_STD;
 }
 
-/**
- * [ars_configradar config radar]
- * @param  hcan [hcan index]
- * @return      [ok]
+/** 
+ * @brief  config radar
+ * @note   
+ * @param  *hcan: 
+ * @retval 0 for ok
  */
 uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan)
 {
@@ -122,12 +123,12 @@ void RadarFilterConfig_func(uint8_t index)
 }
 
 /**
- * [FilterContentCfg_func config content of filter]
+ * @brief  [config content of filter]
  * @param  hcan       [hcan index]
  * @param  index      [filter index]
  * @param  filter_min [content min]
  * @param  filter_max [content max]
- * @return            [ok]
+ * @retval            [ok]
  */
 uint8_t FilterContentCfg_func(CAN_HandleTypeDef *hcan, uint8_t index, uint16_t filter_min, uint16_t filter_max)
 {

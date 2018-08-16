@@ -191,7 +191,7 @@ int main(void)
   MX_DMA_Init();
   MX_CAN1_Init();
   MX_CAN2_Init();
-  //MX_CAN3_Init();
+  MX_CAN3_Init();
   MX_CRC_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
@@ -297,6 +297,12 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+/** 
+ * @brief  can start for sending DBC(in ChongQing)
+ * @note   not using in Benz version
+ * @param  *hcan: may be hcan1
+ * @retval 0 for ok
+ */
 uint8_t DBC_Init(CAN_HandleTypeDef *hcan)
 {
   HAL_CAN_Start(hcan);
@@ -339,6 +345,12 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 	return 0;
 }
 
+/** 
+ * @brief  CAN Callback function
+ * @note   can2 for Radar, can3(can1 in Benz version) for Gyro & Vehicle Speed
+ * @param  *hcan: 
+ * @retval None
+ */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
   if(hcan->Instance == hcan2.Instance)
@@ -353,10 +365,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		EMRR_RadarRxComplete = 1;
 		#endif
   }
-	if(hcan->Instance == hcan1.Instance)
+	if(hcan->Instance == hcan3.Instance)
 	{
     #if CAN_READ_VEHICLE
-		HAL_CAN_GetRxMessage(&hcan1, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
+		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
 		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
 		//Gyroscope
     if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
@@ -372,6 +384,13 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	
 }
 
+/** 
+ * @brief  Send Radar Distance in DBC protocol
+ * @note   only use in ChongQing
+ * @param  *hcan: 
+ * @param  Dist: /m
+ * @retval 0 for ok
+ */
 uint8_t DBC_SendDist(CAN_HandleTypeDef *hcan, float Dist)
 {
   uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;

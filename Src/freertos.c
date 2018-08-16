@@ -245,10 +245,7 @@ void MX_FREERTOS_Init(void)
   /* add queues, ... */
 	
 	//hcan1~hcan3 init, start
-	//DBC_Init(&hcan1);
-	#if CAN_READ_VEHICLE
-  Vehicle_CAN_Init(&hcan1);
-  #endif
+	DBC_Init(&hcan1);
 	//ARS408
 	#if RADAR_TYPE
   ARS_Init(&hcan2);//hcan2 must use hcan1
@@ -256,7 +253,9 @@ void MX_FREERTOS_Init(void)
 	#else
 	EMRR_Init(&hcan2);
 	#endif
-  
+	#if CAN_READ_VEHICLE
+  Vehicle_CAN_Init(&hcan3);
+  #endif
 	
 	#if ATM_READ
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADC_ConvertedValue, 2);

@@ -25,6 +25,12 @@
 extern uint8_t EMRR_RadarRxComplete;
 extern CAN_RxHeaderTypeDef RadarCANRxHeader;
 
+/** 
+ * @brief  Init of EMRR
+ * @note   config can & filter(mask mode)
+ * @param  *hcan: using can2
+ * @retval 0 for ok
+ */
 uint8_t EMRR_Init(CAN_HandleTypeDef *hcan)
 {
 	//配置CAN滤波器接收Objct_General信息，即相对目标的距离、速度等
@@ -42,6 +48,13 @@ uint8_t EMRR_Init(CAN_HandleTypeDef *hcan)
 	return 0;
 }
 
+/** 
+ * @brief  Get Radar Obj & calculate(uint8_t array to float)
+ * @note   data from CANRxBuf[] to RadarGeneral[]
+ * @param  pCANRxBuf: CANRxBuf[8]
+ * @param  *pRadarGeneral: RadarGeneral[64]
+ * @retval None
+ */
 void GetRadarObjGeneral_func(uint8_t* pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral)
 {
 	uint16_t tempData;
@@ -67,6 +80,14 @@ void GetRadarObjGeneral_func(uint8_t* pCANRxBuf, EMRR_RadarGeneral *pRadarGenera
 	}
 }
 
+/** 
+ * @brief  Get Closet Obj & calculate with LaneWidth, TrackPower...
+ * @note   data would be 0, when not detected obj 
+ * @param  *pCANRxBuf: CANRxBuf[8]
+ * @param  *pRadarGeneral: RadarGeneral[64]
+ * @param  *pRadarGeneral_Closet: Closet Obj data
+ * @retval None
+ */
 void EMRR_GetRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral, EMRR_RadarGeneral *pRadarGeneral_Closet)
 {
 	if(EMRR_RadarRxComplete)	//接收标志
@@ -106,6 +127,15 @@ void EMRR_GetRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral
 	}
 }
 
+/** 
+ * @brief  Calculate Turning cross 
+ * @note   Vehicle Speed should read from Vehicle CAN
+ * @param  *pRadargGeneral_Closet: Closet obj
+ * @param  YawRate: °/s
+ * @param  VehicleSpeed: m/s 
+ * @retval 1 Obstacle is in the way
+ *				 0 Obstacle is not in the way
+ */
 uint8_t EMRR_CalcTurn(EMRR_RadarGeneral *pRadargGeneral_Closet, float YawRate, float VehicleSpeed)
 {
 	float Rotate_R, Min_R, Max_R, Obstacle_X, Obstacle_Y, Obstacle_Dis;
@@ -114,7 +144,7 @@ uint8_t EMRR_CalcTurn(EMRR_RadarGeneral *pRadargGeneral_Closet, float YawRate, f
 	Min_R = Rotate_R - VEHICLE_HALF_WIDTH;
 	Max_R = sqrt((Rotate_R + VEHICLE_HALF_WIDTH) * (Rotate_R + VEHICLE_HALF_WIDTH) + \
 								 VEHICLE_CENTRE_LEN * VEHICLE_CENTRE_LEN);
-	//如果最近位置在最大+一个距离，最小-一个距离之间，即转弯的车道内，就返回1，否则返回0
+	//如果最近位置在最大，最小距离之间，即转弯的车道内，就返回1，否则返回0
 	Obstacle_X = pRadargGeneral_Closet->trackRange + VEHICLE_CENTRE_LEN;
 	Obstacle_Y = -pRadargGeneral_Closet->trackCrossRange + Rotate_R;
 	Obstacle_Dis = sqrt(Obstacle_X * Obstacle_X + Obstacle_Y * Obstacle_Y);
