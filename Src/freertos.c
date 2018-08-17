@@ -467,7 +467,7 @@ void StartGyroCommTask(void const * argument)
       if(yawRate > 10 || yawRate < -10)
       {
         Turning_Flag = 1;
-		  	Turning_Collision = EMRR_CalcTurn(&EMRRGeneral_Closet, yawRate, VehicleSpeed);
+		  	//Turning_Collision = CalcTurn(&EMRRGeneral_Closet, yawRate, VehicleSpeed);
       }
 			else
 			{
@@ -554,7 +554,7 @@ void StartRadarCalcTask(void const * argument)
 		#else
 		MinRangeLong = EMRRGeneral_Closet.trackRange;
     VrelLong = EMRRGeneral_Closet.trackSpeed;
-    if(!Turning_Flag || (Turning_Flag && Turning_Collision))
+    if(!Turning_Flag) //|| (Turning_Flag && Turning_Collision))
     {
       if(MinRangeLong < LIMIT_RANGE && MinRangeLong != 0 && VrelLong != 0)
       {

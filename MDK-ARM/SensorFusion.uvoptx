@@ -151,7 +151,7 @@
           <Type>0</Type>
           <LineNumber>123</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134221116</Address>
+          <Address>134221162</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -184,21 +184,6 @@
           <WinNumber>1</WinNumber>
           <ItemText>RadarGeneral_closet</ItemText>
         </Ww>
-        <Ww>
-          <count>4</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>ADC_ConvertedValueF[0]</ItemText>
-        </Ww>
-        <Ww>
-          <count>5</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>ADC_ConvertedValueF[1]</ItemText>
-        </Ww>
-        <Ww>
-          <count>6</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>DMA_Transfer_Complete_Count</ItemText>
-        </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
@@ -229,12 +214,12 @@
         <Ww>
           <count>5</count>
           <WinNumber>2</WinNumber>
-          <ItemText>RadarCANRxBuf</ItemText>
+          <ItemText>Turning_Flag</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>2</WinNumber>
-          <ItemText>aEMRRGeneral</ItemText>
+          <ItemText>yawRate</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>
@@ -242,7 +227,7 @@
       </Tracepoint>
       <DebugFlag>
         <trace>0</trace>
-        <periodic>0</periodic>
+        <periodic>1</periodic>
         <aLwin>0</aLwin>
         <aCover>0</aCover>
         <aSer1>0</aSer1>
