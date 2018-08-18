@@ -37,7 +37,12 @@ MW_RadarFilterConfig RadarFilterConfig;
 MW_RadarFilterIndexContent FilterContent;
 MW_RadarSpeed RadarSpeed;
 
-
+/** 
+ * @brief  ARS408 Radar Init(can & filter config, Radar&filter config)
+ * @note   only using obj data(filtered by can)
+ * @param  *hcan: can2(500kbps)
+ * @retval 0 for ok
+ */
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 {
 	//config CAN filter to receive Objct_General(distance & relSpeed
@@ -219,6 +224,13 @@ void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral)
 }
 
 /* Send Vehicle Speed & gyro yawRate------------------------------------------------------*/
+/** 
+ * @brief  send VehicleSpeed to ARS408
+ * @note   correction Radar in turning corners
+ * @param  *hcan: can2(500kbps)
+ * @param  VehicleSpeed: (km/h)
+ * @retval None
+ */
 void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan, uint16_t VehicleSpeed)
 {
 	uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
@@ -243,6 +255,13 @@ void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan, uint16_t VehicleSpeed)
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxSpeedHeader, CANTxBuf, &CAN_TxMailBox);
 }
 
+/** 
+ * @brief  send YawRate to ARS408
+ * @note   correction Radar in turning corners
+ * @param  *hcan: can2(500kbps)
+ * @param  YawRate: (бу/s)
+ * @retval None
+ */
 void ARS_SendVehicleYaw(CAN_HandleTypeDef *hcan, float YawRate)
 {
 	uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;

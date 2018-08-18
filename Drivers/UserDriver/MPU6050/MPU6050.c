@@ -8,11 +8,17 @@
  */
 #include "MPU6050.h"
 
+/** 
+ * @brief  get YawRate from can3 buf
+ * @note   resolution is 3°/s
+ * @param  *pRxBuf: CANRxBuf
+ * @retval YawRate(float)
+ */
 float MPU_GetYawRate(uint8_t *pRxBuf)
 {
 	float YawRate = 0.0;
 
-  YawRate = (*(pRxBuf + 6))*3 - 381;	//offset -381°/s, Res 3°
+  YawRate = (*(pRxBuf + 6))*3 - 381;	//offset -381°/s, Res 3°/s
 	
 	return YawRate;
 }
