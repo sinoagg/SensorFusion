@@ -558,7 +558,12 @@ void StartRadarCalcTask(void const * argument)
     VrelLong = EMRRGeneral_Closet.trackSpeed;
     if(!Turning_Flag) //|| (Turning_Flag && Turning_Collision))
     {
-      if(MinRangeLong < LIMIT_RANGE && MinRangeLong != 0 && VrelLong != 0)
+			/*if(MinRangeLong < 30)
+			{
+				 CrashWarningLv = WARNING_HIGH;
+          osSemaphoreRelease(bSemSoundWarningSigHandle);
+			}
+      else */if(MinRangeLong < LIMIT_RANGE && MinRangeLong != 0 && VrelLong != 0)
       {
         TimetoCrash = - MinRangeLong / VrelLong;
         if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
