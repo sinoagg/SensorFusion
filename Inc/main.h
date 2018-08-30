@@ -65,8 +65,10 @@
 #define ATM_REAR_GPIO_Port GPIOA
 #define ATM_FRONT_Pin GPIO_PIN_5
 #define ATM_FRONT_GPIO_Port GPIOA
-#define BELL_DATA_Pin GPIO_PIN_7
+#define BELL_DATA_Pin GPIO_PIN_6
 #define BELL_DATA_GPIO_Port GPIOA
+#define BELL_CLK_Pin GPIO_PIN_7
+#define BELL_CLK_GPIO_Port GPIOA
 #define BELL_BUSY_Pin GPIO_PIN_4
 #define BELL_BUSY_GPIO_Port GPIOC
 #define LED0_Pin GPIO_PIN_0

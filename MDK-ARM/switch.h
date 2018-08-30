@@ -3,7 +3,7 @@
  * ARS408 1
  * EMRR 0
 */
-#define RADAR_TYPE 0
+#define RADAR_TYPE 1
 //	Vehicle Speed & gyro via CAN3
 #define CAN_READ_VEHICLE 1
 /**
