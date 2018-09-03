@@ -10,7 +10,7 @@
 
 /** 
  * @brief  get YawRate from can3 buf
- * @note   resolution is 3°/s
+ * @note   resolution is 0.2°/s
  * @param  *pRxBuf: CANRxBuf
  * @retval YawRate(float)
  */
@@ -18,7 +18,7 @@ float MPU_GetYawRate(uint8_t *pRxBuf)
 {
 	float YawRate = 0.0;
 
-  YawRate = (*(pRxBuf + 6))*3 - 381;	//offset -381°/s, Res 3°/s
+  YawRate = (*(pRxBuf + 6))*0.2 - 25;	//offset -25°/s, Res 0.2°/s
 	
 	return YawRate;
 }

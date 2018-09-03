@@ -123,6 +123,7 @@ uint8_t UART1RxComplete=0;
 uint8_t SpeedRxComplete=0;
 uint8_t CmdRxComplete=0;
 uint8_t ADASRxBuf[32]={0};
+uint8_t ADASDispBuf[32] = {0};
 uint8_t CmdRxBuf[4]={0};
 uint8_t CmdRadarDataTxBuf[11];
 uint8_t RadarCANRxBuf[8]={0};

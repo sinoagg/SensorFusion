@@ -88,6 +88,7 @@ osSemaphoreId bSemUART1RxSigHandle;
 extern CAN_RxHeaderTypeDef RadarCANRxHeader;
 extern ADAS_HandleTypeDef ADAS_dev;
 extern uint8_t ADASRxBuf[];
+extern uint8_t ADASDispBuf[];
 extern uint8_t RadarCANRxBuf[];
 extern uint8_t CrashWarningLv;
 extern uint8_t VehicleCANRxBuf[];
@@ -285,6 +286,8 @@ void StartDefaultTask(void const * argument)
 		if(ADASRxComplete==1)
 		{
       ADASRxComplete=0;
+      DispADASData(ADASRxBuf, ADASDispBuf, MinRangeLong, VrelLong, TimetoCrash);
+			HAL_UART_Transmit(&huart5, ADASDispBuf, 32, 100);//transmit ADAS data to screen
       osSemaphoreRelease(bSemADASRxSigHandle);
 		}
     #endif
@@ -300,9 +303,9 @@ void StartDefaultTask(void const * argument)
 		ADC_ConvertedValueF[1] =(double)(ADC_ConvertedValue[1]&0xFFF)*3.3/4096; 	// ADC_ConvertedValue only lowest 12bit
 		#endif
 		
-		HAL_GPIO_TogglePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin|VALVE_REAR_Pin);
+		//HAL_GPIO_TogglePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin|VALVE_REAR_Pin);
 				
-		osDelay(3000);
+		osDelay(30);
   }
   /* USER CODE END StartDefaultTask */
 }

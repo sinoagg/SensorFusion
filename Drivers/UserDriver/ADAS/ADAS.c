@@ -120,3 +120,12 @@ uint8_t CalADASData(ADAS_HandleTypeDef *pADAS_dev, uint8_t *pRxBuf)
 	}
 	return 1;
 }
+
+uint8_t DispADASData(uint8_t *pRxBuf, uint8_t *pDispBuf, float MinRangeLong_fp, float VrelLong_fp, float TimetoCrash_fp)
+{
+	*pDispBuf = *pRxBuf;
+	*(pDispBuf + 13) = (uint8_t)(MinRangeLong_fp / 0.5f);
+	*(pDispBuf + 14) = (uint8_t)(VrelLong_fp / 0.25f);
+	*(pDispBuf + 15) = (uint8_t)(TimetoCrash_fp / 0.05f);
+	return 0;
+}
