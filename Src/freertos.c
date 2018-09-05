@@ -302,9 +302,9 @@ void StartDefaultTask(void const * argument)
     ADC_ConvertedValueF[0] =(double)(ADC_ConvertedValue[0]&0xFFF)*3.3/4096; 	// ADC_ConvertedValue only lowest 12bit
 		ADC_ConvertedValueF[1] =(double)(ADC_ConvertedValue[1]&0xFFF)*3.3/4096; 	// ADC_ConvertedValue only lowest 12bit
 		#endif
-		
+
 		//HAL_GPIO_TogglePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin|VALVE_REAR_Pin);
-				
+
 		osDelay(30);
   }
   /* USER CODE END StartDefaultTask */

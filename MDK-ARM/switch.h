@@ -18,4 +18,4 @@
 //	labview
 #define RADAR_DATA_SEND 0
 //	Atmosphere Sensor
-#define ATM_READ 0
+#define ATM_READ 1
