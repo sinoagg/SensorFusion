@@ -175,8 +175,8 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_NofObj = 1;
   FilterContent.FilterCfg_Min_Distance = (uint16_t)((0 - 0) / 0.1);     //0~200m, offset 0, Res 0.1
   FilterContent.FilterCfg_Max_Distance = (uint16_t)((200 - 0) / 0.1);
-  FilterContent.FilterCfg_Min_Azimuth = (uint16_t)((-9 + 50) / 0.025);  //-9¡ã~9¡ã£¬offset -50, Res 0.025
-  FilterContent.FilterCfg_Max_Azimuth = (uint16_t)((9 + 50) / 0.025);
+  FilterContent.FilterCfg_Min_Azimuth = (uint16_t)((-30 + 50) / 0.025);  //-9¡ã~9¡ã£¬offset -50, Res 0.025
+  FilterContent.FilterCfg_Max_Azimuth = (uint16_t)((30 + 50) / 0.025);
   FilterContent.FilterCfg_Min_VrelOncome = (uint16_t)((0.1 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VrelOncome = (uint16_t)((100 - 0) / 0.0315);
   FilterContent.FilterCfg_Min_VrelDepart = (uint16_t)((0.1 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
