@@ -314,7 +314,6 @@ uint8_t DBC_Init(CAN_HandleTypeDef *hcan)
 
 uint8_t Gyro_CAN_Init(CAN_HandleTypeDef *hcan)
 {
-	//#if GYRO_CAN == 3
 	//config CAN filter to receive Gyro
 	//ID_HIGH,\
 	ID_LOW,\
@@ -329,7 +328,6 @@ uint8_t Gyro_CAN_Init(CAN_HandleTypeDef *hcan)
     CAN_FILTER_FIFO0, 0, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
 	};
 	HAL_CAN_ConfigFilter(hcan, &GyroCANFilter);
-	//#endif
 
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);

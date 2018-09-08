@@ -177,9 +177,9 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_Distance = (uint16_t)((200 - 0) / 0.1);
   FilterContent.FilterCfg_Min_Azimuth = (uint16_t)((-30 + 50) / 0.025);  //-9¡ã~9¡ã£¬offset -50, Res 0.025
   FilterContent.FilterCfg_Max_Azimuth = (uint16_t)((30 + 50) / 0.025);
-  FilterContent.FilterCfg_Min_VrelOncome = (uint16_t)((0.1 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Min_VrelOncome = (uint16_t)((0 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VrelOncome = (uint16_t)((100 - 0) / 0.0315);
-  FilterContent.FilterCfg_Min_VrelDepart = (uint16_t)((0.1 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Min_VrelDepart = (uint16_t)((0 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VrelDepart = (uint16_t)((100 - 0) / 0.0315);
   FilterContent.FilterCfg_Min_RCS = (uint16_t)((-50 + 50) / 0.025);   //0.025~30dBm2, offset -50, Res 0.025
   FilterContent.FilterCfg_Max_RCS = (uint16_t)((52.375 + 50) / 0.025);
@@ -195,11 +195,11 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_X = (uint16_t)((200 + 500) / 0.2);
   FilterContent.FilterCfg_Min_VYRightLeft = (uint16_t)((0 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VYRightLeft = (uint16_t)(100 - 0) / 0.0315;
-  FilterContent.FilterCfg_Min_VXOncome = (uint16_t)((0.1 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Min_VXOncome = (uint16_t)((0 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VXOncome = (uint16_t)((100 - 0) / 0.0315);
   FilterContent.FilterCfg_Min_VYLeftRight = (uint16_t)((0 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VYLeftRight = (uint16_t)((100 - 0) / 0.0315);
-  FilterContent.FilterCfg_Min_VXDepart = (uint16_t)((0.1 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Min_VXDepart = (uint16_t)((0 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VXDepart = (uint16_t)((100 - 0) / 0.0315);
   FilterContent.FilterCfg_Min_Object_Class = 0x0;//0x0: point, 0x1: car, 0x2: truck, 0x3: not used
   FilterContent.FilterCfg_Max_Object_Class = 0x2;//0x4: motorcyc, 0x5: bicycle, 0x6: wide, 0x7: reserved

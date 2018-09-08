@@ -487,7 +487,7 @@ void StartGyroCommTask(void const * argument)
 		//EMRR
 		#else
 			//yawRate = 100;
-			VehicleSpeed = 10;
+			//VehicleSpeed = 10;
       if(yawRate > 10 || yawRate < -10)
       {
         Turning_Flag = 1;
