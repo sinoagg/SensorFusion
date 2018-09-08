@@ -576,7 +576,7 @@ void StartRadarCalcTask(void const * argument)
 				CrashWarningLv = WARNING_HIGH;
 				osSemaphoreRelease(bSemSoundWarningSigHandle);
 			}
-			else if(TimetoCrash < 5.0f && VrelLong < 0 && MinRangeLong > 0)
+			else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
 			{
 				CrashWarningLv = WARNING_LOW;
 				osSemaphoreRelease(bSemSoundWarningSigHandle);
