@@ -88,7 +88,7 @@
 	#define VEHICLE_SPEED_ADDR	0x18FE6E0B
 #else	//KINGLONG
 	#define VEHICLE_SPEED_ADDR	0x18FE6C00
-	#define VEHICLE_SWTICH_ADDR	0x18FA0500
+	#define VEHICLE_SWITCH_ADDR	0x18FA0500
 #endif
 //	can3 id, gyro
 #define GYRO_ADDR 0x18FEE0D8
@@ -130,6 +130,7 @@ uint8_t RadarCANRxBuf[8]={0};
 uint8_t VehicleCANRxBuf[8]={0};
 uint8_t CrashWarningLv = WARNING_NONE;
 uint8_t VehicleSpeed = 0;
+uint8_t Vehicle_CAN_Flag = 0;
 uint16_t ADC_ConvertedValue[2] = {0};
 uint32_t DMA_Transfer_Complete_Count=0;
 
@@ -327,6 +328,23 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 		CAN_FILTER_FIFO0, 0, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
 	};
 	HAL_CAN_ConfigFilter(hcan, &VehicleCANFilter);
+  //config CAN3 filter to receive Vehicle switch data
+	//ID_HIGH,\
+	ID_LOW,\
+	MASK_HIGH,\
+	MASK_LOW,\
+	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
+  #if VEHICLE_MODEL == 0
+	CAN_FilterTypeDef VehicleSwitchCANFilter = {
+		VEHICLE_SWITCH_ADDR>>13 & 0xFFFF,\
+		((VEHICLE_SWITCH_ADDR & 0xFFFF) <<3) | 0x4,\
+		0xFF<<3 | 0xF,\
+		0xFF00<<3,\
+		CAN_FILTER_FIFO0, 1, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
+	};
+	HAL_CAN_ConfigFilter(hcan, &VehicleSwitchCANFilter);
+  #endif
+	
 	//config CAN3 filter to receive Gyro
 	//ID_HIGH,\
 	ID_LOW,\
@@ -337,7 +355,8 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 		(GYRO_ADDR>>13) & 0xFFFF,\
 		((GYRO_ADDR & 0xFFFF) <<3) | 0x4,\
 		0xFF<<3 | 0xF,\
-		0xFF00<<3,CAN_FILTER_FIFO0, 1, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
+		0xFF00<<3, \
+    CAN_FILTER_FIFO0, 2, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
 	};
 	HAL_CAN_ConfigFilter(hcan, &GyroCANFilter);
 	
@@ -385,7 +404,22 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     //  2 bytes(mid)must fit
 		//	Vehicle Speed
     else if((VEHICLE_SPEED_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSpeed ID
+    {
       osSemaphoreRelease(bSemSpeedRxSigHandle);
+      Vehicle_CAN_Flag = 1;
+    }
+    //  KINGLONG
+    #if VEHICLE_MODEL == 0
+		//	Vehicle Switch data
+    else if((VEHICLE_SWITCH_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSwitch ID
+    {
+      osSemaphoreRelease(bSemSpeedRxSigHandle);
+      Vehicle_CAN_Flag = 2;
+    }
+    #endif
+		else
+			Vehicle_CAN_Flag = 0;
+
     #endif
 	}
 	

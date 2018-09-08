@@ -27,12 +27,12 @@ Project File Date:  08/11/2018
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 1 (build 61)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'SensorFusion'
-compiling score.c...
-..\Src\score.c(6): warning:  #940-D: missing return statement at end of non-void function "CalcScore"
-  {;}
-..\Src\score.c: 1 warning, 0 errors
+compiling ARS408.c...
+..\Drivers\UserDriver\ARS408\ARS408.c(268): warning:  #186-D: pointless comparison of unsigned integer with zero
+    if(VehicleSpeed < 0)
+..\Drivers\UserDriver\ARS408\ARS408.c: 1 warning, 0 errors
 linking...
-Program Size: Code=28312 RO-data=892 RW-data=396 ZI-data=19772  
+Program Size: Code=25020 RO-data=900 RW-data=404 ZI-data=19684  
 "SensorFusion\SensorFusion.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
@@ -51,7 +51,7 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.1.1
-Build Time Elapsed:  00:00:05
+Build Time Elapsed:  00:00:06
 </pre>
 </body>
 </html>

@@ -31,8 +31,8 @@
  */
 #include "ARS408.h"
 
-#define CONFIG_ARS408_RADAR 1
-#define CONFIG_ARS408_FILTER 1
+#define CONFIG_ARS408_RADAR 0
+#define CONFIG_ARS408_FILTER 0
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
@@ -177,7 +177,7 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_Distance = (uint16_t)((200 - 0) / 0.1);
   FilterContent.FilterCfg_Min_Azimuth = (uint16_t)((-9 + 50) / 0.025);  //-9¡ã~9¡ã£¬offset -50, Res 0.025
   FilterContent.FilterCfg_Max_Azimuth = (uint16_t)((9 + 50) / 0.025);
-  FilterContent.FilterCfg_Min_VrelOncome = (uint16_t)((0.1 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Min_VrelOncome = (uint16_t)((0 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VrelOncome = (uint16_t)((100 - 0) / 0.0315);
   FilterContent.FilterCfg_Min_VrelDepart = (uint16_t)((0 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VrelDepart = (uint16_t)((100 - 0) / 0.0315);
@@ -193,9 +193,9 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_Y = (uint16_t)((1.5 + 409.5) / 0.2);
   FilterContent.FilterCfg_Min_X = (uint16_t)((0 + 500) / 0.2);          //0~200m, offset -500, Res 0.2
   FilterContent.FilterCfg_Max_X = (uint16_t)((200 + 500) / 0.2);
-  FilterContent.FilterCfg_Min_VYRightLeft = (uint16_t)((0.1 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
-  FilterContent.FilterCfg_Max_VYRightLeft = (uint16_t)(100 - 0) / 0.0315;
-  FilterContent.FilterCfg_Min_VXOncome = (uint16_t)((0.1 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Min_VYRightLeft = (uint16_t)((0 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Max_VYRightLeft = (uint16_t)((100 - 0) / 0.0315);
+  FilterContent.FilterCfg_Min_VXOncome = (uint16_t)((0 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VXOncome = (uint16_t)((100 - 0) / 0.0315);
   FilterContent.FilterCfg_Min_VYLeftRight = (uint16_t)((0 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VYLeftRight = (uint16_t)((100 - 0) / 0.0315);

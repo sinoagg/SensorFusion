@@ -14,8 +14,8 @@
 #define VEHICLE_MODEL 0
 
 #define DBC_SEND 0
-#define ADAS_COMM 1
+#define ADAS_COMM 0
 //	labview
 #define RADAR_DATA_SEND 0
 //	Atmosphere Sensor
-#define ATM_READ 1
+#define ATM_READ 0

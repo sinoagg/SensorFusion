@@ -93,6 +93,7 @@ extern uint8_t RadarCANRxBuf[];
 extern uint8_t CrashWarningLv;
 extern uint8_t VehicleCANRxBuf[];
 extern uint8_t VehicleSpeed;
+extern uint8_t Vehicle_CAN_Flag;
 extern uint8_t CmdRxBuf[];
 extern uint8_t CmdRadarDataTxBuf[];
 extern uint8_t ADASRxComplete;
@@ -110,6 +111,14 @@ extern float MinRangeLong;
 extern float VrelLong;
 extern float TimetoCrash;
 extern __IO float ADC_ConvertedValueF[2];
+
+struct
+{
+  uint8_t brake;
+  uint8_t right_turn;
+  uint8_t left_turn;
+}VehicleSwitch;
+
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
@@ -379,69 +388,74 @@ void StartSoundWarningTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);
-    switch(CrashWarningLv)				//Forward collision warning
-    {
-      case WARNING_HIGH:
-				#if ADAS_COMM
-				if(0 != ADAS_dev.crash_level)
-				{
-				#endif
+		if(VehicleSpeed > 5)
+		{
+			switch(CrashWarningLv)				//Forward collision warning
+			{
+				case WARNING_HIGH:
+					#if ADAS_COMM
+					if(0 != ADAS_dev.crash_level)
+					{
+					#endif
+						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
+						//HAL_GPIO_WritePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin, GPIO_PIN_RESET);
+						//WTN6_Broadcast(BELL_BB_500MS);
+						osDelay(1000);
+						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
+						//HAL_GPIO_WritePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin, GPIO_PIN_SET);
+					#if ADAS_COMM
+					}
+					#endif
+					break;
+				case WARNING_LOW:
+					#if ADAS_COMM
+					if(0 != ADAS_dev.crash_level)
+					{
+					#endif
+						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
+						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
+						//WTN6_Broadcast(BELL_BB_1000MS);
+						osDelay(500);
+						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
+					#if ADAS_COMM
+					}
+					#endif
+					break;
+				default:
+					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_SET);
+					break;
+			}
+
+			#if ADAS_COMM
+			switch(ADAS_dev.LDW_warning)	//Lane departure warning
+			{
+				case 0x01:	//left
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 					//WTN6_Broadcast(BELL_BB_500MS);
-					osDelay(1000);
+					osDelay(2000);
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
-				#if ADAS_COMM
-				}
-				#endif
-        break;
-      case WARNING_LOW:
-				#if ADAS_COMM
-				if(0 != ADAS_dev.crash_level)
-				{
-				#endif
+					break;
+				case 0x02:	//right
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 					//WTN6_Broadcast(BELL_BB_1000MS);
-					osDelay(500);
+					osDelay(2000);
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
-				#if ADAS_COMM
-				}
-				#endif
-        break;
-      default:
-        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin,GPIO_PIN_SET);
-        break;
-    }
-
-    #if ADAS_COMM
-    switch(ADAS_dev.LDW_warning)	//Lane departure warning
-    {
-      case 0x01:	//left
-        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
-				HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
-        //WTN6_Broadcast(BELL_BB_500MS);
-        osDelay(2000);
-        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
-        break;
-      case 0x02:	//right
-        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
-				HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
-        //WTN6_Broadcast(BELL_BB_1000MS);
-        osDelay(2000);
-        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
-        break;
-      default:
-				HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
-        HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
-        break;
-    }
-    #endif
+					break;
+				default:
+					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
+					break;
+			}
+			#endif
+		}
 		osDelay(10);
   }
   /* USER CODE END StartSoundWarningTask */
@@ -507,13 +521,29 @@ void StartCANSpeedReadTask(void const * argument)
 			#endif
     }
     #else   //KINGLONG
-    VehicleSpeed = VehicleCANRxBuf[7];  	//vehicle speed in hex,km/h
+    if(1 == Vehicle_CAN_Flag) //VehicleSpeed ID
+    {
+      VehicleSpeed = VehicleCANRxBuf[7];  	//vehicle speed in hex,km/h
+
 			//ARS408
       #if RADAR_TYPE
       ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);	//send VehicleSpeed to Radar
       //EMRR
       #else
       #endif
+			
+			Vehicle_CAN_Flag = 0;
+    }
+    else if(2 == Vehicle_CAN_Flag)	//VehicleSwitch ID
+    {
+      if(VehicleCANRxBuf[0] == 1)		//pack number == 1
+      {
+        VehicleSwitch.brake = VehicleCANRxBuf[2] & 0x3;
+				VehicleSwitch.right_turn = (VehicleCANRxBuf[4] & 0xC) >> 2;
+				VehicleSwitch.left_turn = (VehicleCANRxBuf[4] & 0x30) >> 4;
+      }
+			Vehicle_CAN_Flag = 0;
+    }
     #endif
     
 		osDelay(10);
@@ -546,7 +576,7 @@ void StartRadarCalcTask(void const * argument)
 				CrashWarningLv = WARNING_HIGH;
 				osSemaphoreRelease(bSemSoundWarningSigHandle);
 			}
-			else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
+			else if(TimetoCrash < 5.0f && VrelLong < 0 && MinRangeLong > 0)
 			{
 				CrashWarningLv = WARNING_LOW;
 				osSemaphoreRelease(bSemSoundWarningSigHandle);
