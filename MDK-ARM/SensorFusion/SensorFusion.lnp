@@ -8,6 +8,7 @@
 "sensorfusion\cmd.o"
 "sensorfusion\emrr.o"
 "sensorfusion\mpu6050.o"
+"sensorfusion\score.o"
 "sensorfusion\freertos.o"
 "sensorfusion\stm32f4xx_it.o"
 "sensorfusion\stm32f4xx_hal_timebase_tim.o"

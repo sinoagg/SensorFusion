@@ -31,8 +31,8 @@
  */
 #include "ARS408.h"
 
-#define CONFIG_ARS408_RADAR 0
-#define CONFIG_ARS408_FILTER 0
+#define CONFIG_ARS408_RADAR 1
+#define CONFIG_ARS408_FILTER 1
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
@@ -61,6 +61,13 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 		0xEFE<<5, 0,\
 		CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B & 0x60A at the same time
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
+		
+	/*CAN_FilterTypeDef MW_RadarCANFilter1 = {
+		0x201<<5, 0,\
+		0xEFE<<5, 0,\
+		CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,15};		//0x60B & 0x60A at the same time
+	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter1);*/
+	
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 	
@@ -95,10 +102,10 @@ void RadarConfig_func()
   RadarConfig.CtrlRelay = RADARCFG_CTRLRELEY;
   RadarConfig.SendQuality = RADARCFG_SENDQUALITY;
   RadarConfig.SendExtInfo = RADARCFG_SENDEXTINFO;
-  RadarConfig.SortIndex = RADARCFG_SORTINDEX_RANGE;
+  RadarConfig.SortIndex = RADARCFG_SORTINDEX_RCS;
   RadarConfig.StoreInNVM = RADARCFG_STOREINNVM;
   RadarConfig.RCS_Threshold_valid = RADARCFG_RCS_THRES_VALID;
-  RadarConfig.RCS_Threshold = RADARCFG_RCSTHRES_STD;
+  RadarConfig.RCS_Threshold = RADARCFG_RCSTHRES_HIGHSENSE;
 }
 
 /** 
@@ -144,13 +151,19 @@ void RadarFilterConfig_func(uint8_t index)
  */
 uint8_t FilterContentCfg_func(CAN_HandleTypeDef *hcan, uint8_t index, uint16_t filter_min, uint16_t filter_max)
 {
+	HAL_Delay(10);
 	uint32_t CAN_TxMailBox=CAN_TX_MAILBOX0;
 	uint8_t CANTxBuf[8]={0};
+	uint8_t Valid_Bits;
+	if(index == 0x0A)
+		Valid_Bits = 0x1F;
+	else
+		Valid_Bits = 0x0F;
   RadarFilterConfig_func(index);
 	CANTxBuf[0] = RadarFilterConfig.FilterCfg_Type|RadarFilterConfig.FilterCfg_Index|RadarFilterConfig.FilterCfg_Active|RadarFilterConfig.FilterCfg_Valid;
-	CANTxBuf[1] = (filter_min>>8) & 0x1F;
+	CANTxBuf[1] = (filter_min>>8) & Valid_Bits;
 	CANTxBuf[2] = filter_min & 0xFF;
-	CANTxBuf[3] = (filter_max>>8) & 0x1F;
+	CANTxBuf[3] = (filter_max>>8) & Valid_Bits;
 	CANTxBuf[4] = filter_max & 0xFF;
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxConfigFilterHeader, CANTxBuf, &CAN_TxMailBox);
 	return 0;
@@ -166,15 +179,15 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_Azimuth = (uint16_t)((9 + 50) / 0.025);
   FilterContent.FilterCfg_Min_VrelOncome = (uint16_t)((0.1 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VrelOncome = (uint16_t)((100 - 0) / 0.0315);
-  FilterContent.FilterCfg_Min_VrelDepart = (uint16_t)((0.1 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Min_VrelDepart = (uint16_t)((0 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VrelDepart = (uint16_t)((100 - 0) / 0.0315);
-  FilterContent.FilterCfg_Min_RCS = (uint16_t)((0.025 + 50) / 0.025);   //0.025~30dBm2, offset -50, Res 0.025
-  FilterContent.FilterCfg_Max_RCS = (uint16_t)((30 + 50) / 0.025);
-  FilterContent.FilterCfg_Min_Lifetime = (uint16_t)((0.1 - 0) / 0.1);   //0.1~409.5s, offset 0, Res 0.1
+  FilterContent.FilterCfg_Min_RCS = (uint16_t)((-50 + 50) / 0.025);   //0.025~30dBm2, offset -50, Res 0.025
+  FilterContent.FilterCfg_Max_RCS = (uint16_t)((52.375 + 50) / 0.025);
+  FilterContent.FilterCfg_Min_Lifetime = (uint16_t)((0 - 0) / 0.1);   //0.1~409.5s, offset 0, Res 0.1
   FilterContent.FilterCfg_Max_Lifetime = (uint16_t)((409.5 - 0) / 0.1);
-  FilterContent.FilterCfg_Min_Size = (uint16_t)((0.025 - 0) / 0.025);   //0.025~20m2, offset 0, Res 0.025
-  FilterContent.FilterCfg_Max_Size = (uint16_t)((20 - 0) / 0.025);
-  FilterContent.FilterCfg_Min_ProbExists = 0x5;//99%~100%, 0x0: 0%, 0x1: 25%, 0x2: 50%
+  FilterContent.FilterCfg_Min_Size = (uint16_t)((0 - 0) / 0.025);   //0.025~20m2, offset 0, Res 0.025
+  FilterContent.FilterCfg_Max_Size = (uint16_t)((102.375 - 0) / 0.025);
+  FilterContent.FilterCfg_Min_ProbExists = 0x4;//99%~100%, 0x0: 0%, 0x1: 25%, 0x2: 50%
   FilterContent.FilterCfg_Max_ProbExists = 0x7;//0x3: 75%, 0x4: 90%, 0x5: 99%, 0x6: 99.9%, 0x7: 100%
   FilterContent.FilterCfg_Min_Y = (uint16_t)((-1.5 + 409.5) / 0.2);     //-1.5~1.5m, offset -409.5, Res 0.2
   FilterContent.FilterCfg_Max_Y = (uint16_t)((1.5 + 409.5) / 0.2);
@@ -184,11 +197,11 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_VYRightLeft = (uint16_t)(100 - 0) / 0.0315;
   FilterContent.FilterCfg_Min_VXOncome = (uint16_t)((0.1 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VXOncome = (uint16_t)((100 - 0) / 0.0315);
-  FilterContent.FilterCfg_Min_VYLeftRight = (uint16_t)((0.1 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Min_VYLeftRight = (uint16_t)((0 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VYLeftRight = (uint16_t)((100 - 0) / 0.0315);
-  FilterContent.FilterCfg_Min_VXDepart = (uint16_t)((0.1 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
+  FilterContent.FilterCfg_Min_VXDepart = (uint16_t)((0 - 0) / 0.0315);   //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VXDepart = (uint16_t)((100 - 0) / 0.0315);
-  FilterContent.FilterCfg_Min_Object_Class = 0x5;//0x0: point, 0x1: car, 0x2: truck, 0x3: not used
+  FilterContent.FilterCfg_Min_Object_Class = 0x0;//0x0: point, 0x1: car, 0x2: truck, 0x3: not used
   FilterContent.FilterCfg_Max_Object_Class = 0x2;//0x4: motorcyc, 0x5: bicycle, 0x6: wide, 0x7: reserved
 
   FilterContentCfg_func(hcan, FILTERCFG_INDEX_NOFOBJ, FilterContent.FilterCfg_Min_NofObj, FilterContent.FilterCfg_Max_NofObj);
@@ -206,7 +219,7 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContentCfg_func(hcan, FILTERCFG_INDEX_VXONCOME, FilterContent.FilterCfg_Min_VXOncome, FilterContent.FilterCfg_Max_VXOncome);
   FilterContentCfg_func(hcan, FILTERCFG_INDEX_VYLEFTRIGHT, FilterContent.FilterCfg_Min_VYLeftRight, FilterContent.FilterCfg_Max_VYLeftRight);
   FilterContentCfg_func(hcan, FILTERCFG_INDEX_VXDEPART, FilterContent.FilterCfg_Min_VXDepart, FilterContent.FilterCfg_Max_VXDepart);
-  FilterContentCfg_func(hcan, FILTERCFG_INDEX_OBJCLASS, FilterContent.FilterCfg_Min_Object_Class, FilterContent.FilterCfg_Max_Object_Class);
+  //FilterContentCfg_func(hcan, FILTERCFG_INDEX_OBJCLASS, FilterContent.FilterCfg_Min_Object_Class, FilterContent.FilterCfg_Max_Object_Class);
 
   return 0;
 }
