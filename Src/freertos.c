@@ -136,6 +136,7 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* USER CODE BEGIN FunctionPrototypes */
 extern uint8_t DBC_Init(CAN_HandleTypeDef *hcan);
+extern uint8_t Gyro_CAN_Init(CAN_HandleTypeDef *hcan);
 extern uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan);
 /* USER CODE END FunctionPrototypes */
 
@@ -255,7 +256,11 @@ void MX_FREERTOS_Init(void)
   /* add queues, ... */
 	
 	//hcan1~hcan3 init, start
+  #if GYRO_CAN == 1
+  Gyro_CAN_Init(&hcan1);
+  #else
 	DBC_Init(&hcan1);
+  #endif
 	//ARS408
 	#if RADAR_TYPE
   ARS_Init(&hcan2);//hcan2 must use hcan1
@@ -494,7 +499,7 @@ void StartGyroCommTask(void const * argument)
 				Turning_Collision = 0;
 			}
     #endif
-		osDelay(10);
+		osDelay(100);
   }
   /* USER CODE END StartGyroCommTask */
 }
@@ -546,7 +551,7 @@ void StartCANSpeedReadTask(void const * argument)
     }
     #endif
     
-		osDelay(10);
+		osDelay(100);
   }
   /* USER CODE END StartCANSpeedReadTask */
 }

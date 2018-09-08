@@ -312,6 +312,31 @@ uint8_t DBC_Init(CAN_HandleTypeDef *hcan)
   return 0;
 }
 
+uint8_t Gyro_CAN_Init(CAN_HandleTypeDef *hcan)
+{
+	//#if GYRO_CAN == 3
+	//config CAN filter to receive Gyro
+	//ID_HIGH,\
+	ID_LOW,\
+	MASK_HIGH,\
+	MASK_LOW,\
+	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
+	CAN_FilterTypeDef GyroCANFilter = {
+		(GYRO_ADDR>>13) & 0xFFFF,\
+		((GYRO_ADDR & 0xFFFF) <<3) | 0x4,\
+		0xFF<<3 | 0xF,\
+		0xFF00<<3, \
+    CAN_FILTER_FIFO0, 0, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
+	};
+	HAL_CAN_ConfigFilter(hcan, &GyroCANFilter);
+	//#endif
+
+	HAL_CAN_Start(hcan);
+	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+
+  return 0;
+}
+
 uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 {
 	//config CAN3 filter to receive Vehicle Speed
@@ -325,7 +350,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 		((VEHICLE_SPEED_ADDR & 0xFFFF) <<3) | 0x4,\
 		0xFF<<3 | 0xF,\
 		0xFF00<<3,\
-		CAN_FILTER_FIFO0, 0, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
+		CAN_FILTER_FIFO0, 1, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
 	};
 	HAL_CAN_ConfigFilter(hcan, &VehicleCANFilter);
   //config CAN3 filter to receive Vehicle switch data
@@ -340,25 +365,10 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 		((VEHICLE_SWITCH_ADDR & 0xFFFF) <<3) | 0x4,\
 		0xFF<<3 | 0xF,\
 		0xFF00<<3,\
-		CAN_FILTER_FIFO0, 1, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
+		CAN_FILTER_FIFO0, 2, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
 	};
 	HAL_CAN_ConfigFilter(hcan, &VehicleSwitchCANFilter);
   #endif
-	
-	//config CAN3 filter to receive Gyro
-	//ID_HIGH,\
-	ID_LOW,\
-	MASK_HIGH,\
-	MASK_LOW,\
-	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
-	CAN_FilterTypeDef GyroCANFilter = {
-		(GYRO_ADDR>>13) & 0xFFFF,\
-		((GYRO_ADDR & 0xFFFF) <<3) | 0x4,\
-		0xFF<<3 | 0xF,\
-		0xFF00<<3, \
-    CAN_FILTER_FIFO0, 2, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
-	};
-	HAL_CAN_ConfigFilter(hcan, &GyroCANFilter);
 	
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
@@ -374,10 +384,23 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
  */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
+	if(hcan->Instance == hcan1.Instance)
+	{
+		#if GYRO_CAN == 1
+		HAL_CAN_GetRxMessage(&hcan1, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
+		//Gyroscope
+    if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
+		{
+			//start gyro semaphore
+      osSemaphoreRelease(bSemGyroCommSigHandle);
+			HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
+		}
+		#endif
+	}
   if(hcan->Instance == hcan2.Instance)
   {
   	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
-		
+		// send RADAR data to CAN1(for debug)
 		uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
 		CAN_TxDBCHeader.StdId = RadarCANRxHeader.StdId;
 		HAL_CAN_AddTxMessage(&hcan1, &CAN_TxDBCHeader, RadarCANRxBuf, &CAN_TxMailBox);
@@ -393,17 +416,20 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   }
 	if(hcan->Instance == hcan3.Instance)
 	{
-    #if CAN_READ_VEHICLE
 		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
 		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
+		
+		#if GYRO_CAN == 3
 		//Gyroscope
     if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
       //start gyro semaphore
       osSemaphoreRelease(bSemGyroCommSigHandle);
+		#endif
       
+		#if CAN_READ_VEHICLE
     //  2 bytes(mid)must fit
 		//	Vehicle Speed
-    else if((VEHICLE_SPEED_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSpeed ID
+    if((VEHICLE_SPEED_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSpeed ID
     {
       osSemaphoreRelease(bSemSpeedRxSigHandle);
       Vehicle_CAN_Flag = 1;

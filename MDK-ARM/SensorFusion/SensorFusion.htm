@@ -3,7 +3,7 @@
 <title>Static Call Graph - [SensorFusion\SensorFusion.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image SensorFusion\SensorFusion.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Sat Sep 08 16:05:28 2018
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Sat Sep 08 22:01:55 2018
 <BR><P>
 <H3>Maximum Stack Usage =        344 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -456,6 +456,7 @@ Global Symbols
 <P><STRONG><a name="[91]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ARS_Init
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Vehicle_CAN_Init
+<LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Gyro_CAN_Init
 <LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_FREERTOS_Init
 </UL>
 
@@ -667,46 +668,38 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartADASCommTask
 </UL>
 
-<P><STRONG><a name="[9a]"></a>DBC_Init</STRONG> (Thumb, 14 bytes, Stack size 8 bytes, main.o(i.DBC_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = DBC_Init &rArr; HAL_CAN_Start
-</UL>
-<BR>[Calls]<UL><LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_Start
-</UL>
-<BR>[Called By]<UL><LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_FREERTOS_Init
-</UL>
-
 <P><STRONG><a name="[16]"></a>DMA1_Stream0_IRQHandler</STRONG> (Thumb, 10 bytes, Stack size 8 bytes, stm32f4xx_it.o(i.DMA1_Stream0_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = DMA1_Stream0_IRQHandler &rArr; HAL_DMA_IRQHandler
 </UL>
-<BR>[Calls]<UL><LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
+<BR>[Calls]<UL><LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f413xx.o(RESET)
 </UL>
 <P><STRONG><a name="[17]"></a>DMA1_Stream1_IRQHandler</STRONG> (Thumb, 10 bytes, Stack size 8 bytes, stm32f4xx_it.o(i.DMA1_Stream1_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = DMA1_Stream1_IRQHandler &rArr; HAL_DMA_IRQHandler
 </UL>
-<BR>[Calls]<UL><LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
+<BR>[Calls]<UL><LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f413xx.o(RESET)
 </UL>
 <P><STRONG><a name="[1b]"></a>DMA1_Stream5_IRQHandler</STRONG> (Thumb, 10 bytes, Stack size 8 bytes, stm32f4xx_it.o(i.DMA1_Stream5_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = DMA1_Stream5_IRQHandler &rArr; HAL_DMA_IRQHandler
 </UL>
-<BR>[Calls]<UL><LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
+<BR>[Calls]<UL><LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f413xx.o(RESET)
 </UL>
 <P><STRONG><a name="[43]"></a>DMA2_Stream0_IRQHandler</STRONG> (Thumb, 10 bytes, Stack size 8 bytes, stm32f4xx_it.o(i.DMA2_Stream0_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = DMA2_Stream0_IRQHandler &rArr; HAL_DMA_IRQHandler
 </UL>
-<BR>[Calls]<UL><LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
+<BR>[Calls]<UL><LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f413xx.o(RESET)
 </UL>
 <P><STRONG><a name="[45]"></a>DMA2_Stream2_IRQHandler</STRONG> (Thumb, 10 bytes, Stack size 8 bytes, stm32f4xx_it.o(i.DMA2_Stream2_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = DMA2_Stream2_IRQHandler &rArr; HAL_DMA_IRQHandler
 </UL>
-<BR>[Calls]<UL><LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
+<BR>[Calls]<UL><LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f413xx.o(RESET)
 </UL>
@@ -722,9 +715,20 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
 <LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_AddTxMessage
-<LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RadarFilterConfig_func
+<LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RadarFilterConfig_func
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ARS_ConfigFilter
+</UL>
+
+<P><STRONG><a name="[9c]"></a>Gyro_CAN_Init</STRONG> (Thumb, 44 bytes, Stack size 48 bytes, main.o(i.Gyro_CAN_Init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = Gyro_CAN_Init &rArr; HAL_CAN_Start
+</UL>
+<BR>[Calls]<UL><LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_Start
+<LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_ConfigFilter
+<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_ActivateNotification
+<LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
+</UL>
+<BR>[Called By]<UL><LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_FREERTOS_Init
 </UL>
 
 <P><STRONG><a name="[f0]"></a>HAL_ADC_ConfigChannel</STRONG> (Thumb, 380 bytes, Stack size 16 bytes, stm32f4xx_hal_adc_1.o(i.HAL_ADC_ConfigChannel))
@@ -755,6 +759,7 @@ Global Symbols
 <P><STRONG><a name="[94]"></a>HAL_CAN_ActivateNotification</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, stm32f4xx_hal_can.o(i.HAL_CAN_ActivateNotification))
 <BR><BR>[Called By]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ARS_Init
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Vehicle_CAN_Init
+<LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Gyro_CAN_Init
 </UL>
 
 <P><STRONG><a name="[8f]"></a>HAL_CAN_AddTxMessage</STRONG> (Thumb, 298 bytes, Stack size 16 bytes, stm32f4xx_hal_can.o(i.HAL_CAN_AddTxMessage))
@@ -772,6 +777,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ARS_Init
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Vehicle_CAN_Init
+<LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Gyro_CAN_Init
 </UL>
 
 <P><STRONG><a name="[af]"></a>HAL_CAN_ErrorCallback</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f4xx_hal_can.o(i.HAL_CAN_ErrorCallback))
@@ -831,7 +837,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_IRQHandler
 </UL>
 
-<P><STRONG><a name="[aa]"></a>HAL_CAN_RxFifo0MsgPendingCallback</STRONG> (Thumb, 178 bytes, Stack size 16 bytes, main.o(i.HAL_CAN_RxFifo0MsgPendingCallback))
+<P><STRONG><a name="[aa]"></a>HAL_CAN_RxFifo0MsgPendingCallback</STRONG> (Thumb, 208 bytes, Stack size 16 bytes, main.o(i.HAL_CAN_RxFifo0MsgPendingCallback))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = HAL_CAN_RxFifo0MsgPendingCallback &rArr; osSemaphoreRelease &rArr; xQueueGenericSend &rArr; vTaskPlaceOnEventList &rArr; prvAddCurrentTaskToDelayedList &rArr; vListInsert
 </UL>
 <BR>[Calls]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_AddTxMessage
@@ -861,7 +867,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ARS_Init
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Vehicle_CAN_Init
-<LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DBC_Init
+<LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Gyro_CAN_Init
 </UL>
 
 <P><STRONG><a name="[a4]"></a>HAL_CAN_TxMailbox0AbortCallback</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f4xx_hal_can.o(i.HAL_CAN_TxMailbox0AbortCallback))
@@ -918,7 +924,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_IRQHandler
 </UL>
 
-<P><STRONG><a name="[9b]"></a>HAL_DMA_IRQHandler</STRONG> (Thumb, 570 bytes, Stack size 24 bytes, stm32f4xx_hal_dma.o(i.HAL_DMA_IRQHandler))
+<P><STRONG><a name="[9a]"></a>HAL_DMA_IRQHandler</STRONG> (Thumb, 570 bytes, Stack size 24 bytes, stm32f4xx_hal_dma.o(i.HAL_DMA_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = HAL_DMA_IRQHandler
 </UL>
 <BR>[Called By]<UL><LI><a href="#[45]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA2_Stream2_IRQHandler
@@ -1157,12 +1163,12 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[d1]"></a>HAL_TIM_ConfigClockSource</STRONG> (Thumb, 306 bytes, Stack size 24 bytes, stm32f4xx_hal_tim.o(i.HAL_TIM_ConfigClockSource))
-<BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = HAL_TIM_ConfigClockSource &rArr; TIM_TI1_ConfigInputStage
+<BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = HAL_TIM_ConfigClockSource &rArr; TIM_ETR_SetConfig
 </UL>
-<BR>[Calls]<UL><LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_TI1_ConfigInputStage
-<LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_ITRx_SetConfig
+<BR>[Calls]<UL><LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_ITRx_SetConfig
 <LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_ETR_SetConfig
 <LI><a href="#[d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_TI2_ConfigInputStage
+<LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_TI1_ConfigInputStage
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_TIM3_Init
 <LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_TIM2_Init
@@ -1368,7 +1374,7 @@ Global Symbols
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreWait
 <LI><a href="#[f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreCreate
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Vehicle_CAN_Init
-<LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DBC_Init
+<LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Gyro_CAN_Init
 <LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -1384,7 +1390,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[fd]"></a>MX_TIM2_Init</STRONG> (Thumb, 92 bytes, Stack size 32 bytes, tim.o(i.MX_TIM2_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 68<LI>Call Chain = MX_TIM2_Init &rArr; HAL_TIM_ConfigClockSource &rArr; TIM_TI1_ConfigInputStage
+<BR><BR>[Stack]<UL><LI>Max Depth = 68<LI>Call Chain = MX_TIM2_Init &rArr; HAL_TIM_ConfigClockSource &rArr; TIM_ETR_SetConfig
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_ConfigClockSource
 <LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIMEx_MasterConfigSynchronization
@@ -1395,7 +1401,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[ff]"></a>MX_TIM3_Init</STRONG> (Thumb, 90 bytes, Stack size 32 bytes, tim.o(i.MX_TIM3_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 68<LI>Call Chain = MX_TIM3_Init &rArr; HAL_TIM_ConfigClockSource &rArr; TIM_TI1_ConfigInputStage
+<BR><BR>[Stack]<UL><LI>Max Depth = 68<LI>Call Chain = MX_TIM3_Init &rArr; HAL_TIM_ConfigClockSource &rArr; TIM_ETR_SetConfig
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_ConfigClockSource
 <LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIMEx_MasterConfigSynchronization
@@ -1451,7 +1457,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ARS_ConfigRadar
 </UL>
 
-<P><STRONG><a name="[9c]"></a>RadarFilterConfig_func</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, ars408.o(i.RadarFilterConfig_func))
+<P><STRONG><a name="[9b]"></a>RadarFilterConfig_func</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, ars408.o(i.RadarFilterConfig_func))
 <BR><BR>[Called By]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FilterContentCfg_func
 </UL>
 
@@ -1596,8 +1602,8 @@ Global Symbols
 <P><STRONG><a name="[6]"></a>UsageFault_Handler</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, stm32f4xx_it.o(i.UsageFault_Handler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f413xx.o(RESET)
 </UL>
-<P><STRONG><a name="[fa]"></a>Vehicle_CAN_Init</STRONG> (Thumb, 84 bytes, Stack size 128 bytes, main.o(i.Vehicle_CAN_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = Vehicle_CAN_Init &rArr; HAL_CAN_Start
+<P><STRONG><a name="[fa]"></a>Vehicle_CAN_Init</STRONG> (Thumb, 64 bytes, Stack size 88 bytes, main.o(i.Vehicle_CAN_Init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = Vehicle_CAN_Init &rArr; HAL_CAN_Start
 </UL>
 <BR>[Calls]<UL><LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_Start
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_ConfigFilter
