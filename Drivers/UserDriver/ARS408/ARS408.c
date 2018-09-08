@@ -30,9 +30,14 @@
  * ARS_SendVehicleYaw(...): send VehicleYaw through can2, yaw read from can3
  */
 #include "ARS408.h"
+#include "math.h"
 
 #define CONFIG_ARS408_RADAR 1
 #define CONFIG_ARS408_FILTER 1
+
+#define VEHICLE_CENTRE_LEN	10.0f
+#define VEHICLE_HALF_WIDTH	1.4f
+#define OBSTACLE_ERR				0.0f
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
@@ -291,3 +296,37 @@ void ARS_SendVehicleYaw(CAN_HandleTypeDef *hcan, float YawRate)
 	CANTxBuf[1] = YawRate_int & 0xFF;
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxYawHeader, CANTxBuf, &CAN_TxMailBox);
 }
+
+
+/** 
+ * @brief  Calculate Turning cross 
+ * @note   Vehicle Speed should read from Vehicle CAN
+ * @param  *pRadargGeneral_Closet: Closet obj
+ * @param  YawRate: °/s
+ * @param  VehicleSpeed: km/h 
+ * @retval 1 Obstacle is in the way
+ *				 0 Obstacle is not in the way
+ */
+uint8_t ARS_CalcTurn(MW_RadarGeneral *pRadargGeneral_Closet, float YawRate, float VehicleSpeed)
+{
+	float Rotate_R, Min_R, Max_R, Obstacle_X, Obstacle_Y, Obstacle_Dis, RangeLong_Closet, RangeLat_Closet;
+  RangeLong_Closet = (pRadargGeneral_Closet->Obj_DistLong * 0.2) - 500;
+  RangeLat_Closet = (pRadargGeneral_Closet->Obj_DistLat * 0.2) - 204.6f;
+  VehicleSpeed /= 3.6f;  //  km/h to m/s
+
+	Rotate_R = (VehicleSpeed * 180) / (YawRate * 3.14f);	//Rotate_R = V / ω
+	Rotate_R = (Rotate_R < 0) ? -Rotate_R : Rotate_R;
+	Min_R = Rotate_R - VEHICLE_HALF_WIDTH;
+	Max_R = sqrt((Rotate_R + VEHICLE_HALF_WIDTH) * (Rotate_R + VEHICLE_HALF_WIDTH) + \
+								 VEHICLE_CENTRE_LEN * VEHICLE_CENTRE_LEN);
+	//如果最近位置在最大，最小距离之间，即转弯的车道内，就返回1，否则返回0
+	Obstacle_X = RangeLong_Closet + VEHICLE_CENTRE_LEN;
+	Obstacle_Y = -RangeLat_Closet + Rotate_R;
+	Obstacle_Dis = sqrt(Obstacle_X * Obstacle_X + Obstacle_Y * Obstacle_Y);
+	
+	if((Obstacle_Dis < Max_R + OBSTACLE_ERR) && (Obstacle_Dis > Min_R - OBSTACLE_ERR))
+		return 1;
+	else
+		return 0;
+}
+

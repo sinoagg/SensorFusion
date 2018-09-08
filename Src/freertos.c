@@ -484,6 +484,19 @@ void StartGyroCommTask(void const * argument)
 		//ARS408
 		#if RADAR_TYPE
 			ARS_SendVehicleYaw(&hcan2, yawRate);  //send VehicleYaw to Radar-ARS408
+		
+		/*
+			if(yawRate > 7 || yawRate < -7)
+      {
+        Turning_Flag = 1;
+		  	Turning_Collision = ARS_CalcTurn(RadarGeneral, yawRate, VehicleSpeed);
+      }
+			else
+			{
+				Turning_Flag = 0;
+				Turning_Collision = 0;
+			}
+		*/
 		//EMRR
 		#else
 			//yawRate = 100;
@@ -491,7 +504,7 @@ void StartGyroCommTask(void const * argument)
       if(yawRate > 10 || yawRate < -10)
       {
         Turning_Flag = 1;
-		  	//Turning_Collision = CalcTurn(&EMRRGeneral_Closet, yawRate, VehicleSpeed);
+		  	//Turning_Collision = EMRR_CalcTurn(&EMRRGeneral_Closet, yawRate, VehicleSpeed);
       }
 			else
 			{

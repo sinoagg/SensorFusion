@@ -237,6 +237,7 @@ void ARS_GetRadarObjStatus(uint8_t* pCANRxBuf, MW_RadarObjStatus *pRadarObjStatu
 void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral);
 void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan, uint16_t VehicleSpeed);
 void ARS_SendVehicleYaw(CAN_HandleTypeDef *hcan,float YawRate);
+uint8_t ARS_CalcTurn(MW_RadarGeneral *pRadargGeneral_Closet, float YawRate, float VehicleSpeed);
 
 #endif
 

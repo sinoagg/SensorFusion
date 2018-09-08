@@ -139,13 +139,15 @@ void EMRR_GetRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral
  * @note   Vehicle Speed should read from Vehicle CAN
  * @param  *pRadargGeneral_Closet: Closet obj
  * @param  YawRate: °/s
- * @param  VehicleSpeed: m/s 
+ * @param  VehicleSpeed: km/h 
  * @retval 1 Obstacle is in the way
  *				 0 Obstacle is not in the way
  */
 uint8_t EMRR_CalcTurn(EMRR_RadarGeneral *pRadargGeneral_Closet, float YawRate, float VehicleSpeed)
 {
 	float Rotate_R, Min_R, Max_R, Obstacle_X, Obstacle_Y, Obstacle_Dis;
+  VehicleSpeed /= 3.6f;  //  km/h to m/s
+	
 	Rotate_R = (VehicleSpeed * 180) / (YawRate * 3.14f);	//Rotate_R = V / ω
 	Rotate_R = (Rotate_R < 0) ? -Rotate_R : Rotate_R;
 	Min_R = Rotate_R - VEHICLE_HALF_WIDTH;
