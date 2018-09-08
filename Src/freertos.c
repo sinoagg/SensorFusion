@@ -584,24 +584,27 @@ void StartRadarCalcTask(void const * argument)
 		MinRange = RadarGeneral[0].Obj_DistLong;
 		relSpeed = RadarGeneral[0].Obj_VrelLong;
 		
-		if((0.2*MinRange-500) < LIMIT_RANGE && MinRange != 0)	//calculate when dist is near enough
-		{
-			VrelLong = 0.25 * relSpeed - 128;						//get real relative speed
-			MinRangeLong = 0.2 * MinRange - 500;				//get real range(longitude)
-			TimetoCrash = -(float)MinRangeLong/VrelLong;//relative Velocity is minus
-			if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
+//		if(!Turning_Flag || (Turning_Flag && Turning_Collision))
+//		{
+			if((0.2*MinRange-500) < LIMIT_RANGE && MinRange != 0)	//calculate when dist is near enough
 			{
-				CrashWarningLv = WARNING_HIGH;
-				osSemaphoreRelease(bSemSoundWarningSigHandle);
+				VrelLong = 0.25 * relSpeed - 128;						//get real relative speed
+				MinRangeLong = 0.2 * MinRange - 500;				//get real range(longitude)
+				TimetoCrash = -(float)MinRangeLong/VrelLong;//relative Velocity is minus
+				if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
+				{
+					CrashWarningLv = WARNING_HIGH;
+					osSemaphoreRelease(bSemSoundWarningSigHandle);
+				}
+				else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
+				{
+					CrashWarningLv = WARNING_LOW;
+					osSemaphoreRelease(bSemSoundWarningSigHandle);
+				}
+				else
+					CrashWarningLv = WARNING_NONE;
 			}
-			else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
-			{
-				CrashWarningLv = WARNING_LOW;
-				osSemaphoreRelease(bSemSoundWarningSigHandle);
-			}
-			else
-				CrashWarningLv = WARNING_NONE;
-		}
+//		}
 
     //EMRR
 		#else
