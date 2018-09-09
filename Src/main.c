@@ -403,9 +403,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   {
   	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
 		// send RADAR data to CAN1(for debug)
-//		uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
-//		CAN_TxDBCHeader.StdId = RadarCANRxHeader.StdId;
-//		HAL_CAN_AddTxMessage(&hcan1, &CAN_TxDBCHeader, RadarCANRxBuf, &CAN_TxMailBox);
+		uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
+		CAN_TxDBCHeader.StdId = RadarCANRxHeader.StdId;
+		HAL_CAN_AddTxMessage(&hcan1, &CAN_TxDBCHeader, RadarCANRxBuf, &CAN_TxMailBox);
 		
   	osSemaphoreRelease(bSemRadarCANRxSigHandle);
 		//ARS408

@@ -37,7 +37,7 @@
 
 #define VEHICLE_CENTRE_LEN	10.0f
 #define VEHICLE_HALF_WIDTH	1.4f
-#define OBSTACLE_ERR				0.0f
+#define OBSTACLE_ERR				-0.5f
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
@@ -312,6 +312,7 @@ uint8_t ARS_CalcTurn(MW_RadarGeneral *pRadargGeneral_Closet, float YawRate, floa
 	float Rotate_R, Min_R, Max_R, Obstacle_X, Obstacle_Y, Obstacle_Dis, RangeLong_Closet, RangeLat_Closet;
   RangeLong_Closet = (pRadargGeneral_Closet->Obj_DistLong * 0.2) - 500;
   RangeLat_Closet = (pRadargGeneral_Closet->Obj_DistLat * 0.2) - 204.6f;
+	RangeLat_Closet = (RangeLat_Closet < 0) ? -RangeLat_Closet : RangeLat_Closet;
   VehicleSpeed /= 3.6f;  //  km/h to m/s
 
 	Rotate_R = (VehicleSpeed * 180) / (YawRate * 3.14f);	//Rotate_R = V / ¦Ø

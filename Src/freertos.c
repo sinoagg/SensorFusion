@@ -496,7 +496,7 @@ void StartGyroCommTask(void const * argument)
 			RadarYawTimes += 1;
 		
 		
-			if(yawRate > 7 || yawRate < -7)
+			if(yawRate > 3 || yawRate < -3)
       {
         Turning_Flag = 1;
 		  	Turning_Collision = ARS_CalcTurn(RadarGeneral, yawRate, VehicleSpeed);
