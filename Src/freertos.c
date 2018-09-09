@@ -142,6 +142,7 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 extern uint8_t DBC_Init(CAN_HandleTypeDef *hcan);
 extern uint8_t Gyro_CAN_Init(CAN_HandleTypeDef *hcan);
 extern uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan);
+extern uint8_t DBC_SendDist(CAN_HandleTypeDef *hcan, float Dist);
 /* USER CODE END FunctionPrototypes */
 
 /* Hook prototypes */
