@@ -424,8 +424,14 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		#if GYRO_CAN == 3
 		//Gyroscope
     if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
+    {
+      for(uint8_t i = 0; i < 8; i++)
+      {
+        YawCANRxBuf[i] = VehicleCANRxBuf[i];
+      }
       //start gyro semaphore
       osSemaphoreRelease(bSemGyroCommSigHandle);
+    }
 		#endif
       
 		#if CAN_READ_VEHICLE
