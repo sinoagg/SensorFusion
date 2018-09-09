@@ -466,6 +466,11 @@
               <FileType>1</FileType>
               <FilePath>..\Drivers\UserDriver\MPU6050\MPU6050.c</FilePath>
             </File>
+            <File>
+              <FileName>score.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\score.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

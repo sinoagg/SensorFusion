@@ -128,11 +128,15 @@ uint8_t CmdRxBuf[4]={0};
 uint8_t CmdRadarDataTxBuf[11];
 uint8_t RadarCANRxBuf[8]={0};
 uint8_t VehicleCANRxBuf[8]={0};
+uint8_t YawCANRxBuf[8] = {0};
 uint8_t CrashWarningLv = WARNING_NONE;
 uint8_t VehicleSpeed = 0;
 uint8_t Vehicle_CAN_Flag = 0;
 uint16_t ADC_ConvertedValue[2] = {0};
 uint32_t DMA_Transfer_Complete_Count=0;
+
+uint8_t RadarTimes = 0;
+uint8_t RadarYawTimes = 0;
 
 float yaw = 0.0;
 float yawRate = 0.0;
@@ -385,7 +389,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	if(hcan->Instance == hcan1.Instance)
 	{
 		#if GYRO_CAN == 1
-		HAL_CAN_GetRxMessage(&hcan1, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
+		HAL_CAN_GetRxMessage(&hcan1, CAN_FILTER_FIFO0, &VehicleCANRxHeader, YawCANRxBuf);
 		//Gyroscope
     if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
 		{

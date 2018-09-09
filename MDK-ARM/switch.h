@@ -15,7 +15,7 @@
 */
 #define VEHICLE_MODEL 0
 
-#define ADAS_COMM 1
+#define ADAS_COMM 0
 //	Atmosphere Sensor
 #define ATM_READ 0
 //	Send Radar data in DBC

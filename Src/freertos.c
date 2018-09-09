@@ -92,6 +92,7 @@ extern uint8_t ADASDispBuf[];
 extern uint8_t RadarCANRxBuf[];
 extern uint8_t CrashWarningLv;
 extern uint8_t VehicleCANRxBuf[];
+extern uint8_t YawCANRxBuf[];
 extern uint8_t VehicleSpeed;
 extern uint8_t Vehicle_CAN_Flag;
 extern uint8_t CmdRxBuf[];
@@ -111,6 +112,9 @@ extern float MinRangeLong;
 extern float VrelLong;
 extern float TimetoCrash;
 extern __IO float ADC_ConvertedValueF[2];
+
+extern uint8_t RadarTimes;
+extern uint8_t RadarYawTimes;
 
 struct
 {
@@ -338,6 +342,7 @@ void StartRadarCommTask(void const * argument)
   {
 		osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);
 		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
+		
     //ARS408
 		#if RADAR_TYPE
 		if(RadarCANRxHeader.StdId==0x60A)												//read all messages before 60B, start calculate
@@ -351,6 +356,7 @@ void StartRadarCommTask(void const * argument)
 				minRadarDistFlag = 0;
 				ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral);//get closet obj data
 				osSemaphoreRelease(bSemRadarCalcSigHandle);
+				RadarTimes += 1;
 			}
 		}
 		
@@ -474,7 +480,7 @@ void StartGyroCommTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);
-    yawRate =  MPU_GetYawRate(VehicleCANRxBuf);
+    yawRate =  MPU_GetYawRate(YawCANRxBuf);
 		if(yawRate < 0)		//clockwise
 		{
 			yawRate = (yawRate < -YAWRATE_LIMIT) ? -YAWRATE_LIMIT : yawRate;
@@ -483,9 +489,12 @@ void StartGyroCommTask(void const * argument)
 			yawRate = (yawRate > YAWRATE_LIMIT) ? YAWRATE_LIMIT: yawRate;
 		//ARS408
 		#if RADAR_TYPE
-			ARS_SendVehicleYaw(&hcan2, yawRate);  //send VehicleYaw to Radar-ARS408
+			//ARS_SendVehicleYaw(&hcan2, -yawRate * 3);  //send VehicleYaw to Radar-ARS408
+			osDelay(2);
+			//ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);
+			RadarYawTimes += 1;
 		
-		/*
+		
 			if(yawRate > 7 || yawRate < -7)
       {
         Turning_Flag = 1;
@@ -496,7 +505,7 @@ void StartGyroCommTask(void const * argument)
 				Turning_Flag = 0;
 				Turning_Collision = 0;
 			}
-		*/
+		
 		//EMRR
 		#else
 			//yawRate = 100;
@@ -584,8 +593,8 @@ void StartRadarCalcTask(void const * argument)
 		MinRange = RadarGeneral[0].Obj_DistLong;
 		relSpeed = RadarGeneral[0].Obj_VrelLong;
 		
-//		if(!Turning_Flag || (Turning_Flag && Turning_Collision))
-//		{
+		if(!Turning_Flag || (Turning_Flag && Turning_Collision))
+		{
 			if((0.2*MinRange-500) < LIMIT_RANGE && MinRange != 0)	//calculate when dist is near enough
 			{
 				VrelLong = 0.25 * relSpeed - 128;						//get real relative speed
@@ -604,7 +613,7 @@ void StartRadarCalcTask(void const * argument)
 				else
 					CrashWarningLv = WARNING_NONE;
 			}
-//		}
+		}
 
     //EMRR
 		#else
