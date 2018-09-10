@@ -3,6 +3,7 @@
 ## platform
  * FreeRTOS on STM32F413
 ## version
+ * 20180910: **gyro** can1/3, **ARS408** config & turning warning
  * 20180816: Turning warning
  * 20180811: led 0 warning
  * 20180804: fix bug of getting Radar for the "<<" priority is low
