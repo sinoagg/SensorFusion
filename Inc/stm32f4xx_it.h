@@ -63,6 +63,7 @@ void USART1_IRQHandler(void);
 void USART2_IRQHandler(void);
 void USART3_IRQHandler(void);
 void UART5_IRQHandler(void);
+void DMA2_Stream0_IRQHandler(void);
 void DMA2_Stream2_IRQHandler(void);
 void CAN2_RX0_IRQHandler(void);
 void CAN3_RX0_IRQHandler(void);

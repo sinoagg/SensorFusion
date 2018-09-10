@@ -83,7 +83,7 @@
 #define RADARCFG_SORTINDEX_RANGE		(1<<4)
 #define RADARCFG_SORTINDEX_RCS			(2<<4)
 #define RADARCFG_STOREINNVM					(VALID<<7)
-#define RADARCFG_RCS_THRES_VALID		(INVALID<<0)
+#define RADARCFG_RCS_THRES_VALID		(VALID<<0)
 #define RADARCFG_RCSTHRES_STD				(0<<1)
 #define RADARCFG_RCSTHRES_HIGHSENSE	(1<<1)
 
@@ -201,6 +201,10 @@ typedef struct
 	uint8_t RadarState_RCS_Threshold;		//为真时传感器开启高敏感模式
 }MW_RadarState;
 
+#define STANDSTILL	0x0
+#define FORWARD			0x1
+#define BACKWORD		0x2
+
 typedef struct
 {
 	uint8_t RadarDevice_SpeedDirection;
@@ -231,6 +235,9 @@ uint8_t ARS_ConfigRadar(CAN_HandleTypeDef *hcan);
 uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan);
 void ARS_GetRadarObjStatus(uint8_t* pCANRxBuf, MW_RadarObjStatus *pRadarObjStatus);
 void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral);
+void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan, uint16_t VehicleSpeed);
+void ARS_SendVehicleYaw(CAN_HandleTypeDef *hcan,float YawRate);
+uint8_t ARS_CalcTurn(MW_RadarGeneral *pRadargGeneral_Closet, float YawRate, float VehicleSpeed);
 
 #endif
 

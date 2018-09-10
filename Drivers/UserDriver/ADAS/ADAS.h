@@ -30,6 +30,7 @@ typedef struct
 } ADAS_HandleTypeDef;
 
 uint8_t CalADASData(ADAS_HandleTypeDef *pADAS_dev, uint8_t *pRxBuf);
+uint8_t DispADASData(uint8_t *pRxBuf, uint8_t *pDispBuf, float MinRangeLong_fp, float VrelLong_fp, float TimetoCrash_fp);
 
 #endif
 

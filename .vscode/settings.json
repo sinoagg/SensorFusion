@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "mpu6050.h": "c",
+        "ostream": "cpp",
+        "typeinfo": "c"
+    }
+}

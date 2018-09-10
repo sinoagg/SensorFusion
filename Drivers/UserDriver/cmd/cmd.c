@@ -1,5 +1,23 @@
+/** 
+ * @brief  send RadarData to labview
+ * ! not using
+ * @param  warning_state: crash warning(high/low)
+ * @param  vehicle_speed: km/h(read from ARS4081)
+ * @param  dist: m(read from ARS408)
+ * @param  crashing_time: calculate by ARS408.c
+ * * sending data via RS232 
+ */
 #include "cmd.h"
 
+/** 
+ * @brief  get Radar Data
+ * @note   assign valuse to RadarData struct
+ * @param  warning_state: 
+ * @param  vehicle_speed: (km/h)
+ * @param  dist: (m)
+ * @param  crashing_time: (s)
+ * @retval 0 for ok
+ */
 uint8_t GetRadarData(uint8_t warning_state, uint8_t vehicle_speed, float dist, float crashing_time)
 {
 	RadarData.Warning_State = warning_state;
@@ -9,6 +27,13 @@ uint8_t GetRadarData(uint8_t warning_state, uint8_t vehicle_speed, float dist, f
 	return 0;
 }
 
+/** 
+ * @brief  Fill TxBuf
+ * @note   RadarData struct assign values to TxBuf
+ * @param  pCmdRadarData: TxBuf
+ * @param  RadarData: struct
+ * @retval None
+ */
 void FillRadarDataTxBuf(uint8_t * pCmdRadarData, Cmd_RadarData RadarData)
 {
 	uint8_t i = 0;
