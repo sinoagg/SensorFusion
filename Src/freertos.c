@@ -400,7 +400,7 @@ void StartSoundWarningTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);
-		if(VehicleSpeed > 5)
+		if(VehicleSpeed > 20)
 		{
 			switch(CrashWarningLv)				//Forward collision warning
 			{
@@ -490,8 +490,8 @@ void StartGyroCommTask(void const * argument)
 			yawRate = (yawRate > YAWRATE_LIMIT) ? YAWRATE_LIMIT: yawRate;
 		//ARS408
 		#if RADAR_TYPE
-			//ARS_SendVehicleYaw(&hcan2, -yawRate * 3);  //send VehicleYaw to Radar-ARS408
-			osDelay(2);
+			//ARS_SendVehicleYaw(&hcan2, yawRate);  //send VehicleYaw to Radar-ARS408
+			//osDelay(2);
 			//ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);
 			RadarYawTimes += 1;
 		
@@ -509,8 +509,6 @@ void StartGyroCommTask(void const * argument)
 		
 		//EMRR
 		#else
-			//yawRate = 100;
-			//VehicleSpeed = 10;
       if(yawRate > 5 || yawRate < -5)
       {
         Turning_Flag = 1;
@@ -601,12 +599,12 @@ void StartRadarCalcTask(void const * argument)
 				VrelLong = 0.25 * relSpeed - 128;						//get real relative speed
 				MinRangeLong = 0.2 * MinRange - 500;				//get real range(longitude)
 				TimetoCrash = -(float)MinRangeLong/VrelLong;//relative Velocity is minus
-				if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
+				if(TimetoCrash < 2.1f && VrelLong < 0 && MinRangeLong > 0)
 				{
 					CrashWarningLv = WARNING_HIGH;
 					osSemaphoreRelease(bSemSoundWarningSigHandle);
 				}
-				else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
+				else if(TimetoCrash < 2.4f && VrelLong < 0 && MinRangeLong > 0)
 				{
 					CrashWarningLv = WARNING_LOW;
 					osSemaphoreRelease(bSemSoundWarningSigHandle);

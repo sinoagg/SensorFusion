@@ -180,13 +180,13 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_NofObj = 1;
   FilterContent.FilterCfg_Min_Distance = (uint16_t)((0 - 0) / 0.1);     //0~200m, offset 0, Res 0.1
   FilterContent.FilterCfg_Max_Distance = (uint16_t)((200 - 0) / 0.1);
-  FilterContent.FilterCfg_Min_Azimuth = (uint16_t)((-30 + 50) / 0.025);  //-9¡ã~9¡ã£¬offset -50, Res 0.025
-  FilterContent.FilterCfg_Max_Azimuth = (uint16_t)((30 + 50) / 0.025);
+  FilterContent.FilterCfg_Min_Azimuth = (uint16_t)((-10 + 50) / 0.025);  //-9¡ã~9¡ã£¬offset -50, Res 0.025
+  FilterContent.FilterCfg_Max_Azimuth = (uint16_t)((10 + 50) / 0.025);
   FilterContent.FilterCfg_Min_VrelOncome = (uint16_t)((0 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VrelOncome = (uint16_t)((100 - 0) / 0.0315);
   FilterContent.FilterCfg_Min_VrelDepart = (uint16_t)((0 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VrelDepart = (uint16_t)((100 - 0) / 0.0315);
-  FilterContent.FilterCfg_Min_RCS = (uint16_t)((-50 + 50) / 0.025);   //0.025~30dBm2, offset -50, Res 0.025
+  FilterContent.FilterCfg_Min_RCS = (uint16_t)((-10 + 50) / 0.025);   //0.025~30dBm2, offset -50, Res 0.025
   FilterContent.FilterCfg_Max_RCS = (uint16_t)((52.375 + 50) / 0.025);
   FilterContent.FilterCfg_Min_Lifetime = (uint16_t)((0.1 - 0) / 0.1);   //0.1~409.5s, offset 0, Res 0.1
   FilterContent.FilterCfg_Max_Lifetime = (uint16_t)((409.5 - 0) / 0.1);
@@ -194,8 +194,8 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_Size = (uint16_t)((102.375 - 0) / 0.025);
   FilterContent.FilterCfg_Min_ProbExists = 0x4;//99%~100%, 0x0: 0%, 0x1: 25%, 0x2: 50%
   FilterContent.FilterCfg_Max_ProbExists = 0x7;//0x3: 75%, 0x4: 90%, 0x5: 99%, 0x6: 99.9%, 0x7: 100%
-  FilterContent.FilterCfg_Min_Y = (uint16_t)((-1.4 + 409.5) / 0.2);     //-1.5~1.5m, offset -409.5, Res 0.2
-  FilterContent.FilterCfg_Max_Y = (uint16_t)((1.4 + 409.5) / 0.2);
+  FilterContent.FilterCfg_Min_Y = (uint16_t)((-2.5 + 409.5) / 0.2);     //-1.5~1.5m, offset -409.5, Res 0.2
+  FilterContent.FilterCfg_Max_Y = (uint16_t)((2.5 + 409.5) / 0.2);
   FilterContent.FilterCfg_Min_X = (uint16_t)((0 + 500) / 0.2);          //0~200m, offset -500, Res 0.2
   FilterContent.FilterCfg_Max_X = (uint16_t)((200 + 500) / 0.2);
   FilterContent.FilterCfg_Min_VYRightLeft = (uint16_t)((0 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
