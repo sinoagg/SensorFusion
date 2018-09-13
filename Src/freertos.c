@@ -108,6 +108,7 @@ extern MW_RadarGeneral RadarGeneral[16];
 extern EMRR_RadarGeneral aEMRRGeneral[];
 extern EMRR_RadarGeneral EMRRGeneral_Closet;
 extern float YawRate_g;
+extern float XAcc_g;
 extern float MinRangeLong_g;
 extern float VrelLong_g;
 extern float TimetoCrash_g;
@@ -482,6 +483,7 @@ void StartGyroCommTask(void const * argument)
   {
     osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);
     YawRate_g =  MPU_GetYawRate(YawCANRxBuf);
+    XAcc_g = MPU_GetXAcc(YawCANRxBuf);
 		if(YawRate_g < 0)		//clockwise
 		{
 			YawRate_g = (YawRate_g < -YAWRATE_LIMIT) ? -YAWRATE_LIMIT : YawRate_g;
@@ -492,7 +494,6 @@ void StartGyroCommTask(void const * argument)
 		#if RADAR_TYPE
 			//ARS_SendVehicleYaw(&hcan2, YawRate_g);  //send VehicleYaw to Radar-ARS408
 			//osDelay(2);
-			//ARS_SendVehicleSpeed(&hcan2, VehicleSpeed_g);
 			RadarYawTimes += 1;
 		
 		
@@ -553,7 +554,7 @@ void StartCANSpeedReadTask(void const * argument)
 
 			//ARS408
       #if RADAR_TYPE
-      ARS_SendVehicleSpeed(&hcan2, VehicleSpeed_g);	//send VehicleSpeed to Radar
+			ARS_SendVehicleSpeed(&hcan2, VehicleSpeed_g);	//send VehicleSpeed to Radar
       //EMRR
       #else
       #endif
