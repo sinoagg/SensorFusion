@@ -130,7 +130,7 @@ uint8_t RadarCANRxBuf[8]={0};
 uint8_t VehicleCANRxBuf[8]={0};
 uint8_t YawCANRxBuf[8] = {0};
 uint8_t CrashWarningLv = WARNING_NONE;
-uint8_t VehicleSpeed = 0;
+uint8_t VehicleSpeed_g = 0;
 uint8_t Vehicle_CAN_Flag = 0;
 uint16_t ADC_ConvertedValue[2] = {0};
 uint32_t DMA_Transfer_Complete_Count=0;
@@ -138,11 +138,11 @@ uint32_t DMA_Transfer_Complete_Count=0;
 uint8_t RadarTimes = 0;
 uint8_t RadarYawTimes = 0;
 
-float yaw = 0.0;
-float yawRate = 0.0;
-float VrelLong = 0.0;
-float MinRangeLong = 0.0;
-float TimetoCrash = 0.0;
+float Yaw_g = 0.0;
+float YawRate_g = 0.0;
+float VrelLong_g = 0.0;
+float MinRangeLong_g = 0.0;
+float TimetoCrash_g = 0.0;
 __IO float ADC_ConvertedValueF[2];
 
 
@@ -402,10 +402,23 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
   if(hcan->Instance == hcan2.Instance)
   {
   	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
-		// send RADAR data to CAN1(for debug)
+		// send RADAR(ARS408) data to CAN1(for debug)
+		#if RADAR_TYPE == 1
 		uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
 		CAN_TxDBCHeader.StdId = RadarCANRxHeader.StdId;
-		HAL_CAN_AddTxMessage(&hcan1, &CAN_TxDBCHeader, RadarCANRxBuf, &CAN_TxMailBox);
+		if(RadarCANRxHeader.StdId == 0x60B)
+		{
+			uint16_t dist = 0;
+			uint16_t temp=0;
+			dist = (uint16_t)(((*(RadarCANRxBuf+1))<<5) | ((*(RadarCANRxBuf+2))>>3));
+			dist -= ((VehicleSpeed_g / 22)-0.0)*5;		
+			*(RadarCANRxBuf + 1) =(dist>>5);
+			temp =((dist<<3)&0xF8);
+			*(RadarCANRxBuf + 2) &=0x07;
+			*(RadarCANRxBuf + 2) |=temp;
+			HAL_CAN_AddTxMessage(&hcan1, &CAN_TxDBCHeader, RadarCANRxBuf, &CAN_TxMailBox);
+		}
+		#endif
 		
   	osSemaphoreRelease(bSemRadarCANRxSigHandle);
 		//ARS408
