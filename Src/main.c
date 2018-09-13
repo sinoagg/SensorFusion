@@ -130,7 +130,7 @@ uint8_t RadarCANRxBuf[8]={0};
 uint8_t VehicleCANRxBuf[8]={0};
 uint8_t YawCANRxBuf[8] = {0};
 uint8_t CrashWarningLv = WARNING_NONE;
-uint8_t VehicleSpeed = 0;
+uint8_t VehicleSpeed_g = 0;
 uint8_t Vehicle_CAN_Flag = 0;
 uint16_t ADC_ConvertedValue[2] = {0};
 uint32_t DMA_Transfer_Complete_Count=0;
@@ -138,11 +138,11 @@ uint32_t DMA_Transfer_Complete_Count=0;
 uint8_t RadarTimes = 0;
 uint8_t RadarYawTimes = 0;
 
-float yaw = 0.0;
-float yawRate = 0.0;
-float VrelLong = 0.0;
-float MinRangeLong = 0.0;
-float TimetoCrash = 0.0;
+float Yaw_g = 0.0;
+float YawRate_g = 0.0;
+float VrelLong_g = 0.0;
+float MinRangeLong_g = 0.0;
+float TimetoCrash_g = 0.0;
 __IO float ADC_ConvertedValueF[2];
 
 
@@ -411,7 +411,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			uint16_t dist = 0;
 			uint16_t temp=0;
 			dist = (uint16_t)(((*(RadarCANRxBuf+1))<<5) | ((*(RadarCANRxBuf+2))>>3));
-			dist -= ((VehicleSpeed / 22)-0.0)*5;		
+			dist -= ((VehicleSpeed_g / 22)-0.0)*5;		
 			*(RadarCANRxBuf + 1) =(dist>>5);
 			temp =((dist<<3)&0xF8);
 			*(RadarCANRxBuf + 2) &=0x07;
