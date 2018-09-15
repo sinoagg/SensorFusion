@@ -401,7 +401,7 @@ void StartSoundWarningTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);
-		if(VehicleSpeed_g > 20)
+		if(VehicleSpeed_g > 10)
 		{
 			switch(CrashWarningLv)				//Forward collision warning
 			{
@@ -444,7 +444,7 @@ void StartSoundWarningTask(void const * argument)
 			}
 
 			#if ADAS_COMM
-			switch(ADAS_dev.LDW_warning)	//Lane departure warning
+			/*switch(ADAS_dev.LDW_warning)	//Lane departure warning
 			{
 				case 0x01:	//left
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
@@ -466,7 +466,7 @@ void StartSoundWarningTask(void const * argument)
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 					break;
-			}
+			}*/
 			#endif
 		}
 		osDelay(10);
@@ -492,12 +492,12 @@ void StartGyroCommTask(void const * argument)
 			YawRate_g = (YawRate_g > YAWRATE_LIMIT) ? YAWRATE_LIMIT: YawRate_g;
 		//ARS408
 		#if RADAR_TYPE
-			//ARS_SendVehicleYaw(&hcan2, YawRate_g);  //send VehicleYaw to Radar-ARS408
-			//osDelay(2);
+			ARS_SendVehicleYaw(&hcan2, YawRate_g);  //send VehicleYaw to Radar-ARS408
+			osDelay(2);
 			RadarYawTimes += 1;
 		
 		
-			if(YawRate_g > 5 || YawRate_g < -5)
+			if(YawRate_g > 0 || YawRate_g < -0)
       {
         Turning_Flag = 1;
 		  	Turning_Collision = ARS_CalcTurn(RadarGeneral, YawRate_g, VehicleSpeed_g);
