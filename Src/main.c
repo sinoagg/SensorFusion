@@ -92,7 +92,7 @@
 #endif
 //	can3 id, gyro
 #define GYRO_ADDR 0x18FEE0D8
-#define YAWRATE_ADDR 0x18FEE1D8
+#define GYRO_ADDR2 0x18FEE1D8
 //	can1 id, dbc
 #define DBC_ADDR  0x509
 
