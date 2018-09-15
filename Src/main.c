@@ -92,6 +92,7 @@
 #endif
 //	can3 id, gyro
 #define GYRO_ADDR 0x18FEE0D8
+#define YAWRATE_ADDR 0x18FEE1D8
 //	can1 id, dbc
 #define DBC_ADDR  0x509
 
@@ -140,6 +141,7 @@ uint8_t RadarYawTimes = 0;
 
 float Yaw_g = 0.0;
 float YawRate_g = 0.0;
+float XAcc_g = 0.0;
 float VrelLong_g = 0.0;
 float MinRangeLong_g = 0.0;
 float TimetoCrash_g = 0.0;
@@ -416,8 +418,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			temp =((dist<<3)&0xF8);
 			*(RadarCANRxBuf + 2) &=0x07;
 			*(RadarCANRxBuf + 2) |=temp;
-			HAL_CAN_AddTxMessage(&hcan1, &CAN_TxDBCHeader, RadarCANRxBuf, &CAN_TxMailBox);
+			
 		}
+		HAL_CAN_AddTxMessage(&hcan1, &CAN_TxDBCHeader, RadarCANRxBuf, &CAN_TxMailBox);
 		#endif
 		
   	osSemaphoreRelease(bSemRadarCANRxSigHandle);
