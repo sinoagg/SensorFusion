@@ -9,11 +9,12 @@
 //	Gyro CAN 1/3
 #define GYRO_CAN 1
 /**
+ * Benz			3
  * BYD			2
  * YUTONG		1
  * KINGLONG	0
 */
-#define VEHICLE_MODEL 0
+#define VEHICLE_MODEL 3
 
 #define ADAS_COMM 1
 //	Atmosphere Sensor

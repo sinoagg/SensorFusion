@@ -45,7 +45,7 @@ float MPU_GetXAcc(uint8_t *pRxBuf)
 	
 		if(XAcc > 16)
 			XAcc -= 32;
-	XAcc *= 9.8;	//m/s2
+	XAcc *= 9.8f;	//m/s2
 	
 	return XAcc;
 }

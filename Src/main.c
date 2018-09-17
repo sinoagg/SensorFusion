@@ -82,7 +82,9 @@
 #define DELAY_TIME	0.4f
 
 //	can3 id, vehicle
-#if VEHICLE_MODEL == 2		//BYD
+#if VEHICLE_MODEL == 3		//Benz
+	#define VEHICLE_SPEED_ADDR 0x18FE6C00
+#elif VEHICLE_MODEL == 2	//BYD
 	#define VEHICLE_SPEED_ADDR	0x18FEF100
 #elif VEHICLE_MODEL == 1	//YUTONG
 	#define VEHICLE_SPEED_ADDR	0x18FE6E0B

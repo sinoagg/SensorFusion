@@ -25,9 +25,9 @@
  */
 #include "EMRR.h"
 
-#define VEHICLE_CENTRE_LEN	3.5f
-#define VEHICLE_HALF_WIDTH	0.9f
-#define OBSTACLE_ERR				1.0f
+#define VEHICLE_CENTRE_LEN	9.5f
+#define VEHICLE_HALF_WIDTH	1.4f
+#define OBSTACLE_ERR				-1.0f
 
 extern uint8_t EMRR_RadarRxComplete;
 extern CAN_RxHeaderTypeDef RadarCANRxHeader;
