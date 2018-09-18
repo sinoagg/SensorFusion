@@ -32,9 +32,9 @@
     * LED1: **Radar** communication
     * LED2: **ADAS** communicatn
     * LED3: UART1(cmd) from **labview**
-    * LED4: Not using
+    * LED4: **Vehicle** Speed & Status
     * LED5: Radar data Tx(**DBC**)
-    * LED6: CAN Rx from **Vehicle**(speed & gyroscope)
+    * LED6: CAN Rx from **gyroscope**
 * BUZZER
     * FCW: 1second(high), 0.5s(low)
     * LDW: 2s

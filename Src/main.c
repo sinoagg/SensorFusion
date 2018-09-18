@@ -386,7 +386,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 
 /** 
  * @brief  CAN Callback function
- * @note   can2 for Radar, can3(can1 in Benz version) for Gyro & Vehicle Speed
+ * @note   can3(can1 in Benz version) for Gyro & Vehicle Speed
  * @param  *hcan: 
  * @retval None
  */
@@ -409,12 +409,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	if(hcan->Instance == hcan3.Instance)
 	{
 		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
-		HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
 		
 		#if GYRO_CAN == 3
 		//Gyroscope
     if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
     {
+			HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
       for(uint8_t i = 0; i < 8; i++)
       {
         YawCANRxBuf[i] = VehicleCANRxBuf[i];
@@ -429,6 +429,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		//	Vehicle Speed
     if((VEHICLE_SPEED_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSpeed ID
     {
+			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
       osSemaphoreRelease(bSemSpeedRxSigHandle);
       Vehicle_CAN_Flag = 1;
     }
@@ -437,6 +438,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		//	Vehicle Switch data
     else if((VEHICLE_SWITCH_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSwitch ID
     {
+			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
       osSemaphoreRelease(bSemSpeedRxSigHandle);
       Vehicle_CAN_Flag = 2;
     }
@@ -448,7 +450,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	}
 	
 }
-
+/** 
+ * @brief  CAN Callback function
+ * @note   can2 for Radar
+ * @param  *hcan: 
+ * @retval None
+ */
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	if(hcan->Instance == hcan2.Instance)
