@@ -14,7 +14,7 @@
  * YUTONG		1
  * KINGLONG	0
 */
-#define VEHICLE_MODEL 3
+#define VEHICLE_MODEL 0
 
 #define ADAS_COMM 1
 //	Atmosphere Sensor
