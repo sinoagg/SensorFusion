@@ -64,7 +64,7 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 	CAN_FilterTypeDef MW_RadarCANFilter = {
 		OBJ_GENERAL_ADDR<<5, 0,\
 		0xEFE<<5, 0,\
-		CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B & 0x60A at the same time
+		CAN_FILTER_FIFO1, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B & 0x60A at the same time
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
 		
 	/*CAN_FilterTypeDef MW_RadarCANFilter1 = {
@@ -74,7 +74,7 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter1);*/
 	
 	HAL_CAN_Start(hcan);
-	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
 	
 	#if CONFIG_ARS408_RADAR
 		ARS_ConfigRadar(hcan);
