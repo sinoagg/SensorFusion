@@ -37,7 +37,8 @@ typedef struct
 
 
 uint8_t EMRR_Init(CAN_HandleTypeDef *hcan);
-void EMRR_GetRaderObjCloset(uint8_t* pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral, EMRR_RadarGeneral *pRadarGeneral_closet);
+void EMRR_GetRadarObjData(uint8_t* pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral);
+void EMRR_CalcRaderObjCloset(uint8_t* pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral, EMRR_RadarGeneral *pRadarGeneral_closet);
 uint8_t EMRR_CalcTurn(EMRR_RadarGeneral *pRadargGeneral_Closet, float YawRate, float VehicleSpeed);
 
 #endif

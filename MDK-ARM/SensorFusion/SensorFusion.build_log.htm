@@ -22,15 +22,29 @@ Dialog DLL:      TCM.DLL V1.14.6.0
  
 <h2>Project:</h2>
 E:\CodesCircuits\AEBS\SensorFusion\MDK-ARM\SensorFusion.uvprojx
-Project File Date:  09/16/2018
+Project File Date:  09/17/2018
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 1 (build 61)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'SensorFusion'
+compiling EMRR.c...
+compiling ARS408.c...
+..\Drivers\UserDriver\ARS408\ARS408.c(273): warning:  #186-D: pointless comparison of unsigned integer with zero
+    if(VehicleSpeed < 0)
+..\Drivers\UserDriver\ARS408\ARS408.c: 1 warning, 0 errors
+compiling MPU6050.c...
+compiling stm32f4xx_it.c...
+../Src/stm32f4xx_it.c(264): warning:  #550-D: variable "temp" was set but never used
+  	uint32_t temp = 0;
+../Src/stm32f4xx_it.c(301): warning:  #550-D: variable "temp" was set but never used
+  	uint32_t temp;
+../Src/stm32f4xx_it.c: 2 warnings, 0 errors
+compiling freertos.c...
 compiling main.c...
+compiling can.c...
 linking...
-Program Size: Code=26688 RO-data=1224 RW-data=272 ZI-data=19440  
-"SensorFusion\SensorFusion.axf" - 0 Error(s), 0 Warning(s).
+Program Size: Code=26376 RO-data=1224 RW-data=280 ZI-data=19440  
+"SensorFusion\SensorFusion.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -48,7 +62,7 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.1.1
-Build Time Elapsed:  00:00:04
+Build Time Elapsed:  00:00:20
 </pre>
 </body>
 </html>

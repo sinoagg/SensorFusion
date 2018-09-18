@@ -313,7 +313,10 @@ void StartDefaultTask(void const * argument)
     #endif
 		
     #if DBC_SEND
-    DBC_SendDist(&hcan1, MinRangeLong_g);
+		if(MinRangeLong_g > 0)
+		{
+			DBC_SendDist(&hcan1, MinRangeLong_g);
+		}
     #endif
 		
 		#if ATM_READ
@@ -325,7 +328,7 @@ void StartDefaultTask(void const * argument)
 
 		//HAL_GPIO_TogglePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin|VALVE_REAR_Pin);
 
-		osDelay(30);
+		osDelay(50);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -364,11 +367,14 @@ void StartRadarCommTask(void const * argument)
 		
     //EMRR
 		#else
-		EMRR_GetRaderObjCloset(RadarCANRxBuf, aEMRRGeneral, &EMRRGeneral_Closet);
+		//EMRR_GetRaderObjCloset(RadarCANRxBuf, aEMRRGeneral, &EMRRGeneral_Closet);
 		if(EMRRGeneral_Closet.trackRange != 0)
-			osSemaphoreRelease(bSemRadarCalcSigHandle);
+		{
+			//EMRRGeneral_Closet.trackRange -= (VehicleSpeed_g / 6);
+			//osSemaphoreRelease(bSemRadarCalcSigHandle);
+		}
 		#endif
-		osDelay(1);
+		osDelay(10);
   }
   /* USER CODE END StartRadarCommTask */
 }
@@ -414,7 +420,7 @@ void StartSoundWarningTask(void const * argument)
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 						//HAL_GPIO_WritePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin, GPIO_PIN_RESET);
 						//WTN6_Broadcast(BELL_BB_500MS);
-						osDelay(200);
+						osDelay(100);
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 						//HAL_GPIO_WritePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin, GPIO_PIN_SET);
@@ -430,7 +436,7 @@ void StartSoundWarningTask(void const * argument)
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 						//WTN6_Broadcast(BELL_BB_1000MS);
-						osDelay(500);
+						osDelay(300);
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 					#if ADAS_COMM
@@ -450,7 +456,7 @@ void StartSoundWarningTask(void const * argument)
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 					//WTN6_Broadcast(BELL_BB_500MS);
-					osDelay(2000);
+					osDelay(1000);
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 					break;
@@ -458,7 +464,7 @@ void StartSoundWarningTask(void const * argument)
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 					//WTN6_Broadcast(BELL_BB_1000MS);
-					osDelay(2000);
+					osDelay(1000);
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 					break;
@@ -617,8 +623,9 @@ void StartRadarCalcTask(void const * argument)
 
     //EMRR
 		#else
-		MinRangeLong_g = EMRRGeneral_Closet.trackRange;
+		MinRangeLong_g = EMRRGeneral_Closet.trackRange;// - VehicleSpeed_g / 6;;
     VrelLong_g = EMRRGeneral_Closet.trackSpeed;
+		//DBC_SendDist(&hcan1, MinRangeLong_g);
     if(!Turning_Flag || (Turning_Flag && Turning_Collision))
     {
 			/*if(MinRangeLong_g < 30)

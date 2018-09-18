@@ -25,10 +25,11 @@
  */
 #include "EMRR.h"
 
-#define VEHICLE_CENTRE_LEN	3.5f
-#define VEHICLE_HALF_WIDTH	0.9f
-#define OBSTACLE_ERR				1.0f
+#define VEHICLE_CENTRE_LEN	9.5f
+#define VEHICLE_HALF_WIDTH	1.4f
+#define OBSTACLE_ERR				-1.0f
 
+extern uint8_t EMRR_RadarObjCount;
 extern uint8_t EMRR_RadarRxComplete;
 extern CAN_RxHeaderTypeDef RadarCANRxHeader;
 
@@ -47,10 +48,10 @@ uint8_t EMRR_Init(CAN_HandleTypeDef *hcan)
 	CAN_FilterTypeDef MW_RadarCANFilter = {
 		EMRR_OBJ_ADDR<<5, 0,\
 		0xFFC0<<5, 0,\
-		CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};
+		CAN_FILTER_FIFO1, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
 	HAL_CAN_Start(hcan);
-	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
 
 	return 0;
 }
@@ -62,7 +63,7 @@ uint8_t EMRR_Init(CAN_HandleTypeDef *hcan)
  * @param  *pRadarGeneral: RadarGeneral[64]
  * @retval None
  */
-void GetRadarObjGeneral_func(uint8_t* pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral)
+void EMRR_GetRadarObjData(uint8_t* pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral)
 {
 	uint16_t tempData;
 	//id
@@ -95,45 +96,45 @@ void GetRadarObjGeneral_func(uint8_t* pCANRxBuf, EMRR_RadarGeneral *pRadarGenera
  * @param  *pRadarGeneral_Closet: Closet Obj data
  * @retval None
  */
-void EMRR_GetRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral, EMRR_RadarGeneral *pRadarGeneral_Closet)
+void EMRR_CalcRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral, EMRR_RadarGeneral *pRadarGeneral_Closet)
 {
-	if(EMRR_RadarRxComplete)	//接收标志
-	{
-		GetRadarObjGeneral_func(pCANRxBuf, (pRadarGeneral + RadarCANRxHeader.StdId - 0x500));
-		if((RadarCANRxHeader.StdId - 0x500+1) == 64)	//收完64个目标数据
-		{
-			uint32_t i=0, min_index;
+	//if(EMRR_RadarRxComplete)	//接收标志
+		//EMRR_GetRadarObjData(pCANRxBuf, (pRadarGeneral + RadarCANRxHeader.StdId - 0x500));
+		//if(EMRR_RadarObjCount >= 64)	//收完64个目标数据
+					//EMRR_RadarObjCount = 0;
+			uint8_t i=0;
+			static uint8_t min_index=0;
 			float min=1000, rad;
-			for(i=0; i<64; i++)
+			if(EMRR_RadarObjCount>0)
 			{
-				if((pRadarGeneral + i)->trackRange!=0)	//目标数据不为零
+			for(i=0; i<EMRR_RadarObjCount; i++)
+			{
+				//if((pRadarGeneral + i)->trackRange!=0)	//目标数据不为零
+				if((pRadarGeneral + i)->trackPower> -40)	//功率
 				{
-					rad = 3.14 * fabs((pRadarGeneral + i)->trackAngle) / 180;	//角度换算成弧度
-					(pRadarGeneral + i)->trackCrossRange = (float)((pRadarGeneral + i)->trackRange * sin(rad));
-					if((pRadarGeneral + i)->trackCrossRange < 1.5f)	//左右距离＜1.5米，在车道线内
+					if(min > (pRadarGeneral + i)->trackRange)	//当前目标距离小于min
 					{
-						if((pRadarGeneral + i)->trackPower> - 35)	//功率
+						rad = 3.14 * fabs((pRadarGeneral + i)->trackAngle) / 180;	//角度换算成弧度
+						(pRadarGeneral + i)->trackCrossRange = (float)((pRadarGeneral + i)->trackRange * sin(rad));
+						if((pRadarGeneral + i)->trackCrossRange < 10.0f)	//左右距离＜1.5米，在车道线内
 						{
-							if(min > (pRadarGeneral + i)->trackRange)	//当前目标距离小于min
-							{
-								min = (pRadarGeneral + i)->trackRange;
-								min_index = i;
-							}
+						
+							min = (pRadarGeneral + i)->trackRange;
+							if(min!=0) min_index = i;
 						}
 					}
-				}
+				}		
 			}
-			pRadarGeneral_Closet->trackId = (pRadarGeneral + min_index)->trackId;
-			pRadarGeneral_Closet->trackCrossRange = (pRadarGeneral + min_index)->trackCrossRange;
-			pRadarGeneral_Closet->trackRange = (pRadarGeneral + min_index)->trackRange;
-			pRadarGeneral_Closet->trackSpeed = (pRadarGeneral + min_index)->trackSpeed;
-			pRadarGeneral_Closet->trackAngle = (pRadarGeneral + min_index)->trackAngle;
-			pRadarGeneral_Closet->trackPower = (pRadarGeneral + min_index)->trackPower;
-		}
+		pRadarGeneral_Closet->trackId = (pRadarGeneral + min_index)->trackId;
+		pRadarGeneral_Closet->trackCrossRange = (pRadarGeneral + min_index)->trackCrossRange;
+		pRadarGeneral_Closet->trackRange = (pRadarGeneral + min_index)->trackRange;
+		pRadarGeneral_Closet->trackSpeed = (pRadarGeneral + min_index)->trackSpeed;
+		pRadarGeneral_Closet->trackAngle = (pRadarGeneral + min_index)->trackAngle;
+		pRadarGeneral_Closet->trackPower = (pRadarGeneral + min_index)->trackPower;
 		EMRR_RadarRxComplete = 0;
-	}
-}
 
+		}
+	}
 /** 
  * @brief  Calculate Turning cross 
  * @note   Vehicle Speed should read from Vehicle CAN

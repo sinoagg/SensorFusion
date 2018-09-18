@@ -82,7 +82,9 @@
 #define DELAY_TIME	0.4f
 
 //	can3 id, vehicle
-#if VEHICLE_MODEL == 2		//BYD
+#if VEHICLE_MODEL == 3		//Benz
+	#define VEHICLE_SPEED_ADDR 0x18FE6C00
+#elif VEHICLE_MODEL == 2	//BYD
 	#define VEHICLE_SPEED_ADDR	0x18FEF100
 #elif VEHICLE_MODEL == 1	//YUTONG
 	#define VEHICLE_SPEED_ADDR	0x18FE6E0B
@@ -133,6 +135,7 @@ uint8_t YawCANRxBuf[8] = {0};
 uint8_t CrashWarningLv = WARNING_NONE;
 uint8_t VehicleSpeed_g = 0;
 uint8_t Vehicle_CAN_Flag = 0;
+uint8_t EMRR_RadarObjCount = 0;
 uint16_t ADC_ConvertedValue[2] = {0};
 uint32_t DMA_Transfer_Complete_Count=0;
 
@@ -149,6 +152,7 @@ __IO float ADC_ConvertedValueF[2];
 
 
 extern osSemaphoreId bSemRadarCANRxSigHandle;
+extern osSemaphoreId bSemRadarCalcSigHandle;
 extern osSemaphoreId bSemGyroCommSigHandle;
 extern osSemaphoreId bSemSpeedRxSigHandle;
 /* USER CODE END PV */
@@ -400,38 +404,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			HAL_GPIO_TogglePin(LED6_GPIO_Port,LED6_Pin);
 		}
 		#endif
-	}
-  if(hcan->Instance == hcan2.Instance)
-  {
-  	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
-		// send RADAR(ARS408) data to CAN1(for debug)
-		#if RADAR_TYPE == 1
-		uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
-		CAN_TxDBCHeader.StdId = RadarCANRxHeader.StdId;
-		if(RadarCANRxHeader.StdId == 0x60B)
-		{
-			uint16_t dist = 0;
-			uint16_t temp=0;
-			dist = (uint16_t)(((*(RadarCANRxBuf+1))<<5) | ((*(RadarCANRxBuf+2))>>3));
-			dist -= ((VehicleSpeed_g / 22)-0.0)*5;		
-			*(RadarCANRxBuf + 1) =(dist>>5);
-			temp =((dist<<3)&0xF8);
-			*(RadarCANRxBuf + 2) &=0x07;
-			*(RadarCANRxBuf + 2) |=temp;
-			
-		}
-		HAL_CAN_AddTxMessage(&hcan1, &CAN_TxDBCHeader, RadarCANRxBuf, &CAN_TxMailBox);
-		#endif
-		
-  	osSemaphoreRelease(bSemRadarCANRxSigHandle);
-		//ARS408
-		#if RADAR_TYPE
-		
-		//EMRR
-		#else
-		EMRR_RadarRxComplete = 1;
-		#endif
-  }
+	}	
+  	
 	if(hcan->Instance == hcan3.Instance)
 	{
 		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
@@ -473,6 +447,49 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     #endif
 	}
 	
+}
+
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+	if(hcan->Instance == hcan2.Instance)
+  {
+  	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO1, &RadarCANRxHeader, RadarCANRxBuf);
+		//	send RADAR(ARS408) data to CAN1(for debug)
+		//	ARS408
+		#if RADAR_TYPE == 1
+		uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
+		CAN_TxDBCHeader.StdId = RadarCANRxHeader.StdId;
+		if(RadarCANRxHeader.StdId == 0x60B)
+		{
+			uint16_t dist = 0;
+			uint16_t temp=0;
+			dist = (uint16_t)(((*(RadarCANRxBuf+1))<<5) | ((*(RadarCANRxBuf+2))>>3));
+			dist -= ((VehicleSpeed_g / 22)-0.0)*5;		
+			*(RadarCANRxBuf + 1) =(dist>>5);
+			temp =((dist<<3)&0xF8);
+			*(RadarCANRxBuf + 2) &=0x07;
+			*(RadarCANRxBuf + 2) |=temp;
+			
+		}
+		HAL_CAN_AddTxMessage(&hcan1, &CAN_TxDBCHeader, RadarCANRxBuf, &CAN_TxMailBox);
+		osSemaphoreRelease(bSemRadarCANRxSigHandle);
+		//	EMRR
+		#elif RADAR_TYPE == 0
+		if((RadarCANRxBuf[0]!=0) || ((RadarCANRxBuf[1]&0x7F)!=0))								//获取有效目标
+		{
+			EMRR_GetRadarObjData(RadarCANRxBuf, aEMRRGeneral+EMRR_RadarObjCount);
+			EMRR_RadarObjCount ++;
+		}
+		if(RadarCANRxHeader.StdId==0x053F) 
+		{
+			EMRR_CalcRaderObjCloset(RadarCANRxBuf, aEMRRGeneral, &EMRRGeneral_Closet);
+			EMRR_RadarObjCount=0;			//起始状态清零
+			osSemaphoreRelease(bSemRadarCalcSigHandle);
+		}
+		//EMRR_RadarRxComplete = 1;
+		
+		#endif  	
+  }
 }
 
 /** 

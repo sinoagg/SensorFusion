@@ -362,7 +362,7 @@ void DMA2_Stream2_IRQHandler(void)
 /**
 * @brief This function handles CAN2 RX0 interrupts.
 */
-void CAN2_RX0_IRQHandler(void)
+void CAN2_RX1_IRQHandler(void)
 {
   /* USER CODE BEGIN CAN2_RX0_IRQn 0 */
 
