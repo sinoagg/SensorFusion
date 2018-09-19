@@ -424,6 +424,7 @@ void StartSoundWarningTask(void const * argument)
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 						//HAL_GPIO_WritePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin, GPIO_PIN_SET);
+						osDelay(100);
 					#if ADAS_COMM
 					}
 					#endif
@@ -439,6 +440,7 @@ void StartSoundWarningTask(void const * argument)
 						osDelay(300);
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
+						osDelay(300);
 					#if ADAS_COMM
 					}
 					#endif
@@ -450,7 +452,7 @@ void StartSoundWarningTask(void const * argument)
 			}
 
 			#if ADAS_COMM
-			switch(ADAS_dev.LDW_warning)	//Lane departure warning
+			/*switch(ADAS_dev.LDW_warning)	//Lane departure warning
 			{
 				case 0x01:	//left
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
@@ -459,6 +461,7 @@ void StartSoundWarningTask(void const * argument)
 					osDelay(1000);
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
+					osDelay(1000);
 					break;
 				case 0x02:	//right
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
@@ -467,12 +470,13 @@ void StartSoundWarningTask(void const * argument)
 					osDelay(1000);
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
+					osDelay(1000);
 					break;
 				default:
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 					break;
-			}
+			}*/
 			#endif
 		}
 		osDelay(10);
@@ -637,7 +641,7 @@ void StartRadarCalcTask(void const * argument)
 		MinRangeLong_g = EMRRGeneral_Closet.trackRange;// - VehicleSpeed_g / 6;;
     VrelLong_g = EMRRGeneral_Closet.trackSpeed;
 		//DBC_SendDist(&hcan1, MinRangeLong_g);
-    if(!Turning_Flag || (Turning_Flag && Turning_Collision))
+    //if(!Turning_Flag || (Turning_Flag && Turning_Collision))
     {
 			/*if(MinRangeLong_g < 30)
 			{
@@ -647,12 +651,12 @@ void StartRadarCalcTask(void const * argument)
       else */if(MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g != 0 && VrelLong_g != 0)
       {
         TimetoCrash_g = - MinRangeLong_g / VrelLong_g;
-        if(TimetoCrash_g < 3 && VrelLong_g < 0 && MinRangeLong_g > 0)
+        if(TimetoCrash_g < 3.5)// && VrelLong_g < 0 && MinRangeLong_g > 0)
         {
           CrashWarningLv = WARNING_HIGH;
           osSemaphoreRelease(bSemSoundWarningSigHandle);
         }
-        else if(TimetoCrash_g < 3.5f && VrelLong_g < 0 && MinRangeLong_g > 0)
+        else if(TimetoCrash_g < 4.5f)// && VrelLong_g < 0 && MinRangeLong_g > 0)
         {
           CrashWarningLv = WARNING_LOW;
           osSemaphoreRelease(bSemSoundWarningSigHandle);
