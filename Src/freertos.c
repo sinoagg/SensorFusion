@@ -540,7 +540,18 @@ void StartCANSpeedReadTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);
-    #if VEHICLE_MODEL == 2    //BYD
+		#if VEHICLE_MODEL == 3		//Benz
+		if(1 == Vehicle_CAN_Flag) //VehicleSpeed ID
+    {
+			VehicleSpeed_g = VehicleCANRxBuf[7]; 		//vehicle speed in hex,km/h
+		
+			#if RADAR_TYPE
+			ARS_SendVehicleSpeed(&hcan2, VehicleSpeed_g);	//send VehicleSpeed to Radar
+			//EMRR
+			#else
+			#endif
+		}
+    #elif VEHICLE_MODEL == 2	//BYD
 
     #elif VEHICLE_MODEL == 1  //YUTONG
     if(0xD1 == VehicleCANRxBuf[0] && 0xD1 == VehicleCANRxBuf[2])
