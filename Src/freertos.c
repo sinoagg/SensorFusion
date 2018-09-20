@@ -124,6 +124,9 @@ struct
   uint8_t left_turn;
 }VehicleSwitch;
 
+#define LOW_WARNING_TIME  4.5f
+#define HIGH_WARNING_TIME 3.5f
+
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
@@ -621,12 +624,12 @@ void StartRadarCalcTask(void const * argument)
 				VrelLong_g = 0.25 * relSpeed - 128;						//get real relative speed
 				MinRangeLong_g = 0.2 * MinRange - 500;				//get real range(longitude)
 				TimetoCrash_g = -(float)MinRangeLong_g/VrelLong_g;//relative Velocity is minus
-				if(TimetoCrash_g < 2.1f && VrelLong_g < 0 && MinRangeLong_g > 0)
+				if(TimetoCrash_g < HIGH_WARNING_TIME && VrelLong_g < 0 && MinRangeLong_g > 0)
 				{
 					CrashWarningLv = WARNING_HIGH;
 					osSemaphoreRelease(bSemSoundWarningSigHandle);
 				}
-				else if(TimetoCrash_g < 2.4f && VrelLong_g < 0 && MinRangeLong_g > 0)
+				else if(TimetoCrash_g < LOW_WARNING_TIME && VrelLong_g < 0 && MinRangeLong_g > 0)
 				{
 					CrashWarningLv = WARNING_LOW;
 					osSemaphoreRelease(bSemSoundWarningSigHandle);
@@ -638,7 +641,7 @@ void StartRadarCalcTask(void const * argument)
 
     //EMRR
 		#else
-		MinRangeLong_g = EMRRGeneral_Closet.trackRange;// - VehicleSpeed_g / 6;;
+		MinRangeLong_g = EMRRGeneral_Closet.trackRange;// - VehicleSpeed_g / 6;
     VrelLong_g = EMRRGeneral_Closet.trackSpeed;
 		//DBC_SendDist(&hcan1, MinRangeLong_g);
     //if(!Turning_Flag || (Turning_Flag && Turning_Collision))
@@ -648,15 +651,15 @@ void StartRadarCalcTask(void const * argument)
 				 CrashWarningLv = WARNING_HIGH;
           osSemaphoreRelease(bSemSoundWarningSigHandle);
 			}
-      else */if(MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g != 0 && VrelLong_g != 0)
+      else */if(MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g > 0 && VrelLong_g < 0)
       {
         TimetoCrash_g = - MinRangeLong_g / VrelLong_g;
-        if(TimetoCrash_g < 3.5)// && VrelLong_g < 0 && MinRangeLong_g > 0)
+        if(TimetoCrash_g < HIGH_WARNING_TIME)
         {
           CrashWarningLv = WARNING_HIGH;
           osSemaphoreRelease(bSemSoundWarningSigHandle);
         }
-        else if(TimetoCrash_g < 4.5f)// && VrelLong_g < 0 && MinRangeLong_g > 0)
+        else if(TimetoCrash_g < LOW_WARNING_TIME)
         {
           CrashWarningLv = WARNING_LOW;
           osSemaphoreRelease(bSemSoundWarningSigHandle);
