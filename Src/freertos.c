@@ -93,7 +93,7 @@ extern uint8_t RadarCANRxBuf[];
 extern uint8_t CrashWarningLv;
 extern uint8_t VehicleCANRxBuf[];
 extern uint8_t YawCANRxBuf[];
-extern uint8_t VehicleSpeed;
+extern uint8_t VehicleSpeed_g;
 extern uint8_t Vehicle_CAN_Flag;
 extern uint8_t CmdRxBuf[];
 extern uint8_t CmdRadarDataTxBuf[];
@@ -108,10 +108,11 @@ extern MW_RadarGeneral RadarGeneral[16];
 //EMRR
 extern EMRR_RadarGeneral aEMRRGeneral[];
 extern EMRR_RadarGeneral EMRRGeneral_Closet;
-extern float yawRate;
-extern float MinRangeLong;
-extern float VrelLong;
-extern float TimetoCrash;
+extern float YawRate_g;
+extern float XAcc_g;
+extern float MinRangeLong_g;
+extern float VrelLong_g;
+extern float TimetoCrash_g;
 extern __IO float ADC_ConvertedValueF[2];
 
 extern uint8_t RadarTimes;
@@ -123,6 +124,9 @@ struct
   uint8_t right_turn;
   uint8_t left_turn;
 }VehicleSwitch;
+
+#define LOW_WARNING_TIME  4.5f
+#define HIGH_WARNING_TIME 3.5f
 
 /* USER CODE END Variables */
 
@@ -306,14 +310,17 @@ void StartDefaultTask(void const * argument)
 		if(ADASRxComplete==1)
 		{
       ADASRxComplete=0;
-      DispADASData(ADASRxBuf, ADASDispBuf, MinRangeLong, VrelLong, TimetoCrash);
+      DispADASData(ADASRxBuf, ADASDispBuf, MinRangeLong_g, VrelLong_g, TimetoCrash_g);
 			HAL_UART_Transmit(&huart5, ADASDispBuf, 32, 100);//transmit ADAS data to screen
       osSemaphoreRelease(bSemADASRxSigHandle);
 		}
     #endif
 		
     #if DBC_SEND
-    DBC_SendDist(&hcan1, MinRangeLong);
+		if(MinRangeLong_g > 0)
+		{
+			DBC_SendDist(&hcan1, MinRangeLong_g);
+		}
     #endif
 		
 		#if ATM_READ
@@ -325,7 +332,7 @@ void StartDefaultTask(void const * argument)
 
 		//HAL_GPIO_TogglePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin|VALVE_REAR_Pin);
 
-		osDelay(30);
+		osDelay(50);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -364,11 +371,14 @@ void StartRadarCommTask(void const * argument)
 		
     //EMRR
 		#else
-		EMRR_GetRaderObjCloset(RadarCANRxBuf, aEMRRGeneral, &EMRRGeneral_Closet);
+		//EMRR_GetRaderObjCloset(RadarCANRxBuf, aEMRRGeneral, &EMRRGeneral_Closet);
 		if(EMRRGeneral_Closet.trackRange != 0)
-			osSemaphoreRelease(bSemRadarCalcSigHandle);
+		{
+			//EMRRGeneral_Closet.trackRange -= (VehicleSpeed_g / 6);
+			//osSemaphoreRelease(bSemRadarCalcSigHandle);
+		}
 		#endif
-		osDelay(1);
+		osDelay(10);
   }
   /* USER CODE END StartRadarCommTask */
 }
@@ -401,7 +411,7 @@ void StartSoundWarningTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);
-		if(VehicleSpeed > 5)
+		if(VehicleSpeed_g > 10)
 		{
 			switch(CrashWarningLv)				//Forward collision warning
 			{
@@ -414,10 +424,11 @@ void StartSoundWarningTask(void const * argument)
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 						//HAL_GPIO_WritePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin, GPIO_PIN_RESET);
 						//WTN6_Broadcast(BELL_BB_500MS);
-						osDelay(1000);
+						osDelay(100);
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 						//HAL_GPIO_WritePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin, GPIO_PIN_SET);
+						osDelay(100);
 					#if ADAS_COMM
 					}
 					#endif
@@ -430,9 +441,10 @@ void StartSoundWarningTask(void const * argument)
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 						//WTN6_Broadcast(BELL_BB_1000MS);
-						osDelay(500);
+						osDelay(300);
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
+						osDelay(300);
 					#if ADAS_COMM
 					}
 					#endif
@@ -450,17 +462,19 @@ void StartSoundWarningTask(void const * argument)
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 					//WTN6_Broadcast(BELL_BB_500MS);
-					osDelay(2000);
+					osDelay(1000);
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
+					osDelay(1000);
 					break;
 				case 0x02:	//right
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 					//WTN6_Broadcast(BELL_BB_1000MS);
-					osDelay(2000);
+					osDelay(1000);
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
+					osDelay(1000);
 					break;
 				default:
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
@@ -482,25 +496,25 @@ void StartGyroCommTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemGyroCommSigHandle, osWaitForever);
-    yawRate =  MPU_GetYawRate(YawCANRxBuf);
-		if(yawRate < 0)		//clockwise
+    YawRate_g =  MPU_GetYawRate(YawCANRxBuf);
+    XAcc_g = MPU_GetXAcc(YawCANRxBuf);
+		if(YawRate_g < 0)		//clockwise
 		{
-			yawRate = (yawRate < -YAWRATE_LIMIT) ? -YAWRATE_LIMIT : yawRate;
+			YawRate_g = (YawRate_g < -YAWRATE_LIMIT) ? -YAWRATE_LIMIT : YawRate_g;
 		}
 		else
-			yawRate = (yawRate > YAWRATE_LIMIT) ? YAWRATE_LIMIT: yawRate;
+			YawRate_g = (YawRate_g > YAWRATE_LIMIT) ? YAWRATE_LIMIT: YawRate_g;
 		//ARS408
 		#if RADAR_TYPE
-			//ARS_SendVehicleYaw(&hcan2, -yawRate * 3);  //send VehicleYaw to Radar-ARS408
+			ARS_SendVehicleYaw(&hcan2, YawRate_g);  //send VehicleYaw to Radar-ARS408
 			osDelay(2);
-			//ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);
 			RadarYawTimes += 1;
 		
 		
-			if(yawRate > 5 || yawRate < -5)
+			if(YawRate_g > 0 || YawRate_g < -0)
       {
         Turning_Flag = 1;
-		  	Turning_Collision = ARS_CalcTurn(RadarGeneral, yawRate, VehicleSpeed);
+		  	Turning_Collision = ARS_CalcTurn(RadarGeneral, YawRate_g, VehicleSpeed_g);
       }
 			else
 			{
@@ -510,12 +524,10 @@ void StartGyroCommTask(void const * argument)
 		
 		//EMRR
 		#else
-			//yawRate = 100;
-			//VehicleSpeed = 10;
-      if(yawRate > 5 || yawRate < -5)
+      if(YawRate_g > 5 || YawRate_g < -5)
       {
         Turning_Flag = 1;
-		  	Turning_Collision = EMRR_CalcTurn(&EMRRGeneral_Closet, yawRate, VehicleSpeed);
+		  	Turning_Collision = EMRR_CalcTurn(&EMRRGeneral_Closet, YawRate_g, VehicleSpeed_g);
       }
 			else
 			{
@@ -536,15 +548,26 @@ void StartCANSpeedReadTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);
-    #if VEHICLE_MODEL == 2    //BYD
+		#if VEHICLE_MODEL == 3		//Benz
+		if(1 == Vehicle_CAN_Flag) //VehicleSpeed ID
+    {
+			VehicleSpeed_g = VehicleCANRxBuf[7]; 		//vehicle speed in hex,km/h
+		
+			#if RADAR_TYPE
+			ARS_SendVehicleSpeed(&hcan2, VehicleSpeed_g);	//send VehicleSpeed to Radar
+			//EMRR
+			#else
+			#endif
+		}
+    #elif VEHICLE_MODEL == 2	//BYD
 
     #elif VEHICLE_MODEL == 1  //YUTONG
     if(0xD1 == VehicleCANRxBuf[0] && 0xD1 == VehicleCANRxBuf[2])
     {
-      VehicleSpeed = VehicleCANRxBuf[1];	//vehicle speed in hex,km/h
+      VehicleSpeed_g = VehicleCANRxBuf[1];	//vehicle speed in hex,km/h
 			//ARS408
 			#if RADAR_TYPE
-			ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);	//send VehicleSpeed to Radar
+			ARS_SendVehicleSpeed(&hcan2, VehicleSpeed_g);	//send VehicleSpeed to Radar
 			//EMRR
 			#else
 			#endif
@@ -552,11 +575,11 @@ void StartCANSpeedReadTask(void const * argument)
     #else   //KINGLONG
     if(1 == Vehicle_CAN_Flag) //VehicleSpeed ID
     {
-      VehicleSpeed = VehicleCANRxBuf[7];  	//vehicle speed in hex,km/h
+      VehicleSpeed_g = VehicleCANRxBuf[7];  	//vehicle speed in hex,km/h
 
 			//ARS408
       #if RADAR_TYPE
-      ARS_SendVehicleSpeed(&hcan2, VehicleSpeed);	//send VehicleSpeed to Radar
+			ARS_SendVehicleSpeed(&hcan2, VehicleSpeed_g);	//send VehicleSpeed to Radar
       //EMRR
       #else
       #endif
@@ -599,15 +622,15 @@ void StartRadarCalcTask(void const * argument)
 		{
 			if((0.2*MinRange-500) < LIMIT_RANGE && MinRange != 0)	//calculate when dist is near enough
 			{
-				VrelLong = 0.25 * relSpeed - 128;						//get real relative speed
-				MinRangeLong = 0.2 * MinRange - 500;				//get real range(longitude)
-				TimetoCrash = -(float)MinRangeLong/VrelLong;//relative Velocity is minus
-				if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
+				VrelLong_g = 0.25 * relSpeed - 128;						//get real relative speed
+				MinRangeLong_g = 0.2 * MinRange - 500;				//get real range(longitude)
+				TimetoCrash_g = -(float)MinRangeLong_g/VrelLong_g;//relative Velocity is minus
+				if(TimetoCrash_g < HIGH_WARNING_TIME && VrelLong_g < 0 && MinRangeLong_g > 0)
 				{
 					CrashWarningLv = WARNING_HIGH;
 					osSemaphoreRelease(bSemSoundWarningSigHandle);
 				}
-				else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
+				else if(TimetoCrash_g < LOW_WARNING_TIME && VrelLong_g < 0 && MinRangeLong_g > 0)
 				{
 					CrashWarningLv = WARNING_LOW;
 					osSemaphoreRelease(bSemSoundWarningSigHandle);
@@ -619,24 +642,25 @@ void StartRadarCalcTask(void const * argument)
 
     //EMRR
 		#else
-		MinRangeLong = EMRRGeneral_Closet.trackRange;
-    VrelLong = EMRRGeneral_Closet.trackSpeed;
-    if(!Turning_Flag || (Turning_Flag && Turning_Collision))
+		MinRangeLong_g = EMRRGeneral_Closet.trackRange;// - VehicleSpeed_g / 6;
+    VrelLong_g = EMRRGeneral_Closet.trackSpeed;
+		//DBC_SendDist(&hcan1, MinRangeLong_g);
+    //if(!Turning_Flag || (Turning_Flag && Turning_Collision))
     {
-			/*if(MinRangeLong < 30)
+			/*if(MinRangeLong_g < 30)
 			{
 				 CrashWarningLv = WARNING_HIGH;
           osSemaphoreRelease(bSemSoundWarningSigHandle);
 			}
-      else */if(MinRangeLong < LIMIT_RANGE && MinRangeLong != 0 && VrelLong != 0)
+      else */if(MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g > 0 && VrelLong_g < 0)
       {
-        TimetoCrash = - MinRangeLong / VrelLong;
-        if(TimetoCrash < 3 && VrelLong < 0 && MinRangeLong > 0)
+        TimetoCrash_g = - MinRangeLong_g / VrelLong_g;
+        if(TimetoCrash_g < HIGH_WARNING_TIME)
         {
           CrashWarningLv = WARNING_HIGH;
           osSemaphoreRelease(bSemSoundWarningSigHandle);
         }
-        else if(TimetoCrash < 3.5f && VrelLong < 0 && MinRangeLong > 0)
+        else if(TimetoCrash_g < LOW_WARNING_TIME)
         {
           CrashWarningLv = WARNING_LOW;
           osSemaphoreRelease(bSemSoundWarningSigHandle);
@@ -692,13 +716,13 @@ void StartRadarDataTxTask(void const * argument)
   for(;;)
   {
     HAL_GPIO_TogglePin(LED5_GPIO_Port,LED5_Pin);
-    uint8_t speed = (uint8_t)VrelLong;
-    if(GetRadarData(CrashWarningLv, speed, MinRangeLong, TimetoCrash) == 0)	//get radar data successed
+    uint8_t speed = (uint8_t)VrelLong_g;
+    if(GetRadarData(CrashWarningLv, speed, MinRangeLong_g, TimetoCrash_g) == 0)	//get radar data successed
     {
       RadarData.Sys_State = RADAR_OK;			//radar data sending sys ok
       FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
       HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
-      //DBC_SendDist(&hcan1, MinRangeLong);
+      //DBC_SendDist(&hcan1, MinRangeLong_g);
 			//if using RS485, EN = 0;
     }
     else
@@ -706,7 +730,7 @@ void StartRadarDataTxTask(void const * argument)
       RadarData.Sys_State = RADAR_ERROR;	//radar data sending sys error
       FillRadarDataTxBuf(CmdRadarDataTxBuf, RadarData);
       HAL_UART_Transmit(&huart1, CmdRadarDataTxBuf, 11, 1000);
-      //DBC_SendDist(&hcan1, MinRangeLong);
+      //DBC_SendDist(&hcan1, MinRangeLong_g);
 			//if using RS485, EN = 0;
     }
     osDelay(100);

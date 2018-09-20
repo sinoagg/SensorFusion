@@ -32,12 +32,12 @@
 #include "ARS408.h"
 #include "math.h"
 
-#define CONFIG_ARS408_RADAR 1
-#define CONFIG_ARS408_FILTER 1
+#define CONFIG_ARS408_RADAR 0
+#define CONFIG_ARS408_FILTER 0
 
 #define VEHICLE_CENTRE_LEN	10.0f
 #define VEHICLE_HALF_WIDTH	1.4f
-#define OBSTACLE_ERR				-0.5f
+#define OBSTACLE_ERR				-0.8f
 
 CAN_TxHeaderTypeDef CAN_TxConfigRadarHeader={RADAR_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxConfigFilterHeader={FILTER_CFG_ADDR,0,CAN_ID_STD,CAN_RTR_DATA,8,DISABLE};
@@ -64,7 +64,7 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 	CAN_FilterTypeDef MW_RadarCANFilter = {
 		OBJ_GENERAL_ADDR<<5, 0,\
 		0xEFE<<5, 0,\
-		CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B & 0x60A at the same time
+		CAN_FILTER_FIFO1, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B & 0x60A at the same time
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
 		
 	/*CAN_FilterTypeDef MW_RadarCANFilter1 = {
@@ -74,7 +74,7 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter1);*/
 	
 	HAL_CAN_Start(hcan);
-	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
 	
 	#if CONFIG_ARS408_RADAR
 		ARS_ConfigRadar(hcan);
@@ -186,7 +186,7 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_VrelOncome = (uint16_t)((100 - 0) / 0.0315);
   FilterContent.FilterCfg_Min_VrelDepart = (uint16_t)((0 - 0) / 0.0315); //0.1~100m/s, offset 0, Res 0.0315
   FilterContent.FilterCfg_Max_VrelDepart = (uint16_t)((100 - 0) / 0.0315);
-  FilterContent.FilterCfg_Min_RCS = (uint16_t)((-50 + 50) / 0.025);   //0.025~30dBm2, offset -50, Res 0.025
+  FilterContent.FilterCfg_Min_RCS = (uint16_t)((-20 + 50) / 0.025);   //0.025~30dBm2, offset -50, Res 0.025
   FilterContent.FilterCfg_Max_RCS = (uint16_t)((52.375 + 50) / 0.025);
   FilterContent.FilterCfg_Min_Lifetime = (uint16_t)((0.1 - 0) / 0.1);   //0.1~409.5s, offset 0, Res 0.1
   FilterContent.FilterCfg_Max_Lifetime = (uint16_t)((409.5 - 0) / 0.1);
@@ -194,8 +194,8 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_Size = (uint16_t)((102.375 - 0) / 0.025);
   FilterContent.FilterCfg_Min_ProbExists = 0x4;//99%~100%, 0x0: 0%, 0x1: 25%, 0x2: 50%
   FilterContent.FilterCfg_Max_ProbExists = 0x7;//0x3: 75%, 0x4: 90%, 0x5: 99%, 0x6: 99.9%, 0x7: 100%
-  FilterContent.FilterCfg_Min_Y = (uint16_t)((-1.4 + 409.5) / 0.2);     //-1.5~1.5m, offset -409.5, Res 0.2
-  FilterContent.FilterCfg_Max_Y = (uint16_t)((1.4 + 409.5) / 0.2);
+  FilterContent.FilterCfg_Min_Y = (uint16_t)((-10.0 + 409.5) / 0.2);     //-1.5~1.5m, offset -409.5, Res 0.2
+  FilterContent.FilterCfg_Max_Y = (uint16_t)((10.0 + 409.5) / 0.2);
   FilterContent.FilterCfg_Min_X = (uint16_t)((0 + 500) / 0.2);          //0~200m, offset -500, Res 0.2
   FilterContent.FilterCfg_Max_X = (uint16_t)((200 + 500) / 0.2);
   FilterContent.FilterCfg_Min_VYRightLeft = (uint16_t)((0 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315
@@ -313,7 +313,8 @@ uint8_t ARS_CalcTurn(MW_RadarGeneral *pRadargGeneral_Closet, float YawRate, floa
   RangeLong_Closet = (pRadargGeneral_Closet->Obj_DistLong * 0.2) - 500;
   RangeLat_Closet = (pRadargGeneral_Closet->Obj_DistLat * 0.2) - 204.6f;
 	RangeLat_Closet = (RangeLat_Closet < 0) ? -RangeLat_Closet : RangeLat_Closet;
-  VehicleSpeed /= 3.6f;  //  km/h to m/s
+  VehicleSpeed /= (3.6f * 1.1f);  //  km/h to m/s
+	
 
 	Rotate_R = (VehicleSpeed * 180) / (YawRate * 3.14f);	//Rotate_R = V / ¦Ø
 	Rotate_R = (Rotate_R < 0) ? -Rotate_R : Rotate_R;

@@ -9,6 +9,7 @@
 //	Gyro CAN 1/3
 #define GYRO_CAN 1
 /**
+ * Benz			3
  * BYD			2
  * YUTONG		1
  * KINGLONG	0
@@ -17,9 +18,9 @@
 
 #define ADAS_COMM 1
 //	Atmosphere Sensor
-#define ATM_READ 1
+#define ATM_READ 0
 //	Send Radar data in DBC
-#define DBC_SEND 1
+#define DBC_SEND 0
 //	labview
 #define RADAR_DATA_SEND 1
 

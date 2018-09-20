@@ -3,6 +3,7 @@
 ## platform
  * FreeRTOS on STM32F413
 ## version
+ * 20180920: Radar using CAN filter1, EMRR getting RadarData faster, Gyroscope in HighSensitivity
  * 20180910: **gyro** can1/3, **ARS408** config & turning warning
  * 20180816: Turning warning
  * 20180811: led 0 warning
@@ -32,9 +33,9 @@
     * LED1: **Radar** communication
     * LED2: **ADAS** communicatn
     * LED3: UART1(cmd) from **labview**
-    * LED4: Not using
+    * LED4: **Vehicle** Speed & Status
     * LED5: Radar data Tx(**DBC**)
-    * LED6: CAN Rx from **Vehicle**(speed & gyroscope)
+    * LED6: CAN Rx from **gyroscope**
 * BUZZER
     * FCW: 1second(high), 0.5s(low)
     * LDW: 2s
