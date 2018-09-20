@@ -124,6 +124,9 @@ struct
   uint8_t left_turn;
 }VehicleSwitch;
 
+#define LOW_WARNING_TIME  4.5f
+#define HIGH_WARNING_TIME 3.5f
+
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
@@ -424,6 +427,7 @@ void StartSoundWarningTask(void const * argument)
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 						//HAL_GPIO_WritePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin, GPIO_PIN_SET);
+						osDelay(100);
 					#if ADAS_COMM
 					}
 					#endif
@@ -439,6 +443,7 @@ void StartSoundWarningTask(void const * argument)
 						osDelay(300);
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
+						osDelay(300);
 					#if ADAS_COMM
 					}
 					#endif
@@ -450,7 +455,7 @@ void StartSoundWarningTask(void const * argument)
 			}
 
 			#if ADAS_COMM
-			switch(ADAS_dev.LDW_warning)	//Lane departure warning
+			/*switch(ADAS_dev.LDW_warning)	//Lane departure warning
 			{
 				case 0x01:	//left
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
@@ -459,6 +464,7 @@ void StartSoundWarningTask(void const * argument)
 					osDelay(1000);
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
+					osDelay(1000);
 					break;
 				case 0x02:	//right
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
@@ -467,12 +473,13 @@ void StartSoundWarningTask(void const * argument)
 					osDelay(1000);
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
+					osDelay(1000);
 					break;
 				default:
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 					break;
-			}
+			}*/
 			#endif
 		}
 		osDelay(10);
@@ -540,7 +547,18 @@ void StartCANSpeedReadTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSpeedRxSigHandle, osWaitForever);
-    #if VEHICLE_MODEL == 2    //BYD
+		#if VEHICLE_MODEL == 3		//Benz
+		if(1 == Vehicle_CAN_Flag) //VehicleSpeed ID
+    {
+			VehicleSpeed_g = VehicleCANRxBuf[7]; 		//vehicle speed in hex,km/h
+		
+			#if RADAR_TYPE
+			ARS_SendVehicleSpeed(&hcan2, VehicleSpeed_g);	//send VehicleSpeed to Radar
+			//EMRR
+			#else
+			#endif
+		}
+    #elif VEHICLE_MODEL == 2	//BYD
 
     #elif VEHICLE_MODEL == 1  //YUTONG
     if(0xD1 == VehicleCANRxBuf[0] && 0xD1 == VehicleCANRxBuf[2])
@@ -606,12 +624,12 @@ void StartRadarCalcTask(void const * argument)
 				VrelLong_g = 0.25 * relSpeed - 128;						//get real relative speed
 				MinRangeLong_g = 0.2 * MinRange - 500;				//get real range(longitude)
 				TimetoCrash_g = -(float)MinRangeLong_g/VrelLong_g;//relative Velocity is minus
-				if(TimetoCrash_g < 2.1f && VrelLong_g < 0 && MinRangeLong_g > 0)
+				if(TimetoCrash_g < HIGH_WARNING_TIME && VrelLong_g < 0 && MinRangeLong_g > 0)
 				{
 					CrashWarningLv = WARNING_HIGH;
 					osSemaphoreRelease(bSemSoundWarningSigHandle);
 				}
-				else if(TimetoCrash_g < 2.4f && VrelLong_g < 0 && MinRangeLong_g > 0)
+				else if(TimetoCrash_g < LOW_WARNING_TIME && VrelLong_g < 0 && MinRangeLong_g > 0)
 				{
 					CrashWarningLv = WARNING_LOW;
 					osSemaphoreRelease(bSemSoundWarningSigHandle);
@@ -623,25 +641,25 @@ void StartRadarCalcTask(void const * argument)
 
     //EMRR
 		#else
-		MinRangeLong_g = EMRRGeneral_Closet.trackRange;// - VehicleSpeed_g / 6;;
+		MinRangeLong_g = EMRRGeneral_Closet.trackRange;// - VehicleSpeed_g / 6;
     VrelLong_g = EMRRGeneral_Closet.trackSpeed;
 		//DBC_SendDist(&hcan1, MinRangeLong_g);
-    if(!Turning_Flag || (Turning_Flag && Turning_Collision))
+    //if(!Turning_Flag || (Turning_Flag && Turning_Collision))
     {
 			/*if(MinRangeLong_g < 30)
 			{
 				 CrashWarningLv = WARNING_HIGH;
           osSemaphoreRelease(bSemSoundWarningSigHandle);
 			}
-      else */if(MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g != 0 && VrelLong_g != 0)
+      else */if(MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g > 0 && VrelLong_g < 0)
       {
         TimetoCrash_g = - MinRangeLong_g / VrelLong_g;
-        if(TimetoCrash_g < 3 && VrelLong_g < 0 && MinRangeLong_g > 0)
+        if(TimetoCrash_g < HIGH_WARNING_TIME)
         {
           CrashWarningLv = WARNING_HIGH;
           osSemaphoreRelease(bSemSoundWarningSigHandle);
         }
-        else if(TimetoCrash_g < 3.5f && VrelLong_g < 0 && MinRangeLong_g > 0)
+        else if(TimetoCrash_g < LOW_WARNING_TIME)
         {
           CrashWarningLv = WARNING_LOW;
           osSemaphoreRelease(bSemSoundWarningSigHandle);

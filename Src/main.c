@@ -431,7 +431,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     {
 			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
       osSemaphoreRelease(bSemSpeedRxSigHandle);
-      Vehicle_CAN_Flag = 1;
+      Vehicle_CAN_Flag = 1;	//	reading Vehicle Speed
     }
     //  KINGLONG
     #if VEHICLE_MODEL == 0
@@ -440,7 +440,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     {
 			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
       osSemaphoreRelease(bSemSpeedRxSigHandle);
-      Vehicle_CAN_Flag = 2;
+      Vehicle_CAN_Flag = 2;	//	reading Vehicle Switch status
     }
     #endif
 		else

@@ -71,15 +71,15 @@ void EMRR_GetRadarObjData(uint8_t* pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral)
 	//range
 	pRadarGeneral->trackRange = (float)(*pCANRxBuf | ((*(pCANRxBuf + 1) & 0x7F) << 8))*0.01f;
 	//speed
-	tempData =  ((*(pCANRxBuf + 3) & 0x3F) << 8) | *(pCANRxBuf + 2);
+	tempData =  ((uint16_t)((*(pCANRxBuf + 3) & 0x3F)) << 8) | *(pCANRxBuf + 2);
 	pRadarGeneral->trackSpeed =  (float)(tempData > 8191 ? (tempData - 16384)*0.01f : tempData*0.01f);
 	//angle
-	tempData = ((*(pCANRxBuf + 5) & 0xFC) >> 2) | ((*(pCANRxBuf + 6) & 0x1F) << 6);
+	tempData = ((uint16_t)((*(pCANRxBuf + 5) & 0xFC)) >> 2) | ((uint16_t)((*(pCANRxBuf + 6) & 0x1F)) << 6);
 	pRadarGeneral->trackAngle = (float)((tempData) > 1023 ? (tempData- 2048) *0.1f : tempData *0.1f);
 	//power
 	if (pRadarGeneral->trackRange > 0)
 	{
-		tempData = ((*(pCANRxBuf + 6) & 0xE0) >> 5) | ((*(pCANRxBuf + 7) & 0x7F) << 3);
+		tempData = (uint16_t)((*(pCANRxBuf + 6) & 0xE0) >> 5) | ((uint16_t)((*(pCANRxBuf + 7) & 0x7F)) << 3);
 		pRadarGeneral->trackPower = (float)(tempData > 511 ? (tempData - 1024)*0.1f - 40 : (tempData)*0.1f - 40);
 	}
 	else
@@ -98,33 +98,27 @@ void EMRR_GetRadarObjData(uint8_t* pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral)
  */
 void EMRR_CalcRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral, EMRR_RadarGeneral *pRadarGeneral_Closet)
 {
-	//if(EMRR_RadarRxComplete)	//接收标志
-		//EMRR_GetRadarObjData(pCANRxBuf, (pRadarGeneral + RadarCANRxHeader.StdId - 0x500));
-		//if(EMRR_RadarObjCount >= 64)	//收完64个目标数据
-					//EMRR_RadarObjCount = 0;
-			uint8_t i=0;
-			static uint8_t min_index=0;
-			float min=1000, rad;
-			if(EMRR_RadarObjCount>0)
+	uint8_t i=0;
+	static uint8_t min_index=0;
+	float min=1000, rad;
+	if(EMRR_RadarObjCount>0)
+	{
+		for(i=0; i<EMRR_RadarObjCount; i++)
+		{
+			if((pRadarGeneral + i)->trackPower> -40)	//功率
 			{
-			for(i=0; i<EMRR_RadarObjCount; i++)
-			{
-				//if((pRadarGeneral + i)->trackRange!=0)	//目标数据不为零
-				if((pRadarGeneral + i)->trackPower> -40)	//功率
+				if(min > (pRadarGeneral + i)->trackRange)	//当前目标距离小于min
 				{
-					if(min > (pRadarGeneral + i)->trackRange)	//当前目标距离小于min
+					rad = 3.14 * fabs((pRadarGeneral + i)->trackAngle) / 180;	//角度换算成弧度
+					(pRadarGeneral + i)->trackCrossRange = (float)((pRadarGeneral + i)->trackRange * sin(rad));
+					if((pRadarGeneral + i)->trackCrossRange < 2.0f)	//左右距离＜1.5米，在车道线内
 					{
-						rad = 3.14 * fabs((pRadarGeneral + i)->trackAngle) / 180;	//角度换算成弧度
-						(pRadarGeneral + i)->trackCrossRange = (float)((pRadarGeneral + i)->trackRange * sin(rad));
-						if((pRadarGeneral + i)->trackCrossRange < 10.0f)	//左右距离＜1.5米，在车道线内
-						{
-						
-							min = (pRadarGeneral + i)->trackRange;
-							if(min!=0) min_index = i;
-						}
+						min = (pRadarGeneral + i)->trackRange;
+						if(min!=0) min_index = i;
 					}
-				}		
-			}
+				}
+			}		
+		}
 		pRadarGeneral_Closet->trackId = (pRadarGeneral + min_index)->trackId;
 		pRadarGeneral_Closet->trackCrossRange = (pRadarGeneral + min_index)->trackCrossRange;
 		pRadarGeneral_Closet->trackRange = (pRadarGeneral + min_index)->trackRange;
@@ -132,7 +126,6 @@ void EMRR_CalcRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGenera
 		pRadarGeneral_Closet->trackAngle = (pRadarGeneral + min_index)->trackAngle;
 		pRadarGeneral_Closet->trackPower = (pRadarGeneral + min_index)->trackPower;
 		EMRR_RadarRxComplete = 0;
-
 		}
 	}
 /** 
