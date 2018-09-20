@@ -417,7 +417,7 @@ void StartSoundWarningTask(void const * argument)
 			{
 				case WARNING_HIGH:
 					#if ADAS_COMM
-					if(0 != ADAS_dev.crash_level)
+					if(ADAS_dev.crash_level > 1)
 					{
 					#endif
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
@@ -435,7 +435,7 @@ void StartSoundWarningTask(void const * argument)
 					break;
 				case WARNING_LOW:
 					#if ADAS_COMM
-					if(0 != ADAS_dev.crash_level)
+					if(ADAS_dev.crash_level > 1)
 					{
 					#endif
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
