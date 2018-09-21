@@ -153,8 +153,7 @@ extern uint8_t DBC_SendDist(CAN_HandleTypeDef *hcan, float Dist);
 
 /* Init FreeRTOS */
 
-void MX_FREERTOS_Init(void) 
-{
+void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
        
   /* USER CODE END Init */
@@ -241,16 +240,16 @@ void MX_FREERTOS_Init(void)
   CANSpeedReadHandle = osThreadCreate(osThread(CANSpeedRead), NULL);
   #endif
 
-  /* definition and creation of RadarCalcTask */
+  /* definition and creation of RadarCalc */
   osThreadDef(RadarCalcTask, StartRadarCalcTask, osPriorityIdle, 0, 128);
   RadarCalcHandle = osThreadCreate(osThread(RadarCalcTask), NULL);
 
 	#if RADAR_DATA_SEND
-  /* definition and creation of UART1RxTask */
+  /* definition and creation of UART1Rx */
   osThreadDef(UART1RxTask, StartUART1RxTask, osPriorityIdle, 0, 64);
   UART1RxHandle = osThreadCreate(osThread(UART1RxTask), NULL);
 
-  /* definition and creation of RadarDataTxTask */
+  /* definition and creation of RadarDataTx */
   osThreadDef(RadarDataTxTask, StartRadarDataTxTask, osPriorityIdle, 0, 128);
   RadarDataTxHandle = osThreadCreate(osThread(RadarDataTxTask), NULL);
 	
@@ -455,7 +454,7 @@ void StartSoundWarningTask(void const * argument)
 			}
 
 			#if ADAS_COMM
-			/*switch(ADAS_dev.LDW_warning)	//Lane departure warning
+			switch(ADAS_dev.LDW_warning)	//Lane departure warning
 			{
 				case 0x01:	//left
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
@@ -479,7 +478,7 @@ void StartSoundWarningTask(void const * argument)
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 					break;
-			}*/
+			}
 			#endif
 		}
 		osDelay(10);

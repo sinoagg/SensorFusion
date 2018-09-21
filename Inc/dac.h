@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file           : main.h
-  * @brief          : Header for main.c file.
-  *                   This file contains the common defines of the application.
+  * File Name          : DAC.h
+  * Description        : This file provides code for the configuration
+  *                      of the DAC instances.
   ******************************************************************************
   * This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
@@ -46,78 +46,46 @@
   *
   ******************************************************************************
   */
-
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef __dac_H
+#define __dac_H
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f4xx_hal.h"
+#include "main.h"
 
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
 
-/* Private define ------------------------------------------------------------*/
-
-#define BUZZER_Pin GPIO_PIN_2
-#define BUZZER_GPIO_Port GPIOE
-#define ATM_REAR_Pin GPIO_PIN_0
-#define ATM_REAR_GPIO_Port GPIOC
-#define ATM_FRONT_Pin GPIO_PIN_1
-#define ATM_FRONT_GPIO_Port GPIOC
-#define BELL_DATA_Pin GPIO_PIN_6
-#define BELL_DATA_GPIO_Port GPIOA
-#define BELL_CLK_Pin GPIO_PIN_7
-#define BELL_CLK_GPIO_Port GPIOA
-#define BELL_BUSY_Pin GPIO_PIN_4
-#define BELL_BUSY_GPIO_Port GPIOC
-#define LED0_Pin GPIO_PIN_0
-#define LED0_GPIO_Port GPIOB
-#define LED1_Pin GPIO_PIN_1
-#define LED1_GPIO_Port GPIOB
-#define LED2_Pin GPIO_PIN_2
-#define LED2_GPIO_Port GPIOB
-#define LED3_Pin GPIO_PIN_7
-#define LED3_GPIO_Port GPIOE
-#define LED4_Pin GPIO_PIN_8
-#define LED4_GPIO_Port GPIOE
-#define LED5_Pin GPIO_PIN_9
-#define LED5_GPIO_Port GPIOE
-#define LED6_Pin GPIO_PIN_10
-#define LED6_GPIO_Port GPIOE
-#define VALVE_FRONT_Pin GPIO_PIN_8
-#define VALVE_FRONT_GPIO_Port GPIOC
-#define VALVE_REAR_Pin GPIO_PIN_9
-#define VALVE_REAR_GPIO_Port GPIOC
-
-/* ########################## Assert Selection ############################## */
-/**
-  * @brief Uncomment the line below to expanse the "assert_param" macro in the 
-  *        HAL drivers code
-  */
-/* #define USE_FULL_ASSERT    1U */
+extern DAC_HandleTypeDef hdac;
 
 /* USER CODE BEGIN Private defines */
 
-/* Defines ------------------------------------------------------------------*/
-#define	WARNING_NONE 0
-#define	WARNING_LOW 1
-#define WARNING_MID 2
-#define	WARNING_HIGH 3
-
-#define LIMIT_RANGE 200		//meter
 /* USER CODE END Private defines */
 
-#ifdef __cplusplus
- extern "C" {
-#endif
-void _Error_Handler(char *, int);
+extern void _Error_Handler(char *, int);
 
-#define Error_Handler() _Error_Handler(__FILE__, __LINE__)
+void MX_DAC_Init(void);
+
+/* USER CODE BEGIN Prototypes */
+
+/* USER CODE END Prototypes */
+
 #ifdef __cplusplus
 }
 #endif
+#endif /*__ dac_H */
 
-#endif /* __MAIN_H__ */
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

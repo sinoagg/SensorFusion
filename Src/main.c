@@ -53,6 +53,7 @@
 #include "adc.h"
 #include "can.h"
 #include "crc.h"
+#include "dac.h"
 #include "dma.h"
 #include "tim.h"
 #include "usart.h"
@@ -212,6 +213,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_ADC1_Init();
+  MX_DAC_Init();
   /* USER CODE BEGIN 2 */
 	delay_init(100);
   #if ADAS_COMM

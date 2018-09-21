@@ -21,6 +21,7 @@
 "sensorfusion\usart.o"
 "sensorfusion\can.o"
 "sensorfusion\crc.o"
+"sensorfusion\dac.o"
 "sensorfusion\heap_4.o"
 "sensorfusion\queue.o"
 "sensorfusion\croutine.o"
@@ -49,6 +50,8 @@
 "sensorfusion\stm32f4xx_hal_rcc.o"
 "sensorfusion\stm32f4xx_hal_adc.o"
 "sensorfusion\stm32f4xx_hal_adc_ex.o"
+"sensorfusion\stm32f4xx_hal_dac_ex.o"
+"sensorfusion\stm32f4xx_hal_dac.o"
 "sensorfusion\system_stm32f4xx.o"
 --library_type=microlib --strict --scatter "SensorFusion\SensorFusion.sct"
 --summary_stderr --info summarysizes --map --xref --callgraph --symbols

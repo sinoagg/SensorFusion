@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file           : main.h
-  * @brief          : Header for main.c file.
-  *                   This file contains the common defines of the application.
+  * File Name          : DAC.c
+  * Description        : This file provides code for the configuration
+  *                      of the DAC instances.
   ******************************************************************************
   * This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
@@ -47,77 +47,108 @@
   ******************************************************************************
   */
 
-/* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H__
-#define __MAIN_H__
-
 /* Includes ------------------------------------------------------------------*/
+#include "dac.h"
 
-/* USER CODE BEGIN Includes */
+#include "gpio.h"
 
-/* USER CODE END Includes */
+/* USER CODE BEGIN 0 */
 
-/* Private define ------------------------------------------------------------*/
+/* USER CODE END 0 */
 
-#define BUZZER_Pin GPIO_PIN_2
-#define BUZZER_GPIO_Port GPIOE
-#define ATM_REAR_Pin GPIO_PIN_0
-#define ATM_REAR_GPIO_Port GPIOC
-#define ATM_FRONT_Pin GPIO_PIN_1
-#define ATM_FRONT_GPIO_Port GPIOC
-#define BELL_DATA_Pin GPIO_PIN_6
-#define BELL_DATA_GPIO_Port GPIOA
-#define BELL_CLK_Pin GPIO_PIN_7
-#define BELL_CLK_GPIO_Port GPIOA
-#define BELL_BUSY_Pin GPIO_PIN_4
-#define BELL_BUSY_GPIO_Port GPIOC
-#define LED0_Pin GPIO_PIN_0
-#define LED0_GPIO_Port GPIOB
-#define LED1_Pin GPIO_PIN_1
-#define LED1_GPIO_Port GPIOB
-#define LED2_Pin GPIO_PIN_2
-#define LED2_GPIO_Port GPIOB
-#define LED3_Pin GPIO_PIN_7
-#define LED3_GPIO_Port GPIOE
-#define LED4_Pin GPIO_PIN_8
-#define LED4_GPIO_Port GPIOE
-#define LED5_Pin GPIO_PIN_9
-#define LED5_GPIO_Port GPIOE
-#define LED6_Pin GPIO_PIN_10
-#define LED6_GPIO_Port GPIOE
-#define VALVE_FRONT_Pin GPIO_PIN_8
-#define VALVE_FRONT_GPIO_Port GPIOC
-#define VALVE_REAR_Pin GPIO_PIN_9
-#define VALVE_REAR_GPIO_Port GPIOC
+DAC_HandleTypeDef hdac;
 
-/* ########################## Assert Selection ############################## */
-/**
-  * @brief Uncomment the line below to expanse the "assert_param" macro in the 
-  *        HAL drivers code
-  */
-/* #define USE_FULL_ASSERT    1U */
+/* DAC init function */
+void MX_DAC_Init(void)
+{
+  DAC_ChannelConfTypeDef sConfig;
 
-/* USER CODE BEGIN Private defines */
+    /**DAC Initialization 
+    */
+  hdac.Instance = DAC;
+  if (HAL_DAC_Init(&hdac) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
 
-/* Defines ------------------------------------------------------------------*/
-#define	WARNING_NONE 0
-#define	WARNING_LOW 1
-#define WARNING_MID 2
-#define	WARNING_HIGH 3
+    /**DAC channel OUT1 config 
+    */
+  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
 
-#define LIMIT_RANGE 200		//meter
-/* USER CODE END Private defines */
+    /**DAC channel OUT2 config 
+    */
+  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
 
-#ifdef __cplusplus
- extern "C" {
-#endif
-void _Error_Handler(char *, int);
-
-#define Error_Handler() _Error_Handler(__FILE__, __LINE__)
-#ifdef __cplusplus
 }
-#endif
 
-#endif /* __MAIN_H__ */
+void HAL_DAC_MspInit(DAC_HandleTypeDef* dacHandle)
+{
+
+  GPIO_InitTypeDef GPIO_InitStruct;
+  if(dacHandle->Instance==DAC)
+  {
+  /* USER CODE BEGIN DAC_MspInit 0 */
+
+  /* USER CODE END DAC_MspInit 0 */
+    /* DAC clock enable */
+    __HAL_RCC_DAC_CLK_ENABLE();
+  
+    /**DAC GPIO Configuration    
+    PA4     ------> DAC_OUT1
+    PA5     ------> DAC_OUT2 
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN DAC_MspInit 1 */
+
+  /* USER CODE END DAC_MspInit 1 */
+  }
+}
+
+void HAL_DAC_MspDeInit(DAC_HandleTypeDef* dacHandle)
+{
+
+  if(dacHandle->Instance==DAC)
+  {
+  /* USER CODE BEGIN DAC_MspDeInit 0 */
+
+  /* USER CODE END DAC_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_DAC_CLK_DISABLE();
+  
+    /**DAC GPIO Configuration    
+    PA4     ------> DAC_OUT1
+    PA5     ------> DAC_OUT2 
+    */
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_4|GPIO_PIN_5);
+
+  /* USER CODE BEGIN DAC_MspDeInit 1 */
+
+  /* USER CODE END DAC_MspDeInit 1 */
+  }
+} 
+
+/* USER CODE BEGIN 1 */
+
+/* USER CODE END 1 */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
