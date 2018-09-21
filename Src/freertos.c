@@ -370,12 +370,7 @@ void StartRadarCommTask(void const * argument)
 		
     //EMRR
 		#else
-		//EMRR_GetRaderObjCloset(RadarCANRxBuf, aEMRRGeneral, &EMRRGeneral_Closet);
-		if(EMRRGeneral_Closet.trackRange != 0)
-		{
-			//EMRRGeneral_Closet.trackRange -= (VehicleSpeed_g / 6);
-			//osSemaphoreRelease(bSemRadarCalcSigHandle);
-		}
+
 		#endif
 		osDelay(10);
   }
@@ -455,7 +450,7 @@ void StartSoundWarningTask(void const * argument)
 			}
 
 			#if ADAS_COMM
-			/*switch(ADAS_dev.LDW_warning)	//Lane departure warning
+			switch(ADAS_dev.LDW_warning)	//Lane departure warning
 			{
 				case 0x01:	//left
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
@@ -479,7 +474,7 @@ void StartSoundWarningTask(void const * argument)
 					HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_SET);
 					break;
-			}*/
+			}
 			#endif
 		}
 		osDelay(10);
@@ -643,15 +638,9 @@ void StartRadarCalcTask(void const * argument)
 		#else
 		MinRangeLong_g = EMRRGeneral_Closet.trackRange;// - VehicleSpeed_g / 6;
     VrelLong_g = EMRRGeneral_Closet.trackSpeed;
-		//DBC_SendDist(&hcan1, MinRangeLong_g);
-    //if(!Turning_Flag || (Turning_Flag && Turning_Collision))
+    if(!Turning_Flag || (Turning_Flag && Turning_Collision))
     {
-			/*if(MinRangeLong_g < 30)
-			{
-				 CrashWarningLv = WARNING_HIGH;
-          osSemaphoreRelease(bSemSoundWarningSigHandle);
-			}
-      else */if(MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g > 0 && VrelLong_g < 0)
+			if(MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g > 0 && VrelLong_g < 0)
       {
         TimetoCrash_g = - MinRangeLong_g / VrelLong_g;
         if(TimetoCrash_g < HIGH_WARNING_TIME)
