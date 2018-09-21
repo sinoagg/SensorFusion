@@ -241,13 +241,13 @@ void MX_FREERTOS_Init(void) {
   #endif
 
   /* definition and creation of RadarCalc */
-  osThreadDef(RadarCalcTask, StartRadarCalcTask, osPriorityIdle, 0, 128);
-  RadarCalcHandle = osThreadCreate(osThread(RadarCalcTask), NULL);
+  osThreadDef(RadarCalc, StartRadarCalcTask, osPriorityIdle, 0, 128);
+  RadarCalcHandle = osThreadCreate(osThread(RadarCalc), NULL);
 
 	#if RADAR_DATA_SEND
   /* definition and creation of UART1Rx */
-  osThreadDef(UART1RxTask, StartUART1RxTask, osPriorityIdle, 0, 64);
-  UART1RxHandle = osThreadCreate(osThread(UART1RxTask), NULL);
+  osThreadDef(UART1Rx, StartUART1RxTask, osPriorityIdle, 0, 64);
+  UART1RxHandle = osThreadCreate(osThread(UART1Rx), NULL);
 
   /* definition and creation of RadarDataTx */
   osThreadDef(RadarDataTxTask, StartRadarDataTxTask, osPriorityIdle, 0, 128);
