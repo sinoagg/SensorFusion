@@ -99,8 +99,10 @@ extern uint8_t CmdRxBuf[];
 extern uint8_t CmdRadarDataTxBuf[];
 extern uint8_t ADASRxComplete;
 extern uint16_t ADC_ConvertedValue[];
+extern uint8_t UART1RxComplete;
 uint8_t Turning_Collision = 0;
 uint8_t Turning_Flag = 0;
+
 //ARS408
 extern MW_RadarObjStatus RadarObjStatus;
 extern MW_RadarGeneral RadarGeneral[16];
@@ -250,8 +252,8 @@ void MX_FREERTOS_Init(void) {
   UART1RxHandle = osThreadCreate(osThread(UART1Rx), NULL);
 
   /* definition and creation of RadarDataTx */
-  osThreadDef(RadarDataTxTask, StartRadarDataTxTask, osPriorityIdle, 0, 128);
-  RadarDataTxHandle = osThreadCreate(osThread(RadarDataTxTask), NULL);
+  osThreadDef(RadarDataTx, StartRadarDataTxTask, osPriorityIdle, 0, 128);
+  RadarDataTxHandle = osThreadCreate(osThread(RadarDataTx), NULL);
 	
 	osThreadSuspend(RadarDataTxHandle);		//suspend Radar data send task
 	#endif
