@@ -57,6 +57,7 @@
 #include "ARS408.h"
 #include "can.h"
 #include "cmd.h"
+#include "dac.h"
 #include "EMRR.h"
 #include "main.h"
 #include "MPU6050.h"
@@ -285,6 +286,10 @@ void MX_FREERTOS_Init(void) {
 	#if ATM_READ
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADC_ConvertedValue, 2);
 	#endif
+	
+	//HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+	HAL_DACEx_TriangleWaveGenerate(&hdac, DAC_CHANNEL_1, DAC_TRIANGLEAMPLITUDE_2047);
+
   /* USER CODE END RTOS_QUEUES */
 }
 
