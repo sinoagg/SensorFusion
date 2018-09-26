@@ -91,6 +91,7 @@
 #else	//KINGLONG
 	#define VEHICLE_SPEED_ADDR	0x18FE6C00
 	#define VEHICLE_SWITCH_ADDR	0x18FA0500
+	#define VEHICLE_ANGLE_ADDR	0x00F00900
 #endif
 //	can3 id, gyro
 #define GYRO_ADDR 0x18FEE0D8
@@ -376,6 +377,15 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 		CAN_FILTER_FIFO0, 2, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
 	};
 	HAL_CAN_ConfigFilter(hcan, &VehicleSwitchCANFilter);
+	
+	CAN_FilterTypeDef VehicleAngleCANFilter = {
+		VEHICLE_ANGLE_ADDR>>13 & 0xFFFF,\
+		((VEHICLE_ANGLE_ADDR & 0xFFFF) <<3) | 0x4,\
+		0xFF<<3 | 0xF,\
+		0xFF00<<3,\
+		CAN_FILTER_FIFO0, 3, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
+	};
+	HAL_CAN_ConfigFilter(hcan, &VehicleSwitchCANFilter);
   #endif
 	
 	HAL_CAN_Start(hcan);
@@ -441,6 +451,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
       osSemaphoreRelease(bSemSpeedRxSigHandle);
       Vehicle_CAN_Flag = 2;	//	reading Vehicle Switch status
+    }
+		else if((VEHICLE_ANGLE_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleAngle ID
+    {
+			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+      osSemaphoreRelease(bSemSpeedRxSigHandle);
+      Vehicle_CAN_Flag = 3;	//	reading Vehicle Angle status
     }
     #endif
 		else

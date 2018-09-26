@@ -124,6 +124,16 @@ struct
   uint8_t left_turn;
 }VehicleSwitch;
 
+struct
+{
+	uint16_t tw_angle;//turn wheel
+	uint8_t  tw_circle;
+	uint8_t  tw_type;
+	uint16_t yawRate;
+	uint16_t latAcc;	//latitude
+	uint8_t  longAcc;	//longitude
+}VehicleAngle;
+
 #define LOW_WARNING_TIME  4.5f
 #define HIGH_WARNING_TIME 3.5f
 
@@ -590,6 +600,11 @@ void StartCANSpeedReadTask(void const * argument)
       }
 			Vehicle_CAN_Flag = 0;
     }
+		else if(3 == Vehicle_CAN_Flag)	//VehicleAngle ID
+		{	
+			VehicleAngle.tw_angle = (uint16_t)VehicleCANRxBuf[0]<<8 | VehicleCANRxBuf[1];
+			//VehicleAngle.tw_circle = VehicleCANRxBuf[2] & ;
+		}
     #endif
     
 		osDelay(100);
