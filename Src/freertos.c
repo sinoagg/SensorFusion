@@ -602,8 +602,12 @@ void StartCANSpeedReadTask(void const * argument)
     }
 		else if(3 == Vehicle_CAN_Flag)	//VehicleAngle ID
 		{	
-			VehicleAngle.tw_angle = (uint16_t)VehicleCANRxBuf[0]<<8 | VehicleCANRxBuf[1];
-			//VehicleAngle.tw_circle = VehicleCANRxBuf[2] & ;
+			VehicleAngle.tw_angle  = ((uint16_t)VehicleCANRxBuf[0])<<8 | VehicleCANRxBuf[1];
+			VehicleAngle.tw_circle = VehicleCANRxBuf[2] & 0x3F;
+			VehicleAngle.tw_type = (VehicleCANRxBuf[2]>>6) & 0x3;
+			VehicleAngle.yawRate = ((uint16_t)VehicleCANRxBuf[3])<<8 | VehicleCANRxBuf[4];
+			VehicleAngle.latAcc  = ((uint16_t)VehicleCANRxBuf[5])<<8 | VehicleCANRxBuf[6];
+			VehicleAngle.longAcc = VehicleCANRxBuf[7];
 		}
     #endif
     
