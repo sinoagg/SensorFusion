@@ -127,6 +127,16 @@ struct
   uint8_t left_turn;
 }VehicleSwitch;
 
+struct
+{
+	uint16_t tw_angle;//turn wheel
+	uint8_t  tw_circle;
+	uint8_t  tw_type;
+	uint16_t yawRate;
+	uint16_t latAcc;	//latitude
+	uint8_t  longAcc;	//longitude
+}VehicleAngle;
+
 #define LOW_WARNING_TIME  4.5f
 #define HIGH_WARNING_TIME 3.5f
 
@@ -378,12 +388,7 @@ void StartRadarCommTask(void const * argument)
 		
     //EMRR
 		#else
-		//EMRR_GetRaderObjCloset(RadarCANRxBuf, aEMRRGeneral, &EMRRGeneral_Closet);
-		if(EMRRGeneral_Closet.trackRange != 0)
-		{
-			//EMRRGeneral_Closet.trackRange -= (VehicleSpeed_g / 6);
-			//osSemaphoreRelease(bSemRadarCalcSigHandle);
-		}
+
 		#endif
 		osDelay(10);
   }
@@ -603,6 +608,15 @@ void StartCANSpeedReadTask(void const * argument)
       }
 			Vehicle_CAN_Flag = 0;
     }
+		else if(3 == Vehicle_CAN_Flag)	//VehicleAngle ID
+		{	
+			VehicleAngle.tw_angle  = ((uint16_t)VehicleCANRxBuf[0])<<8 | VehicleCANRxBuf[1];
+			VehicleAngle.tw_circle = VehicleCANRxBuf[2] & 0x3F;
+			VehicleAngle.tw_type = (VehicleCANRxBuf[2]>>6) & 0x3;
+			VehicleAngle.yawRate = ((uint16_t)VehicleCANRxBuf[3])<<8 | VehicleCANRxBuf[4];
+			VehicleAngle.latAcc  = ((uint16_t)VehicleCANRxBuf[5])<<8 | VehicleCANRxBuf[6];
+			VehicleAngle.longAcc = VehicleCANRxBuf[7];
+		}
     #endif
     
 		osDelay(100);
@@ -651,15 +665,9 @@ void StartRadarCalcTask(void const * argument)
 		#else
 		MinRangeLong_g = EMRRGeneral_Closet.trackRange;// - VehicleSpeed_g / 6;
     VrelLong_g = EMRRGeneral_Closet.trackSpeed;
-		//DBC_SendDist(&hcan1, MinRangeLong_g);
-    //if(!Turning_Flag || (Turning_Flag && Turning_Collision))
+    if(!Turning_Flag || (Turning_Flag && Turning_Collision))
     {
-			/*if(MinRangeLong_g < 30)
-			{
-				 CrashWarningLv = WARNING_HIGH;
-          osSemaphoreRelease(bSemSoundWarningSigHandle);
-			}
-      else */if(MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g > 0 && VrelLong_g < 0)
+			if(MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g > 0 && VrelLong_g < 0)
       {
         TimetoCrash_g = - MinRangeLong_g / VrelLong_g;
         if(TimetoCrash_g < HIGH_WARNING_TIME)
