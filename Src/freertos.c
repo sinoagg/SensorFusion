@@ -288,7 +288,9 @@ void MX_FREERTOS_Init(void) {
 	#endif
 	
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-	HAL_DACEx_TriangleWaveGenerate(&hdac, DAC_CHANNEL_1, DAC_TRIANGLEAMPLITUDE_2047);
+	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+	HAL_DACEx_DualSetValue(&hdac, DAC_ALIGN_12B_R, 1024, 2048);
+	//HAL_DACEx_TriangleWaveGenerate(&hdac, DAC_CHANNEL_1, DAC_TRIANGLEAMPLITUDE_2047);
 
   /* USER CODE END RTOS_QUEUES */
 }
