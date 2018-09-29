@@ -139,6 +139,7 @@ Section Cross References
     freertos.o(i.StartGyroCommTask) refers to main.o(.data) for VehicleSpeed_g
     freertos.o(i.StartGyroCommTask) refers to main.o(.bss) for EMRRGeneral_Closet
     freertos.o(i.StartRadarCalcTask) refers to cmsis_os.o(i.osSemaphoreWait) for osSemaphoreWait
+    freertos.o(i.StartRadarCalcTask) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_TogglePin) for HAL_GPIO_TogglePin
     freertos.o(i.StartRadarCalcTask) refers to cmsis_os.o(i.osSemaphoreRelease) for osSemaphoreRelease
     freertos.o(i.StartRadarCalcTask) refers to cmsis_os.o(i.osDelay) for osDelay
     freertos.o(i.StartRadarCalcTask) refers to main.o(.bss) for EMRRGeneral_Closet
@@ -148,7 +149,6 @@ Section Cross References
     freertos.o(i.StartRadarCalcTask) refers to freertos.o(.data) for .data
     freertos.o(i.StartRadarCalcTask) refers to main.o(.data) for CrashWarningLv
     freertos.o(i.StartRadarCommTask) refers to cmsis_os.o(i.osSemaphoreWait) for osSemaphoreWait
-    freertos.o(i.StartRadarCommTask) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_TogglePin) for HAL_GPIO_TogglePin
     freertos.o(i.StartRadarCommTask) refers to cmsis_os.o(i.osDelay) for osDelay
     freertos.o(i.StartRadarCommTask) refers to freertos.o(.data) for .data
     freertos.o(i.StartRadarDataTxTask) refers to stm32f4xx_hal_gpio.o(i.HAL_GPIO_TogglePin) for HAL_GPIO_TogglePin
@@ -2105,37 +2105,37 @@ Image Symbol Table
     i.StartDefaultTask                       0x08003fe4   Section        0  freertos.o(i.StartDefaultTask)
     i.StartGyroCommTask                      0x08004074   Section        0  freertos.o(i.StartGyroCommTask)
     i.StartRadarCalcTask                     0x08004144   Section        0  freertos.o(i.StartRadarCalcTask)
-    i.StartRadarCommTask                     0x08004200   Section        0  freertos.o(i.StartRadarCommTask)
-    i.StartSoundWarningTask                  0x08004228   Section        0  freertos.o(i.StartSoundWarningTask)
-    i.SysTick_Handler                        0x08004364   Section        0  stm32f4xx_it.o(i.SysTick_Handler)
-    i.SystemClock_Config                     0x08004368   Section        0  main.o(i.SystemClock_Config)
-    i.SystemInit                             0x08004404   Section        0  system_stm32f4xx.o(i.SystemInit)
-    i.TIM4_IRQHandler                        0x0800445c   Section        0  stm32f4xx_it.o(i.TIM4_IRQHandler)
-    i.TIM_Base_SetConfig                     0x08004468   Section        0  stm32f4xx_hal_tim.o(i.TIM_Base_SetConfig)
-    i.UART5_IRQHandler                       0x0800452c   Section        0  stm32f4xx_it.o(i.UART5_IRQHandler)
-    i.UART_DMAAbortOnError                   0x08004538   Section        0  stm32f4xx_hal_uart.o(i.UART_DMAAbortOnError)
-    UART_DMAAbortOnError                     0x08004539   Thumb Code    16  stm32f4xx_hal_uart.o(i.UART_DMAAbortOnError)
-    i.UART_DMAError                          0x08004548   Section        0  stm32f4xx_hal_uart.o(i.UART_DMAError)
-    UART_DMAError                            0x08004549   Thumb Code   100  stm32f4xx_hal_uart.o(i.UART_DMAError)
-    i.UART_DMAReceiveCplt                    0x080045ac   Section        0  stm32f4xx_hal_uart.o(i.UART_DMAReceiveCplt)
-    UART_DMAReceiveCplt                      0x080045ad   Thumb Code    62  stm32f4xx_hal_uart.o(i.UART_DMAReceiveCplt)
-    i.UART_DMARxHalfCplt                     0x080045ea   Section        0  stm32f4xx_hal_uart.o(i.UART_DMARxHalfCplt)
-    UART_DMARxHalfCplt                       0x080045eb   Thumb Code    10  stm32f4xx_hal_uart.o(i.UART_DMARxHalfCplt)
-    i.UART_Receive_IT                        0x080045f4   Section        0  stm32f4xx_hal_uart.o(i.UART_Receive_IT)
-    UART_Receive_IT                          0x080045f5   Thumb Code   138  stm32f4xx_hal_uart.o(i.UART_Receive_IT)
-    i.UART_SetConfig                         0x08004680   Section        0  stm32f4xx_hal_uart.o(i.UART_SetConfig)
-    UART_SetConfig                           0x08004681   Thumb Code   820  stm32f4xx_hal_uart.o(i.UART_SetConfig)
-    i.UART_WaitOnFlagUntilTimeout            0x080049c0   Section        0  stm32f4xx_hal_uart.o(i.UART_WaitOnFlagUntilTimeout)
-    UART_WaitOnFlagUntilTimeout              0x080049c1   Thumb Code   116  stm32f4xx_hal_uart.o(i.UART_WaitOnFlagUntilTimeout)
-    i.USART1_IRQHandler                      0x08004a34   Section        0  stm32f4xx_it.o(i.USART1_IRQHandler)
-    i.USART2_IRQHandler                      0x08004a70   Section        0  stm32f4xx_it.o(i.USART2_IRQHandler)
-    i.USART3_IRQHandler                      0x08004a7c   Section        0  stm32f4xx_it.o(i.USART3_IRQHandler)
-    i.UsageFault_Handler                     0x08004ab0   Section        0  stm32f4xx_it.o(i.UsageFault_Handler)
-    i.Valve_Calc                             0x08004ab4   Section        0  main.o(i.Valve_Calc)
-    i.Vehicle_CAN_Init                       0x08004af8   Section        0  main.o(i.Vehicle_CAN_Init)
-    i.WTN6_Broadcast                         0x08004b78   Section        0  wtn6040.o(i.WTN6_Broadcast)
-    i._Error_Handler                         0x08004c24   Section        0  main.o(i._Error_Handler)
-    i.__ARM_fpclassify                       0x08004c26   Section        0  fpclassify.o(i.__ARM_fpclassify)
+    i.StartRadarCommTask                     0x0800420c   Section        0  freertos.o(i.StartRadarCommTask)
+    i.StartSoundWarningTask                  0x08004224   Section        0  freertos.o(i.StartSoundWarningTask)
+    i.SysTick_Handler                        0x08004360   Section        0  stm32f4xx_it.o(i.SysTick_Handler)
+    i.SystemClock_Config                     0x08004364   Section        0  main.o(i.SystemClock_Config)
+    i.SystemInit                             0x08004400   Section        0  system_stm32f4xx.o(i.SystemInit)
+    i.TIM4_IRQHandler                        0x08004458   Section        0  stm32f4xx_it.o(i.TIM4_IRQHandler)
+    i.TIM_Base_SetConfig                     0x08004464   Section        0  stm32f4xx_hal_tim.o(i.TIM_Base_SetConfig)
+    i.UART5_IRQHandler                       0x08004528   Section        0  stm32f4xx_it.o(i.UART5_IRQHandler)
+    i.UART_DMAAbortOnError                   0x08004534   Section        0  stm32f4xx_hal_uart.o(i.UART_DMAAbortOnError)
+    UART_DMAAbortOnError                     0x08004535   Thumb Code    16  stm32f4xx_hal_uart.o(i.UART_DMAAbortOnError)
+    i.UART_DMAError                          0x08004544   Section        0  stm32f4xx_hal_uart.o(i.UART_DMAError)
+    UART_DMAError                            0x08004545   Thumb Code   100  stm32f4xx_hal_uart.o(i.UART_DMAError)
+    i.UART_DMAReceiveCplt                    0x080045a8   Section        0  stm32f4xx_hal_uart.o(i.UART_DMAReceiveCplt)
+    UART_DMAReceiveCplt                      0x080045a9   Thumb Code    62  stm32f4xx_hal_uart.o(i.UART_DMAReceiveCplt)
+    i.UART_DMARxHalfCplt                     0x080045e6   Section        0  stm32f4xx_hal_uart.o(i.UART_DMARxHalfCplt)
+    UART_DMARxHalfCplt                       0x080045e7   Thumb Code    10  stm32f4xx_hal_uart.o(i.UART_DMARxHalfCplt)
+    i.UART_Receive_IT                        0x080045f0   Section        0  stm32f4xx_hal_uart.o(i.UART_Receive_IT)
+    UART_Receive_IT                          0x080045f1   Thumb Code   138  stm32f4xx_hal_uart.o(i.UART_Receive_IT)
+    i.UART_SetConfig                         0x0800467c   Section        0  stm32f4xx_hal_uart.o(i.UART_SetConfig)
+    UART_SetConfig                           0x0800467d   Thumb Code   820  stm32f4xx_hal_uart.o(i.UART_SetConfig)
+    i.UART_WaitOnFlagUntilTimeout            0x080049bc   Section        0  stm32f4xx_hal_uart.o(i.UART_WaitOnFlagUntilTimeout)
+    UART_WaitOnFlagUntilTimeout              0x080049bd   Thumb Code   116  stm32f4xx_hal_uart.o(i.UART_WaitOnFlagUntilTimeout)
+    i.USART1_IRQHandler                      0x08004a30   Section        0  stm32f4xx_it.o(i.USART1_IRQHandler)
+    i.USART2_IRQHandler                      0x08004a6c   Section        0  stm32f4xx_it.o(i.USART2_IRQHandler)
+    i.USART3_IRQHandler                      0x08004a78   Section        0  stm32f4xx_it.o(i.USART3_IRQHandler)
+    i.UsageFault_Handler                     0x08004aac   Section        0  stm32f4xx_it.o(i.UsageFault_Handler)
+    i.Valve_Calc                             0x08004ab0   Section        0  main.o(i.Valve_Calc)
+    i.Vehicle_CAN_Init                       0x08004af4   Section        0  main.o(i.Vehicle_CAN_Init)
+    i.WTN6_Broadcast                         0x08004b74   Section        0  wtn6040.o(i.WTN6_Broadcast)
+    i._Error_Handler                         0x08004c20   Section        0  main.o(i._Error_Handler)
+    i.__ARM_fpclassify                       0x08004c22   Section        0  fpclassify.o(i.__ARM_fpclassify)
     i.__hardfp_sin                           0x08004c58   Section        0  sin.o(i.__hardfp_sin)
     i.__hardfp_sqrt                          0x08004d20   Section        0  sqrt.o(i.__hardfp_sqrt)
     i.__ieee754_rem_pio2                     0x08004da0   Section        0  rred.o(i.__ieee754_rem_pio2)
@@ -2550,24 +2550,24 @@ Image Symbol Table
     StartCANSpeedReadTask                    0x08003f41   Thumb Code   142  freertos.o(i.StartCANSpeedReadTask)
     StartDefaultTask                         0x08003fe5   Thumb Code   102  freertos.o(i.StartDefaultTask)
     StartGyroCommTask                        0x08004075   Thumb Code   160  freertos.o(i.StartGyroCommTask)
-    StartRadarCalcTask                       0x08004145   Thumb Code   152  freertos.o(i.StartRadarCalcTask)
-    StartRadarCommTask                       0x08004201   Thumb Code    30  freertos.o(i.StartRadarCommTask)
-    StartSoundWarningTask                    0x08004229   Thumb Code   288  freertos.o(i.StartSoundWarningTask)
-    SysTick_Handler                          0x08004365   Thumb Code     4  stm32f4xx_it.o(i.SysTick_Handler)
-    SystemClock_Config                       0x08004369   Thumb Code   146  main.o(i.SystemClock_Config)
-    SystemInit                               0x08004405   Thumb Code    64  system_stm32f4xx.o(i.SystemInit)
-    TIM4_IRQHandler                          0x0800445d   Thumb Code     6  stm32f4xx_it.o(i.TIM4_IRQHandler)
-    TIM_Base_SetConfig                       0x08004469   Thumb Code   176  stm32f4xx_hal_tim.o(i.TIM_Base_SetConfig)
-    UART5_IRQHandler                         0x0800452d   Thumb Code     6  stm32f4xx_it.o(i.UART5_IRQHandler)
-    USART1_IRQHandler                        0x08004a35   Thumb Code    48  stm32f4xx_it.o(i.USART1_IRQHandler)
-    USART2_IRQHandler                        0x08004a71   Thumb Code     6  stm32f4xx_it.o(i.USART2_IRQHandler)
-    USART3_IRQHandler                        0x08004a7d   Thumb Code    42  stm32f4xx_it.o(i.USART3_IRQHandler)
-    UsageFault_Handler                       0x08004ab1   Thumb Code     2  stm32f4xx_it.o(i.UsageFault_Handler)
-    Valve_Calc                               0x08004ab5   Thumb Code    56  main.o(i.Valve_Calc)
-    Vehicle_CAN_Init                         0x08004af9   Thumb Code   124  main.o(i.Vehicle_CAN_Init)
-    WTN6_Broadcast                           0x08004b79   Thumb Code   164  wtn6040.o(i.WTN6_Broadcast)
-    _Error_Handler                           0x08004c25   Thumb Code     2  main.o(i._Error_Handler)
-    __ARM_fpclassify                         0x08004c27   Thumb Code    48  fpclassify.o(i.__ARM_fpclassify)
+    StartRadarCalcTask                       0x08004145   Thumb Code   160  freertos.o(i.StartRadarCalcTask)
+    StartRadarCommTask                       0x0800420d   Thumb Code    20  freertos.o(i.StartRadarCommTask)
+    StartSoundWarningTask                    0x08004225   Thumb Code   288  freertos.o(i.StartSoundWarningTask)
+    SysTick_Handler                          0x08004361   Thumb Code     4  stm32f4xx_it.o(i.SysTick_Handler)
+    SystemClock_Config                       0x08004365   Thumb Code   146  main.o(i.SystemClock_Config)
+    SystemInit                               0x08004401   Thumb Code    64  system_stm32f4xx.o(i.SystemInit)
+    TIM4_IRQHandler                          0x08004459   Thumb Code     6  stm32f4xx_it.o(i.TIM4_IRQHandler)
+    TIM_Base_SetConfig                       0x08004465   Thumb Code   176  stm32f4xx_hal_tim.o(i.TIM_Base_SetConfig)
+    UART5_IRQHandler                         0x08004529   Thumb Code     6  stm32f4xx_it.o(i.UART5_IRQHandler)
+    USART1_IRQHandler                        0x08004a31   Thumb Code    48  stm32f4xx_it.o(i.USART1_IRQHandler)
+    USART2_IRQHandler                        0x08004a6d   Thumb Code     6  stm32f4xx_it.o(i.USART2_IRQHandler)
+    USART3_IRQHandler                        0x08004a79   Thumb Code    42  stm32f4xx_it.o(i.USART3_IRQHandler)
+    UsageFault_Handler                       0x08004aad   Thumb Code     2  stm32f4xx_it.o(i.UsageFault_Handler)
+    Valve_Calc                               0x08004ab1   Thumb Code    56  main.o(i.Valve_Calc)
+    Vehicle_CAN_Init                         0x08004af5   Thumb Code   124  main.o(i.Vehicle_CAN_Init)
+    WTN6_Broadcast                           0x08004b75   Thumb Code   164  wtn6040.o(i.WTN6_Broadcast)
+    _Error_Handler                           0x08004c21   Thumb Code     2  main.o(i._Error_Handler)
+    __ARM_fpclassify                         0x08004c23   Thumb Code    48  fpclassify.o(i.__ARM_fpclassify)
     __hardfp_sin                             0x08004c59   Thumb Code   180  sin.o(i.__hardfp_sin)
     __hardfp_sqrt                            0x08004d21   Thumb Code   122  sqrt.o(i.__hardfp_sqrt)
     __ieee754_rem_pio2                       0x08004da1   Thumb Code   938  rred.o(i.__ieee754_rem_pio2)
@@ -2880,34 +2880,34 @@ Memory Map of the image
     0x08003f40   0x000000a4   Code   RO          562    i.StartCANSpeedReadTask  freertos.o
     0x08003fe4   0x00000090   Code   RO          563    i.StartDefaultTask  freertos.o
     0x08004074   0x000000d0   Code   RO          564    i.StartGyroCommTask  freertos.o
-    0x08004144   0x000000bc   Code   RO          565    i.StartRadarCalcTask  freertos.o
-    0x08004200   0x00000028   Code   RO          566    i.StartRadarCommTask  freertos.o
-    0x08004228   0x0000013c   Code   RO          568    i.StartSoundWarningTask  freertos.o
-    0x08004364   0x00000004   Code   RO          696    i.SysTick_Handler   stm32f4xx_it.o
-    0x08004368   0x0000009c   Code   RO          895    i.SystemClock_Config  main.o
-    0x08004404   0x00000058   Code   RO         5360    i.SystemInit        system_stm32f4xx.o
-    0x0800445c   0x0000000c   Code   RO          697    i.TIM4_IRQHandler   stm32f4xx_it.o
-    0x08004468   0x000000c4   Code   RO         2972    i.TIM_Base_SetConfig  stm32f4xx_hal_tim.o
-    0x0800452c   0x0000000c   Code   RO          698    i.UART5_IRQHandler  stm32f4xx_it.o
-    0x08004538   0x00000010   Code   RO         3703    i.UART_DMAAbortOnError  stm32f4xx_hal_uart.o
-    0x08004548   0x00000064   Code   RO         3704    i.UART_DMAError     stm32f4xx_hal_uart.o
-    0x080045ac   0x0000003e   Code   RO         3705    i.UART_DMAReceiveCplt  stm32f4xx_hal_uart.o
-    0x080045ea   0x0000000a   Code   RO         3707    i.UART_DMARxHalfCplt  stm32f4xx_hal_uart.o
-    0x080045f4   0x0000008a   Code   RO         3713    i.UART_Receive_IT   stm32f4xx_hal_uart.o
-    0x0800467e   0x00000002   PAD
-    0x08004680   0x00000340   Code   RO         3714    i.UART_SetConfig    stm32f4xx_hal_uart.o
-    0x080049c0   0x00000074   Code   RO         3715    i.UART_WaitOnFlagUntilTimeout  stm32f4xx_hal_uart.o
-    0x08004a34   0x0000003c   Code   RO          699    i.USART1_IRQHandler  stm32f4xx_it.o
-    0x08004a70   0x0000000c   Code   RO          700    i.USART2_IRQHandler  stm32f4xx_it.o
-    0x08004a7c   0x00000034   Code   RO          701    i.USART3_IRQHandler  stm32f4xx_it.o
-    0x08004ab0   0x00000002   Code   RO          702    i.UsageFault_Handler  stm32f4xx_it.o
-    0x08004ab2   0x00000002   PAD
-    0x08004ab4   0x00000044   Code   RO          897    i.Valve_Calc        main.o
-    0x08004af8   0x00000080   Code   RO          898    i.Vehicle_CAN_Init  main.o
-    0x08004b78   0x000000ac   Code   RO          209    i.WTN6_Broadcast    wtn6040.o
-    0x08004c24   0x00000002   Code   RO          899    i._Error_Handler    main.o
-    0x08004c26   0x00000030   Code   RO         5511    i.__ARM_fpclassify  m_wm.l(fpclassify.o)
-    0x08004c56   0x00000002   PAD
+    0x08004144   0x000000c8   Code   RO          565    i.StartRadarCalcTask  freertos.o
+    0x0800420c   0x00000018   Code   RO          566    i.StartRadarCommTask  freertos.o
+    0x08004224   0x0000013c   Code   RO          568    i.StartSoundWarningTask  freertos.o
+    0x08004360   0x00000004   Code   RO          696    i.SysTick_Handler   stm32f4xx_it.o
+    0x08004364   0x0000009c   Code   RO          895    i.SystemClock_Config  main.o
+    0x08004400   0x00000058   Code   RO         5360    i.SystemInit        system_stm32f4xx.o
+    0x08004458   0x0000000c   Code   RO          697    i.TIM4_IRQHandler   stm32f4xx_it.o
+    0x08004464   0x000000c4   Code   RO         2972    i.TIM_Base_SetConfig  stm32f4xx_hal_tim.o
+    0x08004528   0x0000000c   Code   RO          698    i.UART5_IRQHandler  stm32f4xx_it.o
+    0x08004534   0x00000010   Code   RO         3703    i.UART_DMAAbortOnError  stm32f4xx_hal_uart.o
+    0x08004544   0x00000064   Code   RO         3704    i.UART_DMAError     stm32f4xx_hal_uart.o
+    0x080045a8   0x0000003e   Code   RO         3705    i.UART_DMAReceiveCplt  stm32f4xx_hal_uart.o
+    0x080045e6   0x0000000a   Code   RO         3707    i.UART_DMARxHalfCplt  stm32f4xx_hal_uart.o
+    0x080045f0   0x0000008a   Code   RO         3713    i.UART_Receive_IT   stm32f4xx_hal_uart.o
+    0x0800467a   0x00000002   PAD
+    0x0800467c   0x00000340   Code   RO         3714    i.UART_SetConfig    stm32f4xx_hal_uart.o
+    0x080049bc   0x00000074   Code   RO         3715    i.UART_WaitOnFlagUntilTimeout  stm32f4xx_hal_uart.o
+    0x08004a30   0x0000003c   Code   RO          699    i.USART1_IRQHandler  stm32f4xx_it.o
+    0x08004a6c   0x0000000c   Code   RO          700    i.USART2_IRQHandler  stm32f4xx_it.o
+    0x08004a78   0x00000034   Code   RO          701    i.USART3_IRQHandler  stm32f4xx_it.o
+    0x08004aac   0x00000002   Code   RO          702    i.UsageFault_Handler  stm32f4xx_it.o
+    0x08004aae   0x00000002   PAD
+    0x08004ab0   0x00000044   Code   RO          897    i.Valve_Calc        main.o
+    0x08004af4   0x00000080   Code   RO          898    i.Vehicle_CAN_Init  main.o
+    0x08004b74   0x000000ac   Code   RO          209    i.WTN6_Broadcast    wtn6040.o
+    0x08004c20   0x00000002   Code   RO          899    i._Error_Handler    main.o
+    0x08004c22   0x00000030   Code   RO         5511    i.__ARM_fpclassify  m_wm.l(fpclassify.o)
+    0x08004c52   0x00000006   PAD
     0x08004c58   0x000000c8   Code   RO         5394    i.__hardfp_sin      m_wm.l(sin.o)
     0x08004d20   0x0000007a   Code   RO         5406    i.__hardfp_sqrt     m_wm.l(sqrt.o)
     0x08004d9a   0x00000006   PAD
@@ -3055,7 +3055,7 @@ Image component sizes
        200         18          0          4          0       2775   delay.o
        124          4          0          0          0        814   dma.o
        828         88         40          1          0       4528   emrr.o
-      1488        226        230         68         10       8813   freertos.o
+      1484        224        230         68         10       8809   freertos.o
        288         22          0          0          0       1059   gpio.o
        492         30          0         24      15360       8471   heap_4.o
        142          0          0          0          0       3562   list.o
@@ -3088,7 +3088,7 @@ Image component sizes
        172          8          0          0          0      21297   wtn6040.o
 
     ----------------------------------------------------------------------
-     22766       1710        972        276      19472     971059   Object Totals
+     22762       1708        972        276      19472     971055   Object Totals
          0          0         32          0          0          0   (incl. Generated)
         40          4          6          6          6          0   (incl. Padding)
 
@@ -3135,8 +3135,8 @@ Image component sizes
        110          0          0          0          0        168   fepilogue.o
 
     ----------------------------------------------------------------------
-      4282        270        288          4          0       3356   Library Totals
-        16          0          0          0          0          0   (incl. Padding)
+      4286        270        288          4          0       3356   Library Totals
+        20          0          0          0          0          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
@@ -3147,7 +3147,7 @@ Image component sizes
       1458          0          0          0          0       1176   mf_w.l
 
     ----------------------------------------------------------------------
-      4282        270        288          4          0       3356   Library Totals
+      4286        270        288          4          0       3356   Library Totals
 
     ----------------------------------------------------------------------
 
@@ -3156,9 +3156,9 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     27048       1980       1260        280      19472     953939   Grand Totals
-     27048       1980       1260        280      19472     953939   ELF Image Totals
-     27048       1980       1260        280          0          0   ROM Totals
+     27048       1978       1260        280      19472     953935   Grand Totals
+     27048       1978       1260        280      19472     953935   ELF Image Totals
+     27048       1978       1260        280          0          0   ROM Totals
 
 ==============================================================================
 

@@ -364,7 +364,6 @@ void StartRadarCommTask(void const * argument)
   for(;;)
   {
 		osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);
-		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
 		
     //ARS408
 		#if RADAR_TYPE
@@ -632,6 +631,8 @@ void StartRadarCalcTask(void const * argument)
     osSemaphoreWait(bSemRadarCalcSigHandle, osWaitForever);
     //ARS408
 		#if RADAR_TYPE
+		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
+
 		uint16_t MinRange=255;
 		uint32_t relSpeed=0;
 		MinRange = RadarGeneral[0].Obj_DistLong;
@@ -661,6 +662,8 @@ void StartRadarCalcTask(void const * argument)
 
     //EMRR
 		#else
+		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
+
 		MinRangeLong_g = EMRRGeneral_Closet.trackRange;// - VehicleSpeed_g / 6;
     VrelLong_g = EMRRGeneral_Closet.trackSpeed;
     if(!Turning_Flag || (Turning_Flag && Turning_Collision))
