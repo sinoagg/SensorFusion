@@ -137,8 +137,6 @@ struct
 	uint8_t  longAcc;	//longitude
 }VehicleAngle;
 
-#define LOW_WARNING_TIME  4.5f
-#define HIGH_WARNING_TIME 3.5f
 
 /* USER CODE END Variables */
 
@@ -160,6 +158,7 @@ extern uint8_t DBC_Init(CAN_HandleTypeDef *hcan);
 extern uint8_t Gyro_CAN_Init(CAN_HandleTypeDef *hcan);
 extern uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan);
 extern uint8_t DBC_SendDist(CAN_HandleTypeDef *hcan, float Dist);
+extern uint8_t Valve_Calc(DAC_HandleTypeDef* hdac);
 /* USER CODE END FunctionPrototypes */
 
 /* Hook prototypes */
@@ -297,9 +296,7 @@ void MX_FREERTOS_Init(void) {
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)ADC_ConvertedValue, 2);
 	#endif
 	
-	HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
-	HAL_DACEx_DualSetValue(&hdac, DAC_ALIGN_12B_R, 1024, 2048);
+	
 	//HAL_DACEx_TriangleWaveGenerate(&hdac, DAC_CHANNEL_1, DAC_TRIANGLEAMPLITUDE_2047);
 
   /* USER CODE END RTOS_QUEUES */
@@ -432,6 +429,7 @@ void StartSoundWarningTask(void const * argument)
 					if(ADAS_dev.crash_level > 1)
 					{
 					#endif
+						Valve_Calc(&hdac);
 						HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin,GPIO_PIN_SET);
 						HAL_GPIO_WritePin(LED0_GPIO_Port,LED0_Pin, GPIO_PIN_RESET);
 						//HAL_GPIO_WritePin(VALVE_FRONT_GPIO_Port, VALVE_FRONT_Pin, GPIO_PIN_RESET);

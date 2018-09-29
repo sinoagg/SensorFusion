@@ -37,5 +37,5 @@
     * LED5: Radar data Tx(**DBC**)
     * LED6: CAN Rx from **gyroscope**
 * BUZZER
-    * FCW: 1second(high), 0.5s(low)
-    * LDW: 2s
+    * FCW: 0.1s/0.1s pause(high), 0.3s/0.3s pause(low)
+    * LDW: 1s/1s pause

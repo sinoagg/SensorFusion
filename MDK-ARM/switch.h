@@ -24,3 +24,7 @@
 //	labview
 #define RADAR_DATA_SEND 0
 
+
+#define LOW_WARNING_TIME  4.5f
+#define HIGH_WARNING_TIME 3.5f
+

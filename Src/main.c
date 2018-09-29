@@ -92,7 +92,7 @@
 #else	//KINGLONG
 	#define VEHICLE_SPEED_ADDR	0x18FE6C00
 	#define VEHICLE_SWITCH_ADDR	0x18FA0500
-	#define VEHICLE_ANGLE_ADDR	0x00F00900
+	#define VEHICLE_ANGLE_ADDR	0x18F00900
 #endif
 //	can3 id, gyro
 #define GYRO_ADDR 0x18FEE0D8
@@ -230,6 +230,10 @@ int main(void)
 	WTN6_Broadcast(BELL_ADAS_START);
 	delay_ms(3000);
 	WTN6_Broadcast(BELL_BB_1000MS);
+	
+	//HAL_DACEx_DualSetValue(&hdac, DAC_ALIGN_12B_R, 1024, 2048);
+	HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -534,6 +538,41 @@ uint8_t DBC_SendDist(CAN_HandleTypeDef *hcan, float Dist)
   CANTxBuf[1] = Dist_mm >> 16;
   CANTxBuf[0] = Dist_mm >> 24;
   HAL_CAN_AddTxMessage(hcan, &CAN_TxDBCHeader, CANTxBuf, &CAN_TxMailBox);
+  return 0;
+}
+
+/** 
+ * @brief  Brake using Relay Valve
+ * @note   
+ * @param  *hdac: 
+ * @param  data1: dac channel1 data
+ * @param  data2: dac channel2 data
+ * @retval 0 for ok
+ */
+uint8_t Valve_Brake(DAC_HandleTypeDef* hdac, uint32_t data1, uint32_t data2)
+{
+	if(TimetoCrash_g < HIGH_WARNING_TIME)
+	{
+		HAL_DACEx_DualSetValue(hdac, DAC_ALIGN_12B_R, data1, data2);
+//		HAL_DAC_Start(hdac, DAC_CHANNEL_1);
+//		HAL_DAC_Start(hdac, DAC_CHANNEL_2);
+//		HAL_DAC_Stop(hdac, DAC_CHANNEL_1);
+//		HAL_DAC_Stop(hdac, DAC_CHANNEL_2);
+	}
+  return 0;
+}
+
+/** 
+ * @brief  Calculate Relay Valve
+ * @note   
+ * @param  *hdac: 
+ * @retval 0 for ok
+ */
+uint8_t Valve_Calc(DAC_HandleTypeDef* hdac)
+{
+	uint32_t data1, data2;
+	data1 = (LOW_WARNING_TIME - TimetoCrash_g) * 1000;
+	Valve_Brake(hdac, data1, data1);
   return 0;
 }
 
