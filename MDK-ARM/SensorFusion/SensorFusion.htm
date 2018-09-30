@@ -3,7 +3,7 @@
 <title>Static Call Graph - [SensorFusion\SensorFusion.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image SensorFusion\SensorFusion.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Wed Sep 26 16:07:24 2018
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Sun Sep 30 15:18:42 2018
 <BR><P>
 <H3>Maximum Stack Usage =        352 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1000,7 +1000,7 @@ Global Symbols
 
 <P><STRONG><a name="[b7]"></a>HAL_GPIO_TogglePin</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, stm32f4xx_hal_gpio.o(i.HAL_GPIO_TogglePin))
 <BR><BR>[Called By]<UL><LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_RxFifo0MsgPendingCallback
-<LI><a href="#[74]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartRadarCommTask
+<LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartRadarCalcTask
 <LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartADASCommTask
 </UL>
 
@@ -1495,21 +1495,21 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
-<P><STRONG><a name="[79]"></a>StartRadarCalcTask</STRONG> (Thumb, 152 bytes, Stack size 0 bytes, freertos.o(i.StartRadarCalcTask))
+<P><STRONG><a name="[79]"></a>StartRadarCalcTask</STRONG> (Thumb, 160 bytes, Stack size 0 bytes, freertos.o(i.StartRadarCalcTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = StartRadarCalcTask &rArr; osSemaphoreRelease &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreWait
 <LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreRelease
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_TogglePin
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
-<P><STRONG><a name="[74]"></a>StartRadarCommTask</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, freertos.o(i.StartRadarCommTask))
+<P><STRONG><a name="[74]"></a>StartRadarCommTask</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, freertos.o(i.StartRadarCommTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = StartRadarCommTask &rArr; osSemaphoreWait &rArr; xQueueGenericReceive &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreWait
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
-<LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_TogglePin
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
