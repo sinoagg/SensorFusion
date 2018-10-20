@@ -20,7 +20,7 @@
 //	Atmosphere Sensor
 #define ATM_READ 0
 //	Send Radar data in DBC
-#define DBC_SEND 1
+#define DBC_SEND 0
 //	labview
 #define RADAR_DATA_SEND 0
 
