@@ -326,7 +326,7 @@ void StartDefaultTask(void const * argument)
 		{
       ADASRxComplete=0;
       DispADASData(ADASRxBuf, ADASDispBuf, MinRangeLong_g, VrelLong_g, TimetoCrash_g);
-			HAL_UART_Transmit(&huart5, ADASDispBuf, 32, 100);//transmit ADAS data to screen
+			HAL_UART_Transmit(&huart2, ADASDispBuf, 32, 100);//transmit ADAS data to screen
       osSemaphoreRelease(bSemADASRxSigHandle);
 		}
     #endif
