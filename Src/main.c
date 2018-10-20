@@ -342,7 +342,7 @@ uint8_t Gyro_CAN_Init(CAN_HandleTypeDef *hcan)
 		((GYRO_ADDR & 0xFFFF) <<3) | 0x4,\
 		0xFF<<3 | 0xF,\
 		0xFF00<<3, \
-    CAN_FILTER_FIFO0, 0, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
+    CAN_FILTER_FIFO0, 10, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
 	};
 	HAL_CAN_ConfigFilter(hcan, &GyroCANFilter);
 
@@ -365,7 +365,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 		((VEHICLE_SPEED_ADDR & 0xFFFF) <<3) | 0x4,\
 		0xFF<<3 | 0xF,\
 		0xFF00<<3,\
-		CAN_FILTER_FIFO0, 1, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
+		CAN_FILTER_FIFO1, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14
 	};
 	HAL_CAN_ConfigFilter(hcan, &VehicleCANFilter);
   //config CAN3 filter to receive Vehicle switch data
@@ -375,12 +375,13 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 	MASK_LOW,\
 	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
   #if VEHICLE_MODEL == 0
+	//KINGLONG
 	CAN_FilterTypeDef VehicleSwitchCANFilter = {
 		VEHICLE_SWITCH_ADDR>>13 & 0xFFFF,\
 		((VEHICLE_SWITCH_ADDR & 0xFFFF) <<3) | 0x4,\
 		0xFF<<3 | 0xF,\
 		0xFF00<<3,\
-		CAN_FILTER_FIFO0, 2, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
+		CAN_FILTER_FIFO1, 15, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,15
 	};
 	HAL_CAN_ConfigFilter(hcan, &VehicleSwitchCANFilter);
 	
@@ -389,13 +390,13 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 		((VEHICLE_ANGLE_ADDR & 0xFFFF) <<3) | 0x4,\
 		0xFF<<3 | 0xF,\
 		0xFF00<<3,\
-		CAN_FILTER_FIFO0, 3, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,1
+		CAN_FILTER_FIFO1, 16, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,16
 	};
 	HAL_CAN_ConfigFilter(hcan, &VehicleAngleCANFilter);
   #endif
 	
 	HAL_CAN_Start(hcan);
-	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
 
 	return 0;
 }
@@ -423,10 +424,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	}	
   	
 	if(hcan->Instance == hcan3.Instance)
-	{
-		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
-		
+	{		
 		#if GYRO_CAN == 3
+		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &VehicleCANRxHeader, VehicleCANRxBuf);
 		//Gyroscope
     if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
     {
@@ -440,49 +440,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     }
 		#endif
       
-		#if CAN_READ_VEHICLE
-    //  2 bytes(mid)must fit
-		//	Vehicle Speed
-    if((VEHICLE_SPEED_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSpeed ID
-    {
-			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
-      osSemaphoreRelease(bSemSpeedRxSigHandle);
-      Vehicle_CAN_Flag = 1;	//	reading Vehicle Speed
-    }
-    //  KINGLONG
-    #if VEHICLE_MODEL == 0
-		//	Vehicle Switch data
-    else if((VEHICLE_SWITCH_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSwitch ID
-    {
-			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
-      osSemaphoreRelease(bSemSpeedRxSigHandle);
-      Vehicle_CAN_Flag = 2;	//	reading Vehicle Switch status
-    }
-		else if((VEHICLE_ANGLE_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleAngle ID
-    {
-			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
-      osSemaphoreRelease(bSemSpeedRxSigHandle);
-      Vehicle_CAN_Flag = 3;	//	reading Vehicle Angle status
-    }
-    #endif
-		else
-			Vehicle_CAN_Flag = 0;
-
-    #endif
-	}
-	
-}
-/** 
- * @brief  CAN Callback function
- * @note   can2 for Radar
- * @param  *hcan: 
- * @retval None
- */
-void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
-{
-	if(hcan->Instance == hcan2.Instance)
-  {
-  	HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO1, &RadarCANRxHeader, RadarCANRxBuf);
+		HAL_CAN_GetRxMessage(&hcan3, CAN_FILTER_FIFO0, &RadarCANRxHeader, RadarCANRxBuf);
 		//	send RADAR(ARS408) data to CAN1(for debug)
 		//	ARS408
 		#if RADAR_TYPE == 1
@@ -517,7 +475,50 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		}
 		//EMRR_RadarRxComplete = 1;
 		
-		#endif  	
+		#endif
+	}
+	
+}
+/** 
+ * @brief  CAN Callback function
+ * @note   can2 for Radar
+ * @param  *hcan: 
+ * @retval None
+ */
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+	if(hcan->Instance == hcan2.Instance)
+  {
+		HAL_CAN_GetRxMessage(&hcan2, CAN_FILTER_FIFO1, &VehicleCANRxHeader, VehicleCANRxBuf);
+		#if CAN_READ_VEHICLE
+    //  2 bytes(mid)must fit
+		//	Vehicle Speed
+    if((VEHICLE_SPEED_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSpeed ID
+    {
+			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+      osSemaphoreRelease(bSemSpeedRxSigHandle);
+      Vehicle_CAN_Flag = 1;	//	reading Vehicle Speed
+    }
+    //  KINGLONG
+    #if VEHICLE_MODEL == 0
+		//	Vehicle Switch data
+    else if((VEHICLE_SWITCH_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleSwitch ID
+    {
+			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+      osSemaphoreRelease(bSemSpeedRxSigHandle);
+      Vehicle_CAN_Flag = 2;	//	reading Vehicle Switch status
+    }
+		else if((VEHICLE_ANGLE_ADDR & 0x00FFFF00) == (VehicleCANRxHeader.ExtId & 0x00FFFF00)) //VehicleAngle ID
+    {
+			HAL_GPIO_TogglePin(LED4_GPIO_Port,LED4_Pin);
+      osSemaphoreRelease(bSemSpeedRxSigHandle);
+      Vehicle_CAN_Flag = 3;	//	reading Vehicle Angle status
+    }
+    #endif
+		else
+			Vehicle_CAN_Flag = 0;
+
+    #endif		
   }
 }
 

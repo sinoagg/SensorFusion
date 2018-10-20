@@ -280,16 +280,17 @@ void MX_FREERTOS_Init(void) {
   Gyro_CAN_Init(&hcan1);
   #else
 	DBC_Init(&hcan1);
+	Gyro_CAN_Init(&hcan3);
   #endif
 	//ARS408
 	#if RADAR_TYPE
-  ARS_Init(&hcan2);//hcan2 must use hcan1
+  ARS_Init(&hcan3);
 	//EMRR
 	#else
-	EMRR_Init(&hcan2);
+	EMRR_Init(&hcan3);
 	#endif
 	#if CAN_READ_VEHICLE
-  Vehicle_CAN_Init(&hcan3);
+  Vehicle_CAN_Init(&hcan2);
   #endif
 	
 	#if ATM_READ
