@@ -125,8 +125,8 @@ struct
   uint8_t left_turn;
 }VehicleSwitch;
 
-#define LOW_WARNING_TIME  4.5f
-#define HIGH_WARNING_TIME 3.5f
+#define LOW_WARNING_TIME  3.5f
+#define HIGH_WARNING_TIME 2.5f
 
 /* USER CODE END Variables */
 
@@ -350,7 +350,6 @@ void StartRadarCommTask(void const * argument)
   for(;;)
   {
 		osSemaphoreWait(bSemRadarCANRxSigHandle, osWaitForever);
-		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
 		
     //ARS408
 		#if RADAR_TYPE
@@ -411,7 +410,7 @@ void StartSoundWarningTask(void const * argument)
   for(;;)
   {
     osSemaphoreWait(bSemSoundWarningSigHandle, osWaitForever);
-		if(VehicleSpeed_g > 10)
+		//if(VehicleSpeed_g)// > 10)
 		{
 			switch(CrashWarningLv)				//Forward collision warning
 			{
@@ -613,6 +612,7 @@ void StartRadarCalcTask(void const * argument)
     osSemaphoreWait(bSemRadarCalcSigHandle, osWaitForever);
     //ARS408
 		#if RADAR_TYPE
+		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
 		uint16_t MinRange=255;
 		uint32_t relSpeed=0;
 		MinRange = RadarGeneral[0].Obj_DistLong;
@@ -642,17 +642,13 @@ void StartRadarCalcTask(void const * argument)
 
     //EMRR
 		#else
+		HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
 		MinRangeLong_g = EMRRGeneral_Closet.trackRange;// - VehicleSpeed_g / 6;
     VrelLong_g = EMRRGeneral_Closet.trackSpeed;
 		//DBC_SendDist(&hcan1, MinRangeLong_g);
-    //if(!Turning_Flag || (Turning_Flag && Turning_Collision))
+    if(!Turning_Flag)// || (Turning_Flag && Turning_Collision))
     {
-			/*if(MinRangeLong_g < 30)
-			{
-				 CrashWarningLv = WARNING_HIGH;
-          osSemaphoreRelease(bSemSoundWarningSigHandle);
-			}
-      else */if(MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g > 0 && VrelLong_g < 0)
+			if(MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g > 0 && VrelLong_g < 0)
       {
         TimetoCrash_g = - MinRangeLong_g / VrelLong_g;
         if(TimetoCrash_g < HIGH_WARNING_TIME)

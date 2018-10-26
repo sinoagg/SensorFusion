@@ -3,7 +3,7 @@
  * ARS408 1
  * EMRR 0
 */
-#define RADAR_TYPE 1
+#define RADAR_TYPE 0
 //	Vehicle Speed & Switch
 #define CAN_READ_VEHICLE 1
 //	Gyro CAN 1/3
@@ -16,7 +16,7 @@
 */
 #define VEHICLE_MODEL 0
 
-#define ADAS_COMM 1
+#define ADAS_COMM 0
 //	Atmosphere Sensor
 #define ATM_READ 0
 //	Send Radar data in DBC
