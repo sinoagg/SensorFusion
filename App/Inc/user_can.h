@@ -5,7 +5,7 @@
 #include "can.h"
 #include "vehicle.h"
 
-#define DBC_ADDR  0x509 //	can1 id, dbc
+#define DBC_ADDR 0x509 //	can1 id, dbc
 
 extern uint8_t AEB_CAN_TxReady;
 extern uint8_t VehicleCANRxBuf[];
@@ -20,7 +20,6 @@ extern CAN_TxHeaderTypeDef DBC_CAN_TxHeader;
 extern CAN_TxHeaderTypeDef AEB_CAN_TxHeader;
 
 uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan);
-uint8_t CAN1_Init(CAN_HandleTypeDef * hcan);	
+uint8_t CAN1_Init(CAN_HandleTypeDef *hcan);
 
 #endif
-

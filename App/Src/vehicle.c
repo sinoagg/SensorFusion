@@ -3,4 +3,3 @@
 VehicleSwitchTypeDef vehicleSwitch;
 VehicleTypeDef vehicle;
 
-

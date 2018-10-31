@@ -8,32 +8,32 @@
 
 uint8_t WTN6_Broadcast(uint8_t addr)
 {
-	if(GPIO_PIN_SET==HAL_GPIO_ReadPin(BELL_BUSY_GPIO_Port, BELL_BUSY_Pin))
+	if (GPIO_PIN_SET == HAL_GPIO_ReadPin(BELL_BUSY_GPIO_Port, BELL_BUSY_Pin))
 	{
 		uint8_t bit_data;
 		uint8_t j;
 		HAL_GPIO_WritePin(BELL_CLK_GPIO_Port, BELL_CLK_Pin, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(BELL_CLK_GPIO_Port, BELL_CLK_Pin, GPIO_PIN_RESET);
-		delay_ms(5); 
-		for(j=0;j<8;j++)
+		delay_ms(5);
+		for (j = 0; j < 8; j++)
 		{
-			bit_data = addr&0X01;
+			bit_data = addr & 0X01;
 			HAL_GPIO_WritePin(BELL_CLK_GPIO_Port, BELL_CLK_Pin, GPIO_PIN_RESET);
-			if(bit_data == 1)
+			if (bit_data == 1)
 				HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_SET);
 			else
 				HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_RESET);
-			delay_us(300); 
+			delay_us(300);
 			HAL_GPIO_WritePin(BELL_CLK_GPIO_Port, BELL_CLK_Pin, GPIO_PIN_SET);
-			delay_us(300); 
-			addr = addr>>1;
+			delay_us(300);
+			addr = addr >> 1;
 		}
 		HAL_GPIO_WritePin(BELL_DATA_GPIO_Port, BELL_DATA_Pin, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(BELL_CLK_GPIO_Port, BELL_CLK_Pin, GPIO_PIN_SET);
 		return 0;
 	}
-	else 
+	else
 		return 1;
 }
 
@@ -74,4 +74,3 @@ uint8_t WTN6_Broadcast(uint8_t addr)
 		return 1;
 }
 */
-

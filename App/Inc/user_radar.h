@@ -10,13 +10,13 @@ typedef struct
 	float MinRangeLong;
 }ObjectTypeDef;
 
-#if RADAR_TYPE==ARS408
+#if RADAR_TYPE == ARS408
 	#include "ARS408.h"
   extern MW_RadarObjStatus RadarObjStatus;
 	extern MW_RadarGeneral RadarGeneral[];
 	extern uint8_t MW_RadarRxComplete;
 	extern uint8_t CmdRxComplete;
-#elif RADAR_TYPE==EMRR
+#elif RADAR_TYPE == EMRR
 	#include "EMRR.h"
   extern EMRR_RadarGeneral aEMRRGeneral[];
 	extern EMRR_RadarGeneral EMRRGeneral_Closet;

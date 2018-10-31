@@ -25,9 +25,9 @@
  */
 #include "EMRR.h"
 
-#define VEHICLE_CENTRE_LEN	9.5f
-#define VEHICLE_HALF_WIDTH	1.4f
-#define OBSTACLE_ERR				-1.0f
+#define VEHICLE_CENTRE_LEN 9.5f
+#define VEHICLE_HALF_WIDTH 1.4f
+#define OBSTACLE_ERR -1.0f
 
 uint8_t EMRR_RadarObjCount;
 uint8_t EMRR_RadarRxComplete;
@@ -45,9 +45,9 @@ uint8_t EMRR_Init(CAN_HandleTypeDef *hcan)
 	MASK_HIGH, MASK_LOW,\
 	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
 	CAN_FilterTypeDef MW_RadarCANFilter = {
-		EMRR_OBJ_ADDR<<5, 0,\
-		0xFFC0<<5, 0,\
-		CAN_FILTER_FIFO1, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};
+			EMRR_OBJ_ADDR << 5, 0,
+			0xFFC0 << 5, 0,
+			CAN_FILTER_FIFO1, 14, CAN_FILTERMODE_IDMASK, CAN_FILTERSCALE_32BIT, ENABLE, 14};
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
@@ -62,24 +62,24 @@ uint8_t EMRR_Init(CAN_HandleTypeDef *hcan)
  * @param  *pRadarGeneral: RadarGeneral[64]
  * @retval None
  */
-void EMRR_GetRadarObjData(CAN_TxHeaderTypeDef* pDBC_CAN_TxHeader, uint8_t* pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral)
+void EMRR_GetRadarObjData(CAN_TxHeaderTypeDef *pDBC_CAN_TxHeader, uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral)
 {
 	uint16_t tempData;
 	//id
-	pRadarGeneral->trackId = pDBC_CAN_TxHeader->StdId- 0x4ff;
+	pRadarGeneral->trackId = pDBC_CAN_TxHeader->StdId - 0x4ff;
 	//range
-	pRadarGeneral->trackRange = (float)(*pCANRxBuf | ((*(pCANRxBuf + 1) & 0x7F) << 8))*0.01f;
+	pRadarGeneral->trackRange = (float)(*pCANRxBuf | ((*(pCANRxBuf + 1) & 0x7F) << 8)) * 0.01f;
 	//speed
-	tempData =  ((uint16_t)((*(pCANRxBuf + 3) & 0x3F)) << 8) | *(pCANRxBuf + 2);
-	pRadarGeneral->trackSpeed =  (float)(tempData > 8191 ? (tempData - 16384)*0.01f : tempData*0.01f);
+	tempData = ((uint16_t)((*(pCANRxBuf + 3) & 0x3F)) << 8) | *(pCANRxBuf + 2);
+	pRadarGeneral->trackSpeed = (float)(tempData > 8191 ? (tempData - 16384) * 0.01f : tempData * 0.01f);
 	//angle
 	tempData = ((uint16_t)((*(pCANRxBuf + 5) & 0xFC)) >> 2) | ((uint16_t)((*(pCANRxBuf + 6) & 0x1F)) << 6);
-	pRadarGeneral->trackAngle = (float)((tempData) > 1023 ? (tempData- 2048) *0.1f : tempData *0.1f);
+	pRadarGeneral->trackAngle = (float)((tempData) > 1023 ? (tempData - 2048) * 0.1f : tempData * 0.1f);
 	//power
 	if (pRadarGeneral->trackRange > 0)
 	{
 		tempData = (uint16_t)((*(pCANRxBuf + 6) & 0xE0) >> 5) | ((uint16_t)((*(pCANRxBuf + 7) & 0x7F)) << 3);
-		pRadarGeneral->trackPower = (float)(tempData > 511 ? (tempData - 1024)*0.1f - 40 : (tempData)*0.1f - 40);
+		pRadarGeneral->trackPower = (float)(tempData > 511 ? (tempData - 1024) * 0.1f - 40 : (tempData)*0.1f - 40);
 	}
 	else
 	{
@@ -97,26 +97,27 @@ void EMRR_GetRadarObjData(CAN_TxHeaderTypeDef* pDBC_CAN_TxHeader, uint8_t* pCANR
  */
 void EMRR_CalcRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral, EMRR_RadarGeneral *pRadarGeneral_Closet)
 {
-	uint8_t i=0;
-	static uint8_t min_index=0;
-	float min=1000, rad;
-	if(EMRR_RadarObjCount>0)
+	uint8_t i = 0;
+	static uint8_t min_index = 0;
+	float min = 1000, rad;
+	if (EMRR_RadarObjCount > 0)
 	{
-		for(i=0; i<EMRR_RadarObjCount; i++)
+		for (i = 0; i < EMRR_RadarObjCount; i++)
 		{
-			if((pRadarGeneral + i)->trackPower> -40)	//功率
+			if ((pRadarGeneral + i)->trackPower > -40) //功率
 			{
-				if(min > (pRadarGeneral + i)->trackRange)	//当前目标距离小于min
+				if (min > (pRadarGeneral + i)->trackRange) //当前目标距离小于min
 				{
-					rad = 3.14 * fabs((pRadarGeneral + i)->trackAngle) / 180;	//角度换算成弧度
+					rad = 3.14 * fabs((pRadarGeneral + i)->trackAngle) / 180; //角度换算成弧度
 					(pRadarGeneral + i)->trackCrossRange = (float)((pRadarGeneral + i)->trackRange * sin(rad));
-					if((pRadarGeneral + i)->trackCrossRange < 2.0f)	//左右距离＜1.5米，在车道线内
+					if ((pRadarGeneral + i)->trackCrossRange < 2.0f) //左右距离＜1.5米，在车道线内
 					{
 						min = (pRadarGeneral + i)->trackRange;
-						if(min!=0) min_index = i;
+						if (min != 0)
+							min_index = i;
 					}
 				}
-			}		
+			}
 		}
 		pRadarGeneral_Closet->trackId = (pRadarGeneral + min_index)->trackId;
 		pRadarGeneral_Closet->trackCrossRange = (pRadarGeneral + min_index)->trackCrossRange;
@@ -125,8 +126,8 @@ void EMRR_CalcRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGenera
 		pRadarGeneral_Closet->trackAngle = (pRadarGeneral + min_index)->trackAngle;
 		pRadarGeneral_Closet->trackPower = (pRadarGeneral + min_index)->trackPower;
 		EMRR_RadarRxComplete = 0;
-		}
 	}
+}
 /** 
  * @brief  Calculate Turning cross 
  * @note   Vehicle Speed should read from Vehicle CAN
@@ -139,21 +140,20 @@ void EMRR_CalcRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGenera
 uint8_t EMRR_CalcTurn(EMRR_RadarGeneral *pRadargGeneral_Closet, float YawRate, float VehicleSpeed)
 {
 	float Rotate_R, Min_R, Max_R, Obstacle_X, Obstacle_Y, Obstacle_Dis;
-  VehicleSpeed /= 3.6f;  //  km/h to m/s
-	
-	Rotate_R = (VehicleSpeed * 180) / (YawRate * 3.14f);	//Rotate_R = V / ω
+	VehicleSpeed /= 3.6f; //  km/h to m/s
+
+	Rotate_R = (VehicleSpeed * 180) / (YawRate * 3.14f); //Rotate_R = V / ω
 	Rotate_R = (Rotate_R < 0) ? -Rotate_R : Rotate_R;
 	Min_R = Rotate_R - VEHICLE_HALF_WIDTH;
-	Max_R = sqrt((Rotate_R + VEHICLE_HALF_WIDTH) * (Rotate_R + VEHICLE_HALF_WIDTH) + \
-								 VEHICLE_CENTRE_LEN * VEHICLE_CENTRE_LEN);
+	Max_R = sqrt((Rotate_R + VEHICLE_HALF_WIDTH) * (Rotate_R + VEHICLE_HALF_WIDTH) +
+							 VEHICLE_CENTRE_LEN * VEHICLE_CENTRE_LEN);
 	//如果最近位置在最大，最小距离之间，即转弯的车道内，就返回1，否则返回0
 	Obstacle_X = pRadargGeneral_Closet->trackRange + VEHICLE_CENTRE_LEN;
 	Obstacle_Y = -pRadargGeneral_Closet->trackCrossRange + Rotate_R;
 	Obstacle_Dis = sqrt(Obstacle_X * Obstacle_X + Obstacle_Y * Obstacle_Y);
-	
-	if((Obstacle_Dis < Max_R + OBSTACLE_ERR) && (Obstacle_Dis > Min_R - OBSTACLE_ERR))
+
+	if ((Obstacle_Dis < Max_R + OBSTACLE_ERR) && (Obstacle_Dis > Min_R - OBSTACLE_ERR))
 		return 1;
 	else
 		return 0;
 }
-

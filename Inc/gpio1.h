@@ -51,8 +51,7 @@
 #ifndef __gpio_H
 #define __gpio_H
 #ifdef __cplusplus
-extern "C"
-{
+ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -66,30 +65,22 @@ extern "C"
 /* USER CODE BEGIN Private defines */
 #define LED_WARNING_OFF()  HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET)
 #define LED_WARNING_ON()   HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET)
-#define LED_WARNING_TOGGLE() HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin)
-#define LED_RADAR_OFF()   HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET)
-#define LED_RADAR_ON()    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET)
-#define LED_RADAR_TOGGLE() HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin)
-#define LED_ADAS_OFF()    HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET)
-#define LED_ADAS_ON()     HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET)
-#define LED_ADAS_TOGGLE() HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin)
-#define LED_VEHICLE_OFF() HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET)
-#define LED_VEHICLE_ON()  HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET)
-#define LED_VEHICLE_TOGGLE() HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin)
-
+#define LED_RADAR_OFF()  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET)
+#define LED_RADAR_ON()   HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET)
+#define LED_ADAS_OFF()  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET)
+#define LED_ADAS_ON()   HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET)
+#define LED_VEHICLE_OFF()  HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET)
+#define LED_VEHICLE_ON()   HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET)
+`
 #define BUZZER_OFF() HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_RESET)
 #define BUZZER_ON()  HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET)
-#define BUZZER_TOGGLE() HAL_GPIO_TogglePin(BUZZER_GPIO_Port, BUZZER_Pin)
+/* USER CODE END Private defines */
 
-#define VALVE_EN()  HAL_GPIO_WritePin(VALVE_ENABLE_GPIO_Port, VALVE_ENABLE_Pin, GPIO_PIN_SET)
-#define VALVE_DIS() HAL_GPIO_WritePin(VALVE_ENABLE_GPIO_Port, VALVE_ENABLE_Pin, GPIO_PIN_RESET)
-  /* USER CODE END Private defines */
+void MX_GPIO_Init(void);
 
-  void MX_GPIO_Init(void);
+/* USER CODE BEGIN Prototypes */
 
-  /* USER CODE BEGIN Prototypes */
-
-  /* USER CODE END Prototypes */
+/* USER CODE END Prototypes */
 
 #ifdef __cplusplus
 }

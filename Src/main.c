@@ -91,7 +91,7 @@ int main(void)
   MX_DAC_Init();
   /* USER CODE BEGIN 2 */
 	delay_init(100);
-	
+
 	WTN6_Broadcast(BELL_LOUDEST);
 	delay_ms(100);
 	WTN6_Broadcast(BELL_ADAS_START);
@@ -195,7 +195,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		if(i++>10)
 		{
 			i=0;
-			HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+			LED_RADAR_TOGGLE();
 		}
 
 		#if RADAR_TYPE == ARS408
@@ -231,7 +231,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		if(i++>10)
 		{
 			i=0;
-			HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
+			LED_VEHICLE_TOGGLE();
 		}
 		#if CAN_READ_VEHICLE
 			#if VEHICLE_MODEL == BENZ
@@ -298,8 +298,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
 	else if (htim->Instance == TIM2) 
 	{
-		HAL_GPIO_TogglePin(BUZZER_GPIO_Port, BUZZER_Pin);
-		HAL_GPIO_TogglePin(LED0_GPIO_Port,LED0_Pin);
+		BUZZER_TOGGLE();
+		LED_WARNING_TOGGLE();
   }
 	else if (htim->Instance == TIM3)
 	{
