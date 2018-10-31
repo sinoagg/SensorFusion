@@ -7,13 +7,13 @@ AEBS_Status vAEBS_Status = {OFF, OFF};
 
 void StopBuzzer(AEBS_Status *pAEBS_Status)
 {
-	//if(pAEBS_Status->BuzzerStatus==ON)
-	//{
+//if(pAEBS_Status->BuzzerStatus == ON)
+//{
 	pAEBS_Status->BuzzerStatus = OFF;
 	HAL_TIM_Base_Stop_IT(&htim2);
 	BUZZER_OFF();
 	LED_WARNING_OFF();
-	//}
+//}
 }
 
 void StartBuzzer(uint8_t warningLv)
@@ -44,7 +44,7 @@ void DisableAEBS(AEBS_Status *pAEBS_Status)
 	{
 		pAEBS_Status->valveStatus = OFF;
 		VALVE_DIS(); //禁止刹车电源
-		HAL_DACEx_DualSetValue(&hdac, DAC_ALIGN_12B_R, 0, 0);												 //清空DAC输出
+		HAL_DACEx_DualSetValue(&hdac, DAC_ALIGN_12B_R, 0, 0);				//清空DAC输出
 	}
 }
 

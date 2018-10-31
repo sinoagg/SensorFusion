@@ -40,12 +40,12 @@ osThreadId radarCalcHandle;
 osThreadId ADAS_CommTaskHandle;
 #endif
 
-osSemaphoreId bSemPrepareCanDataSigHandle;
+osSemaphoreId bSemPrepareCANDataSigHandle;
 osSemaphoreId bSemRadarCalcSigHandle;
 
-//uint8_t Turning_Collision = 0;
-//uint8_t Turning_Flag = 0;
 
+extern uint8_t Turning_Collision;
+extern uint8_t Turning_Flag;
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
@@ -79,14 +79,14 @@ void MX_FREERTOS_Init(void)
 	/* definition and creation of bSemPrepareCANDataSig */
 
 	osSemaphoreDef(bSemPrepareCANDataSig);
-	bSemPrepareCanDataSigHandle = osSemaphoreCreate(osSemaphore(bSemPrepareCANDataSig), 1);
+	bSemPrepareCANDataSigHandle = osSemaphoreCreate(osSemaphore(bSemPrepareCANDataSig), 1);
 	/* definition and creation of bSemRadarCalcSig */
 	osSemaphoreDef(bSemRadarCalcSig);
 	bSemRadarCalcSigHandle = osSemaphoreCreate(osSemaphore(bSemRadarCalcSig), 1);
 
 	/* USER CODE BEGIN RTOS_SEMAPHORES */
 	/* add semaphores, ... */
-	osSemaphoreWait(bSemPrepareCanDataSigHandle, osWaitForever); //read once to disable
+	osSemaphoreWait(bSemPrepareCANDataSigHandle, osWaitForever); //read once to disable
 	osSemaphoreWait(bSemRadarCalcSigHandle, osWaitForever);			 //read once to disable
 	/* USER CODE END RTOS_SEMAPHORES */
 
@@ -149,6 +149,11 @@ void StartDefaultTask(void const *argument)
 		{
 			AEB_CAN_TxReady = 0;
 			HAL_CAN_AddTxMessage(&hcan2, &AEB_CAN_TxHeader, AEB_CAN_TxBuf, &AEB_CAN_TxMailBox);
+			#if RADAR_TYPE == ARS408
+			ARS_SendVehicleSpeed(&hcan3, vehicle.speed);	//send vehicle speed to Radar
+			ARS_SendVehicleYaw(&hcan3, vehicle.yawRate);	//send vehicle yawRate to Radar
+			#elif RADAR_TYPE == EMRR
+			#endif
 		}
 		osDelay(20);
 	}
@@ -166,12 +171,12 @@ void StartADAS_CommTask(void const *argument)
 			//HAL_UART_Transmit(&huart2, ADASDispBuf, 32, 100);//transmit ADAS data to screen
 			CalADASData(&ADAS_dev, ADASRxBuf);
 			LED_ADAS_TOGGLE();
-#ifdef LDW
+			#ifdef LDW
 			if (ADAS_dev.LDW_warning == 0x01 || ADAS_dev.LDW_warning == 0x02) //Lane departure warning(left/right)
 			{
-				osSemaphoreRelease(bSemPrepareCanDataSigHandle);
+				osSemaphoreRelease(bSemPrepareCANDataSigHandle);
 			}
-#endif
+			#endif
 		}
 		osDelay(10);
 	}
@@ -185,7 +190,7 @@ void StartPrepareCANDataTask(void const *argument)
 	uint8_t tempTTC;
 	for (;;)
 	{
-		osSemaphoreWait(bSemPrepareCanDataSigHandle, osWaitForever);
+		osSemaphoreWait(bSemPrepareCANDataSigHandle, osWaitForever);
 		//Step3.向整车CAN发AEBS报警数据准备
 		AEB_CAN_TxBuf[0] = CrashWarningLv; //5, 6, 7对应金龙车三个等级
 		if (TimetoCrash_g < 0)
@@ -256,61 +261,62 @@ void StartRadarCalcTask(void const *argument)
 					uint16_t MinRange = RadarGeneral[0].Obj_DistLong;
 					uint32_t relSpeed = RadarGeneral[0].Obj_VrelLong;
 
-					//if(!Turning_Flag || (Turning_Flag && Turning_Collision))
-					//{
-					if ((0.2 * MinRange - 500) < LIMIT_RANGE && MinRange != 0) //calculate when dist is near enough
+					if(!Turning_Flag || (Turning_Flag && Turning_Collision))
 					{
-						RadarObject.VrelLong = 0.25 * relSpeed - 128; //get real relative speed
-						if (RadarObject.VrelLong < 0)
+						if ((0.2 * MinRange - 500) < LIMIT_RANGE && MinRange != 0) //calculate when dist is near enough
 						{
-							RadarObject.MinRangeLong = 0.2 * MinRange - 500; //get real range(longitude)
-							if (RadarObject.MinRangeLong > 0)
+							RadarObject.VrelLong = 0.25 * relSpeed - 128; //get real relative speed
+							if (RadarObject.VrelLong < 0)
 							{
-								AEBS_Deal = 1;																													 //处理了报警
-								TimetoCrash_g = -(float)RadarObject.MinRangeLong / RadarObject.VrelLong; //relative Velocity is minus
-								if (TimetoCrash_g < HIGH_WARNING_TIME)
+								RadarObject.MinRangeLong = 0.2 * MinRange - 500; //get real range(longitude)
+								if (RadarObject.MinRangeLong > 0)
 								{
-									CrashWarningLv = WARNING_HIGH;
-#if ADAS_COMM
-									if (ADAS_dev.crash_level > 0)
-#endif
+									AEBS_Deal = 1;																													 //处理了报警
+									TimetoCrash_g = -(float)RadarObject.MinRangeLong / RadarObject.VrelLong; //relative Velocity is minus
+									if (TimetoCrash_g < HIGH_WARNING_TIME)
 									{
-										StartBuzzer(WARNING_HIGH);
-										EnableAEBS(TimetoCrash_g, WARNING_HIGH);
+										CrashWarningLv = WARNING_HIGH;
+										#if ADAS_COMM
+										if (ADAS_dev.crash_level > 0)
+										#endif
+										{
+											StartBuzzer(WARNING_HIGH);
+											EnableAEBS(TimetoCrash_g, WARNING_HIGH);
+										}
 									}
-								}
-								else if (TimetoCrash_g < MID_WARNING_TIME)
-								{
-									CrashWarningLv = WARNING_MID;
-#if ADAS_COMM
-									if (ADAS_dev.crash_level > 0)
-#endif
+									else if (TimetoCrash_g < MID_WARNING_TIME)
 									{
-										StartBuzzer(WARNING_MID);
-										EnableAEBS(TimetoCrash_g, WARNING_MID);
+										CrashWarningLv = WARNING_MID;
+										#if ADAS_COMM
+										if (ADAS_dev.crash_level > 0)
+										#endif
+										{
+											StartBuzzer(WARNING_MID);
+											EnableAEBS(TimetoCrash_g, WARNING_MID);
+										}
 									}
-								}
-								else if (TimetoCrash_g < LOW_WARNING_TIME)
-								{
-									CrashWarningLv = WARNING_LOW;
-#if ADAS_COMM
-									if (ADAS_dev.crash_level > 0)
-#endif
+									else if (TimetoCrash_g < LOW_WARNING_TIME)
 									{
-										StartBuzzer(WARNING_LOW);
-										DisableAEBS(&vAEBS_Status);
+										CrashWarningLv = WARNING_LOW;
+										#if ADAS_COMM
+										if (ADAS_dev.crash_level > 0)
+										#endif
+										{
+											StartBuzzer(WARNING_LOW);
+											DisableAEBS(&vAEBS_Status);
+										}
+									}
+									else
+									{
+										AEBS_Deal = 0;
 									}
 								}
 								else
-								{
 									AEBS_Deal = 0;
-								}
 							}
 							else
 								AEBS_Deal = 0;
 						}
-						else
-							AEBS_Deal = 0;
 					}
 					else
 						AEBS_Deal = 0;
@@ -334,7 +340,7 @@ void StartRadarCalcTask(void const *argument)
 				StopBuzzer(&vAEBS_Status);
 				DisableAEBS(&vAEBS_Status);
 			}
-			osSemaphoreRelease(bSemPrepareCanDataSigHandle); //发送雷达准备数据信号量
+			osSemaphoreRelease(bSemPrepareCANDataSigHandle); //发送雷达准备数据信号量
 #elif RADAR_TYPE == EMRR
 		LED_RADAR_TOGGLE();
 		MinRangeLong_g = EMRRGeneral_Closet.trackRange; // - VehicleSpeed_g / 6;
@@ -347,12 +353,12 @@ void StartRadarCalcTask(void const *argument)
 				if (TimetoCrash_g < HIGH_WARNING_TIME)
 				{
 					CrashWarningLv = WARNING_HIGH;
-					osSemaphoreRelease(bSemPrepareCanDataSigHandle);
+					osSemaphoreRelease(bSemPrepareCANDataSigHandle);
 				}
 				else if (TimetoCrash_g < LOW_WARNING_TIME)
 				{
 					CrashWarningLv = WARNING_LOW;
-					//osSemaphoreRelease(bSemPrepareCanDataSigHandle);
+					//osSemaphoreRelease(bSemPrepareCANDataSigHandle);
 				}
 				else
 					CrashWarningLv = WARNING_NONE;

@@ -39,6 +39,8 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
+uint8_t Turning_Collision = 0;
+uint8_t Turning_Flag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -245,33 +247,56 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 				}
 			#elif VEHICLE_MODEL == BYD
 			#elif VEHICLE_MODEL == YUTONG
-		  #elif VEHICLE_MODEL ==KINGLONG
+		  #elif VEHICLE_MODEL == KINGLONG
 				if(KINGLONG_VEHICLE_SPEED_ADDR == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
 				{
 					vehicle.speed = VehicleCANRxBuf[7]; 		//vehicle speed in hex,km/h
-					#if RADAR_TYPE==ARS408
-					ARS_SendVehicleSpeed(&hcan3, vehicle.speed);	//send VehicleSpeed to Radar
-					#elif RADAR_TYPE==EMRR
-					#endif
 				}
-				/*else if(VEHICLE_SWITCH_ADDR == VehicleCANRxHeader.ExtId)
+				else if(VEHICLE_SWITCH_ADDR == VehicleCANRxHeader.ExtId)
 				{
 					if(VehicleCANRxBuf[0] == 1)		//pack number == 1
 					{
-						VehicleSwitch.brake = VehicleCANRxBuf[2] & 0x3;
-						VehicleSwitch.right_turn = (VehicleCANRxBuf[4] & 0xC) >> 2;
-						VehicleSwitch.left_turn = (VehicleCANRxBuf[4] & 0x30) >> 4;
+						vehicleSwitch.brake = VehicleCANRxBuf[2] & 0x3;
+						vehicleSwitch.right_turn = (VehicleCANRxBuf[4] & 0xC) >> 2;
+						vehicleSwitch.left_turn = (VehicleCANRxBuf[4] & 0x30) >> 4;
 					}
 				}
 				else if(VEHICLE_ANGLE_ADDR == VehicleCANRxHeader.ExtId)
 				{
-					VehicleAngle.tw_angle  = ((uint16_t)VehicleCANRxBuf[0])<<8 | VehicleCANRxBuf[1];
-					VehicleAngle.tw_circle = VehicleCANRxBuf[2] & 0x3F;
-					VehicleAngle.tw_type = (VehicleCANRxBuf[2]>>6) & 0x3;
-					VehicleAngle.yawRate = ((uint16_t)VehicleCANRxBuf[3])<<8 | VehicleCANRxBuf[4];
-					VehicleAngle.latAcc  = ((uint16_t)VehicleCANRxBuf[5])<<8 | VehicleCANRxBuf[6];
-					VehicleAngle.longAcc = VehicleCANRxBuf[7];
-				}*/
+					vehicle.tw_angle  = ((uint16_t)VehicleCANRxBuf[0])<<8 | VehicleCANRxBuf[1];
+					vehicle.tw_circle = VehicleCANRxBuf[2] & 0x3F;
+					vehicle.tw_type = (VehicleCANRxBuf[2]>>6) & 0x3;
+					vehicle.yawRate = ((uint16_t)VehicleCANRxBuf[3])<<8 | VehicleCANRxBuf[4];
+					vehicle.latAcc  = ((uint16_t)VehicleCANRxBuf[5])<<8 | VehicleCANRxBuf[6];
+					vehicle.longAcc = VehicleCANRxBuf[7];
+          //vehicle.tw_angle = (vehicle.tw_angle > YAWRATE_LIMIT) ? YAWRATE_LIMIT : vehicle.tw_angle;
+          //vehicle.tw_angle = (vehicle.tw_angle < -YAWRATE_LIMIT) ? -YAWRATE_LIMIT : vehicle.tw_angle;
+          #if RADAR_TYPE == ARS408
+          if(vehicle.tw_angle > 5 || vehicle.tw_angle < -5)
+          {
+            Turning_Flag = 1;
+            Turning_Collision = ARS_CalcTurn(RadarGeneral, vehicle.tw_angle, vehicle.speed);
+          }
+          else
+          {
+            Turning_Flag = 0;
+            Turning_Collision = 0;
+          }
+        
+          #elif RADAR_TYPE == EMRR
+          if(vehicle.tw_angle > 5 || vehicle.tw_angle < -5)
+          {
+            Turning_Flag = 1;
+            Turning_Collision = EMRR_CalcTurn(&EMRRGeneral_Closet, vehicle.tw_angle, vehicle.speed);
+          }
+          else
+          {
+            Turning_Flag = 0;
+            Turning_Collision = 0;
+          }
+          #endif
+    
+				}
 			#endif
 		#endif  		
   }
@@ -303,7 +328,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
 	else if (htim->Instance == TIM3)
 	{
-		AEB_CAN_TxReady=1;
+		AEB_CAN_TxReady = 1;
 	}
 		
   /* USER CODE BEGIN Callback 1 */
