@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "mpu6050.h": "c",
+        "ostream": "cpp",
+        "typeinfo": "c",
+        "stm32f4xx_hal.h": "c"
+    }
+}

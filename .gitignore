@@ -1,0 +1,12 @@
+#project
+*.swp
+.mxproject
+./Drivers/CMSIS/
+*.o
+*.a
+*.crf
+*.d
+*.dep
+*.Bak
+*.lst
+JLinkLog.txt
