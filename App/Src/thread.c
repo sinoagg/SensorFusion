@@ -7,7 +7,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
 #include "task.h"
-#include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */
 #include "thread.h"
@@ -149,11 +148,6 @@ void StartDefaultTask(void const *argument)
 		{
 			AEB_CAN_TxReady = 0;
 			HAL_CAN_AddTxMessage(&hcan2, &AEB_CAN_TxHeader, AEB_CAN_TxBuf, &AEB_CAN_TxMailBox);
-			#if RADAR_TYPE == ARS408
-			ARS_SendVehicleSpeed(&hcan3, vehicle.speed);	//send vehicle speed to Radar
-			ARS_SendVehicleYaw(&hcan3, vehicle.yawRate);	//send vehicle yawRate to Radar
-			#elif RADAR_TYPE == EMRR
-			#endif
 		}
 		osDelay(20);
 	}
@@ -239,7 +233,7 @@ void StartRadarCalcTask(void const *argument)
 		else if (RadarCAN_RxHeader.StdId == 0x60B)
 		{
 			AEBS_Deal = 0;
-			if (vehicle.speed > 5) //车速报警阈值,如果此值太大，制动后期低速时不再制动
+			if (vehicle.speed >= VEHICLE_SPEED_THRESHOLD) //车速报警阈值,如果此值太大，制动后期低速时不再制动
 			{
 				if (minRadarDistFlag) //如果是最近目标
 				{
@@ -261,7 +255,7 @@ void StartRadarCalcTask(void const *argument)
 					uint16_t MinRange = RadarGeneral[0].Obj_DistLong;
 					uint32_t relSpeed = RadarGeneral[0].Obj_VrelLong;
 
-					if(!Turning_Flag || (Turning_Flag && Turning_Collision))
+					//if(!Turning_Flag || (Turning_Flag && Turning_Collision))
 					{
 						if ((0.2 * MinRange - 500) < LIMIT_RANGE && MinRange != 0) //calculate when dist is near enough
 						{
@@ -317,9 +311,9 @@ void StartRadarCalcTask(void const *argument)
 							else
 								AEBS_Deal = 0;
 						}
-					}
 					else
 						AEBS_Deal = 0;
+					}
 				}
 				if (AEBS_Deal == 0) //没有处理报警
 				{

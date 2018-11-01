@@ -3,7 +3,6 @@
 
 #include "stm32f4xx_hal.h"
 
-//	can3 id, vehicle
 #define KINGLONG 0
 #define YUTONG 1
 #define BYD 2
@@ -15,10 +14,10 @@
 
 #define YUTONG_VEHICLE_SPEED_ADDR	0x18FE6E0B
 	
-#define KINGLONG_VEHICLE_SPEED_ADDR	0x0CFE6CEE
+#define KINGLONG_VEHICLE_SPEED_ADDR		0x0CFE6CEE
 #define KINGLONG_VEHICLE_SWITCH_ADDR	0x18FA0517
-#define KINGLONG_VEHICLE_ANGLE_ADDR	0x18F0090B
-#define KINGLONG_VEHICLE_AEBS_ADDR   0x0CF02FA0
+#define KINGLONG_VEHICLE_ANGLE_ADDR		0x18F0090B
+#define KINGLONG_VEHICLE_AEBS_ADDR   	0x0CF02FA0
 
 #define VEHICLE_MODEL KINGLONG
 #define VEHICLE_SPEED_ADDR 	KINGLONG_VEHICLE_SPEED_ADDR
@@ -35,12 +34,12 @@ typedef struct
 
 typedef struct
 {
-	uint16_t tw_angle;	//turn wheel
+	float tw_angle;	//turn wheel
 	uint8_t  tw_circle;	
 	uint8_t  tw_type;
-	uint16_t yawRate;
-	uint16_t latAcc;	//latitude
-	uint8_t  longAcc;	//longitude
+	float yawRate;
+	float latAcc;	//latitude
+	float  longAcc;	//longitude
 	uint8_t speed;
 }VehicleTypeDef;
 

@@ -284,13 +284,16 @@ void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan, uint16_t VehicleSpeed)
  * @brief  send YawRate to ARS408
  * @note   correction Radar in turning corners
  * @param  *hcan: can2(500kbps)
- * @param  YawRate: (бу/s)
+ * @param  YawRate: (rad/s)
  * @retval None
  */
 void ARS_SendVehicleYaw(CAN_HandleTypeDef *hcan, float YawRate)
 {
 	uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
 	uint8_t CANTxBuf[2] = {0};
+	YawRate = YawRate /3.14f * 180;
+	YawRate = (YawRate > 327.68f) ? 327.68f : YawRate;
+	YawRate = (YawRate < -327.68f) ? -327.68f : YawRate;
   uint16_t YawRate_int = ((YawRate + 327.68f) / 0.01f);     //offset -327.68, Res 0.01
   CANTxBuf[0] = (YawRate_int >> 8) & 0xFF;
 	CANTxBuf[1] = YawRate_int & 0xFF;

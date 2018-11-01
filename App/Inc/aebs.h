@@ -8,6 +8,8 @@
 #define LOW_WARNING_TIM_PERIOD 200 //ms
 #define HIGH_WARNING_TIM_PERIOD 50 //ms
 
+#define VEHICLE_SPEED_THRESHOLD 0
+
 #define LOW_WARNING_TIME 4.4f
 #define MID_WARNING_TIME 3.8f
 #define HIGH_WARNING_TIME 3.0f
@@ -42,6 +44,14 @@
 
 #define ON 1
 #define OFF 0
+
+/* ---Turning_Flag values---*/
+#define TURNING 1
+#define STRAIGHT 0
+/* ---Turning_Collision flag values---*/
+#define TURNING_COLLISION_WARNING 1
+#define TURNING_COLLISION_NONE 0
+
 
 typedef struct
 {

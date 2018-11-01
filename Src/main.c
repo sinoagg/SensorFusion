@@ -39,8 +39,8 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
-uint8_t Turning_Collision = 0;
-uint8_t Turning_Flag = 0;
+uint8_t Turning_Collision = TURNING_COLLISION_NONE;
+uint8_t Turning_Flag = STRAIGHT;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -94,6 +94,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	delay_init(100);
 
+	//delay_ms(2000);
 	WTN6_Broadcast(BELL_LOUDEST);
 	delay_ms(100);
 	WTN6_Broadcast(BELL_ADAS_START);
@@ -241,7 +242,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 				{
 					VehicleSpeed_g = VehicleCANRxBuf[7]; 		//vehicle speed in hex,km/h
 					#if RADAR_TYPE==ARS408
-						ARS_SendVehicleSpeed(&hcan3, VehicleSpeed_g);	//send VehicleSpeed to Radar
+						ARS_SendVehicleSpeed(&hcan3, vehicle.speed);	//send VehicleSpeed to Radar
 					#elif RADAR_TYPE==EMRR
 					#endif
 				}
@@ -251,6 +252,9 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 				if(KINGLONG_VEHICLE_SPEED_ADDR == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
 				{
 					vehicle.speed = VehicleCANRxBuf[7]; 		//vehicle speed in hex,km/h
+					#if RADAR_TYPE == ARS408
+					ARS_SendVehicleSpeed(&hcan3, vehicle.speed);	//send vehicle speed to Radar
+					#endif
 				}
 				else if(VEHICLE_SWITCH_ADDR == VehicleCANRxHeader.ExtId)
 				{
@@ -263,36 +267,49 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 				}
 				else if(VEHICLE_ANGLE_ADDR == VehicleCANRxHeader.ExtId)
 				{
-					vehicle.tw_angle  = ((uint16_t)VehicleCANRxBuf[0])<<8 | VehicleCANRxBuf[1];
-					vehicle.tw_circle = VehicleCANRxBuf[2] & 0x3F;
+					uint16_t TW_angle, YawRate, LatAcc;
+					TW_angle = ((uint16_t)VehicleCANRxBuf[1])<<8 | VehicleCANRxBuf[0];
+					vehicle.tw_angle  = ((float)(TW_angle))/1024 - 31.374f;
+					
+					vehicle.tw_circle = (VehicleCANRxBuf[2] & 0x3F) - 32;
 					vehicle.tw_type = (VehicleCANRxBuf[2]>>6) & 0x3;
-					vehicle.yawRate = ((uint16_t)VehicleCANRxBuf[3])<<8 | VehicleCANRxBuf[4];
-					vehicle.latAcc  = ((uint16_t)VehicleCANRxBuf[5])<<8 | VehicleCANRxBuf[6];
-					vehicle.longAcc = VehicleCANRxBuf[7];
+					
+					YawRate = ((uint16_t)VehicleCANRxBuf[4])<<8 | VehicleCANRxBuf[3];
+					vehicle.yawRate = ((float)(YawRate))/8192 - 3.92f;
+					
+					LatAcc = ((uint16_t)VehicleCANRxBuf[5])<<8 | VehicleCANRxBuf[6];
+					vehicle.latAcc  = ((float)(LatAcc))/2048 - 15.687f;
+					
+					vehicle.longAcc = (float)(VehicleCANRxBuf[7])*0.1f - 12.5f;
           //vehicle.tw_angle = (vehicle.tw_angle > YAWRATE_LIMIT) ? YAWRATE_LIMIT : vehicle.tw_angle;
           //vehicle.tw_angle = (vehicle.tw_angle < -YAWRATE_LIMIT) ? -YAWRATE_LIMIT : vehicle.tw_angle;
+					
+					#if RADAR_TYPE == ARS408
+					ARS_SendVehicleYaw(&hcan3, vehicle.yawRate);	//send vehicle yawRate to Radar
+					#endif
+					
           #if RADAR_TYPE == ARS408
           if(vehicle.tw_angle > 5 || vehicle.tw_angle < -5)
           {
-            Turning_Flag = 1;
+            Turning_Flag = TURNING;
             Turning_Collision = ARS_CalcTurn(RadarGeneral, vehicle.tw_angle, vehicle.speed);
           }
           else
           {
-            Turning_Flag = 0;
-            Turning_Collision = 0;
+            Turning_Flag = STRAIGHT;
+            Turning_Collision = TURNING_COLLISION_NONE;
           }
         
           #elif RADAR_TYPE == EMRR
           if(vehicle.tw_angle > 5 || vehicle.tw_angle < -5)
           {
-            Turning_Flag = 1;
+            Turning_Flag = TURNING;
             Turning_Collision = EMRR_CalcTurn(&EMRRGeneral_Closet, vehicle.tw_angle, vehicle.speed);
           }
           else
           {
-            Turning_Flag = 0;
-            Turning_Collision = 0;
+            Turning_Flag = STRAIGHT;
+            Turning_Collision = TURNING_COLLISION_NONE;
           }
           #endif
     
