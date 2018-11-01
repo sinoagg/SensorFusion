@@ -339,7 +339,7 @@ void StartRadarCalcTask(void const *argument)
 		LED_RADAR_TOGGLE();
 		MinRangeLong_g = EMRRGeneral_Closet.trackRange; // - VehicleSpeed_g / 6;
 		VrelLong_g = EMRRGeneral_Closet.trackSpeed;
-		if (!Turning_Flag || (Turning_Flag && Turning_Collision))
+		//if (!Turning_Flag || (Turning_Flag && Turning_Collision))
 		{
 			if (MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g > 0 && VrelLong_g < 0)
 			{

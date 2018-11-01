@@ -289,7 +289,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 					#endif
 					
           #if RADAR_TYPE == ARS408
-          if(vehicle.tw_angle > 5 || vehicle.tw_angle < -5)
+          /*if(vehicle.tw_angle > 5 || vehicle.tw_angle < -5)
           {
             Turning_Flag = TURNING;
             Turning_Collision = ARS_CalcTurn(RadarGeneral, vehicle.tw_angle, vehicle.speed);
@@ -310,7 +310,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
           {
             Turning_Flag = STRAIGHT;
             Turning_Collision = TURNING_COLLISION_NONE;
-          }
+          }*/
           #endif
     
 				}
