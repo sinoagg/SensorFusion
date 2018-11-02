@@ -32,8 +32,8 @@
 #include "ARS408.h"
 #include "math.h"
 
-#define CONFIG_ARS408_RADAR 0
-#define CONFIG_ARS408_FILTER 0
+#define CONFIG_ARS408_RADAR 1
+#define CONFIG_ARS408_FILTER 1
 
 #define VEHICLE_CENTRE_LEN	10.0f
 #define VEHICLE_HALF_WIDTH	1.4f
@@ -194,8 +194,8 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_Size = (uint16_t)((102.375 - 0) / 0.025);
   FilterContent.FilterCfg_Min_ProbExists = 0x4;//99%~100%, 0x0: 0%, 0x1: 25%, 0x2: 50%
   FilterContent.FilterCfg_Max_ProbExists = 0x7;//0x3: 75%, 0x4: 90%, 0x5: 99%, 0x6: 99.9%, 0x7: 100%
-  FilterContent.FilterCfg_Min_Y = (uint16_t)((-1.5 + 409.5) / 0.2);     //-1.5~1.5m, offset -409.5, Res 0.2
-  FilterContent.FilterCfg_Max_Y = (uint16_t)((1.5 + 409.5) / 0.2);
+  FilterContent.FilterCfg_Min_Y = (uint16_t)((-3.5 + 409.5) / 0.2);     //-3.5~3.5m, offset -409.5, Res 0.2
+  FilterContent.FilterCfg_Max_Y = (uint16_t)((3.5 + 409.5) / 0.2);
   FilterContent.FilterCfg_Min_X = (uint16_t)((0 + 500) / 0.2);          //0~200m, offset -500, Res 0.2
   FilterContent.FilterCfg_Max_X = (uint16_t)((200 + 500) / 0.2);
   FilterContent.FilterCfg_Min_VYRightLeft = (uint16_t)((0 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315

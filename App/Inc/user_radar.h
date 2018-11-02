@@ -8,6 +8,8 @@ typedef struct
 {
 	float VrelLong;
 	float MinRangeLong;
+	float VrelLat;
+	float MinRangeLat;
 }ObjectTypeDef;
 
 #if RADAR_TYPE == ARS408

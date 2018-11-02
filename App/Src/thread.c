@@ -31,6 +31,7 @@
 
 /* USER CODE BEGIN Variables */
 #define YAWRATE_LIMIT 327.68f
+#define LANE_TIME_THRESHOLD 5.0f
 
 osThreadId defaultTaskHandle;
 osThreadId soundWarningHandle;
@@ -213,6 +214,7 @@ void StartRadarCalcTask(void const *argument)
 	for (;;)
 	{
 		uint8_t AEBS_Deal = 0;
+		uint8_t AEBS_Lane = 0;
 		osSemaphoreWait(bSemRadarCalcSigHandle, osWaitForever);
 
 		MW_RadarObjStatus RadarObjStatus;
@@ -252,17 +254,32 @@ void StartRadarCalcTask(void const *argument)
 
 					//step2.解析大陆雷达数据
 					ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral); //get closet obj data
-					uint16_t MinRange = RadarGeneral[0].Obj_DistLong;
-					uint32_t relSpeed = RadarGeneral[0].Obj_VrelLong;
+					uint16_t MinRangeLong = RadarGeneral[0].Obj_DistLong;
+					uint16_t MinRangeLat  = RadarGeneral[0].Obj_DistLat;
+					uint32_t relSpeedLong = RadarGeneral[0].Obj_VrelLong;
+					uint32_t relSpeedLat  = RadarGeneral[0].Obj_VrelLat;
+					float Lane_Time = 0.0;
 
-					//if(!Turning_Flag || (Turning_Flag && Turning_Collision))
+					RadarObject.MinRangeLat  = 0.2 * MinRangeLat  - 204.6;	//get real range(latitude)
+					RadarObject.VrelLat = 0.25 * relSpeedLat - 64;		//get real relative latitude  speed
+					Lane_Time = RadarObject.MinRangeLat / RadarObject.VrelLat;
+					
+					
+					if(RadarObject.MinRangeLat < LANEWIDTH && RadarObject.MinRangeLat > -LANEWIDTH)
+						AEBS_Lane = 1;
+					else
+						AEBS_Lane = 0;
+					//在本车道内 或 在旁边车道且在靠近本车道
+					if(AEBS_Lane || (!AEBS_Lane && (Lane_Time < LANE_TIME_THRESHOLD)))
 					{
-						if ((0.2 * MinRange - 500) < LIMIT_RANGE && MinRange != 0) //calculate when dist is near enough
+						if ((0.2 * MinRangeLong - 500) < LIMIT_RANGE && MinRangeLong != 0) //calculate when dist is near enough
 						{
-							RadarObject.VrelLong = 0.25 * relSpeed - 128; //get real relative speed
+							RadarObject.VrelLong = 0.25 * relSpeedLong - 128; //get real relative longitude speed
+							
 							if (RadarObject.VrelLong < 0)
 							{
-								RadarObject.MinRangeLong = 0.2 * MinRange - 500; //get real range(longitude)
+								RadarObject.MinRangeLong = 0.2 * MinRangeLong - 500; 		//get real range(longitude)
+
 								if (RadarObject.MinRangeLong > 0)
 								{
 									AEBS_Deal = 1;																													 //处理了报警
