@@ -14,6 +14,29 @@ CAN_RxHeaderTypeDef RadarCAN_RxHeader;
 CAN_TxHeaderTypeDef AEB_CAN_TxHeader = {0, VEHICLE_AEBS_ADDR, CAN_ID_EXT, CAN_RTR_DATA, 8, DISABLE};
 CAN_TxHeaderTypeDef DBC_CAN_TxHeader = {DBC_ADDR, 0, CAN_ID_EXT, CAN_RTR_DATA, 8, DISABLE};
 
+uint8_t Gyro_CAN_Init(CAN_HandleTypeDef *hcan)
+{
+	//config CAN filter to receive Gyro
+	//ID_HIGH,\
+	ID_LOW,\
+	MASK_HIGH,\
+	MASK_LOW,\
+	FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
+	CAN_FilterTypeDef GyroCANFilter = {
+		(GYRO_ADDR>>13) & 0xFFFF,\
+		((GYRO_ADDR & 0xFFFF) <<3) | 0x4,\
+		0xFF<<3 | 0xF,\
+		0xFF00<<3, \
+    CAN_FILTER_FIFO0, 10, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14
+	};
+	HAL_CAN_ConfigFilter(hcan, &GyroCANFilter);
+
+	HAL_CAN_Start(hcan);
+	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+
+  return 0;
+}
+
 uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 {
 	//config CAN3 filter to receive Vehicle Speed

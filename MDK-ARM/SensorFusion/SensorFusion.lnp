@@ -7,6 +7,7 @@
 "sensorfusion\ars408.o"
 "sensorfusion\cmd.o"
 "sensorfusion\emrr.o"
+"sensorfusion\mpu6050.o"
 "sensorfusion\stm32f4xx_it.o"
 "sensorfusion\stm32f4xx_hal_timebase_tim.o"
 "sensorfusion\stm32f4xx_hal_msp.o"

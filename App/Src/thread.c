@@ -30,7 +30,6 @@
 /* Variables -----------------------------------------------------------------*/
 
 /* USER CODE BEGIN Variables */
-#define YAWRATE_LIMIT 327.68f
 #define LANE_TIME_THRESHOLD 5.0f
 
 osThreadId defaultTaskHandle;

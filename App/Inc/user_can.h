@@ -10,6 +10,7 @@
 extern uint8_t AEB_CAN_TxReady;
 extern uint8_t VehicleCANRxBuf[];
 extern uint8_t RadarCANRxBuf[];
+extern uint8_t YawCANRxBuf[];
 extern uint8_t AEB_CAN_TxBuf[];
 extern uint32_t AEB_CAN_TxMailBox;
 extern uint32_t DBC_CAN_TxMailBox;

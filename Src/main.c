@@ -28,6 +28,7 @@
 #include "user_radar.h"
 #include "user_adas.h"
 #include "thread.h"
+#include "MPU6050.h"
 
 /* Defines -------------------------------------------------------------------*/
 
@@ -191,6 +192,25 @@ void SystemClock_Config(void)
  */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {  	
+  if(hcan->Instance == hcan1.Instance)
+  {
+    HAL_CAN_GetRxMessage(&hcan1, CAN_FILTER_FIFO0, &VehicleCANRxHeader, YawCANRxBuf);
+		//Gyroscope
+    if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
+		{
+			//start gyro semaphore
+			#if GYRO_TYPE == MPU6050
+      vehicle.yawRate =  MPU_GetYawRate(YawCANRxBuf);
+			vehicle.longAcc = MPU_GetXAcc(YawCANRxBuf);
+			LED_GYRO_TOGGLE();
+			
+			#if RADAR_TYPE == ARS408
+			ARS_SendVehicleYaw(&hcan3, vehicle.yawRate);	//send vehicle yawRate to Radar
+			#endif
+			
+			#endif
+		}
+  }
 	if(hcan->Instance == hcan3.Instance)
 	{		
 		static uint8_t i=0;

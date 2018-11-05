@@ -9,7 +9,10 @@
 
 #include "stm32f4xx_hal.h"
 
+#define	YAWRATE_LIMIT 327.68f
+
 float MPU_GetYawRate(uint8_t *pRxBuf);
 float MPU_GetXAcc(uint8_t *pRxBuf);
+
 
 #endif

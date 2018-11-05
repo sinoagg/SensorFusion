@@ -23,6 +23,13 @@ float MPU_GetYawRate(uint8_t *pRxBuf)
 	if(YawRate > 2000)
 		YawRate -= 4000;
 	
+	if(YawRate < 0)		//clockwise
+		{
+			YawRate = (YawRate < -YAWRATE_LIMIT) ? -YAWRATE_LIMIT : YawRate;
+		}
+		else
+			YawRate = (YawRate > YAWRATE_LIMIT) ? YAWRATE_LIMIT: YawRate;
+	
 	return YawRate;
 }
 

@@ -18,6 +18,8 @@
 #define BYD_VEHICLE_SPEED_ADDR	0x18FEF100
 #define BENZ_VEHICLE_SPEED_ADDR 0x18FE6C00
 
+#define GYRO_ADDR 0x18FEE0D8
+
 /*-------- define vehicle model ---------*/
 #define VEHICLE_MODEL KINGLONG
 
@@ -33,6 +35,10 @@
 #elif VEHICLE_MODEL == BENZ
 	#define VEHICLE_SPEED_ADDR	BENZ_VEHICLE_SPEED_ADDR
 #endif
+
+#define GYRO_VEHICLE
+#define GYRO_MPU6050 1
+#define GYRO_TYPE GYRO_MPU6050
 
 typedef struct
 {
