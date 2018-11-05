@@ -187,6 +187,7 @@ void SystemClock_Config(void)
 /** 
  * @brief  CAN Callback function
  * @note   can3 for Radar
+ *				 can1 for Gyroscope
  * @param  *hcan: 
  * @retval None
  */
@@ -200,13 +201,13 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		{
 			//start gyro semaphore
 			#if GYRO_TYPE == MPU6050
-      vehicle.yawRate =  MPU_GetYawRate(YawCANRxBuf);
+      vehicle.yawRate = MPU_GetYawRate(YawCANRxBuf);
 			vehicle.longAcc = MPU_GetXAcc(YawCANRxBuf);
 			LED_GYRO_TOGGLE();
 			
-			#if RADAR_TYPE == ARS408
-			ARS_SendVehicleYaw(&hcan3, vehicle.yawRate);	//send vehicle yawRate to Radar
-			#endif
+				#if RADAR_TYPE == ARS408
+				ARS_SendVehicleYaw(&hcan3, vehicle.yawRate);	//send vehicle yawRate to Radar
+				#endif
 			
 			#endif
 		}
