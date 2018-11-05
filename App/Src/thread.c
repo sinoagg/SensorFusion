@@ -214,7 +214,7 @@ void StartRadarCalcTask(void const *argument)
 	for (;;)
 	{
 		uint8_t AEBS_Deal = 0;
-		uint8_t AEBS_Lane = 0;
+//		uint8_t AEBS_Lane = 0;
 		osSemaphoreWait(bSemRadarCalcSigHandle, osWaitForever);
 
 		MW_RadarObjStatus RadarObjStatus;
@@ -255,22 +255,23 @@ void StartRadarCalcTask(void const *argument)
 					//step2.解析大陆雷达数据
 					ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral); //get closet obj data
 					uint16_t MinRangeLong = RadarGeneral[0].Obj_DistLong;
-					uint16_t MinRangeLat  = RadarGeneral[0].Obj_DistLat;
+//					uint16_t MinRangeLat  = RadarGeneral[0].Obj_DistLat;
 					uint32_t relSpeedLong = RadarGeneral[0].Obj_VrelLong;
-					uint32_t relSpeedLat  = RadarGeneral[0].Obj_VrelLat;
-					float Lane_Time = 0.0;
+//					uint32_t relSpeedLat  = RadarGeneral[0].Obj_VrelLat;
+//					float Lane_Time = 0.0;
 
-					RadarObject.MinRangeLat  = 0.2 * MinRangeLat  - 204.6;	//get real range(latitude)
-					RadarObject.VrelLat = 0.25 * relSpeedLat - 64;		//get real relative latitude  speed
-					Lane_Time = RadarObject.MinRangeLat / RadarObject.VrelLat;
-					
-					
-					if(RadarObject.MinRangeLat < LANEWIDTH && RadarObject.MinRangeLat > -LANEWIDTH)
-						AEBS_Lane = 1;
-					else
-						AEBS_Lane = 0;
+//					RadarObject.MinRangeLat  = 0.2 * MinRangeLat  - 204.6;	//get real range(latitude)
+//					RadarObject.VrelLat = 0.25 * relSpeedLat - 64;		//get real relative latitude  speed
+//					if(RadarObject.VrelLat != 0)
+//						Lane_Time = - RadarObject.MinRangeLat / RadarObject.VrelLat;
+//					
+//					
+//					if(RadarObject.MinRangeLat < LANEWIDTH && RadarObject.MinRangeLat > -LANEWIDTH)
+//						AEBS_Lane = 1;
+//					else
+//						AEBS_Lane = 0;
 					//在本车道内 或 在旁边车道且在靠近本车道
-					if(AEBS_Lane || (!AEBS_Lane && (Lane_Time < LANE_TIME_THRESHOLD)))
+					//if(AEBS_Lane || (!AEBS_Lane && (Lane_Time < LANE_TIME_THRESHOLD) && (Lane_Time > 0)))
 					{
 						if ((0.2 * MinRangeLong - 500) < LIMIT_RANGE && MinRangeLong != 0) //calculate when dist is near enough
 						{

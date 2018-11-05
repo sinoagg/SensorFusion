@@ -32,8 +32,8 @@
 #include "ARS408.h"
 #include "math.h"
 
-#define CONFIG_ARS408_RADAR 1
-#define CONFIG_ARS408_FILTER 1
+#define CONFIG_ARS408_RADAR 0
+#define CONFIG_ARS408_FILTER 0
 
 #define VEHICLE_CENTRE_LEN	10.0f
 #define VEHICLE_HALF_WIDTH	1.4f
@@ -52,7 +52,7 @@ MW_RadarSpeed RadarSpeed;
 /** 
  * @brief  ARS408 Radar Init(can & filter config, Radar&filter config)
  * @note   only using obj data(filtered by can)
- * @param  *hcan: can2(500kbps)
+ * @param  *hcan: can3(500kbps)
  * @retval 0 for ok
  */
 uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
@@ -64,13 +64,13 @@ uint8_t ARS_Init(CAN_HandleTypeDef *hcan)
 	CAN_FilterTypeDef MW_RadarCANFilter = {
 		OBJ_GENERAL_ADDR<<5, 0,\
 		0xEFE<<5, 0,\
-		CAN_FILTER_FIFO0, 13, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,13};		//0x60B & 0x60A at the same time
+		CAN_FILTER_FIFO0, 1, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};		//0x60B & 0x60A at the same time
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
 		
 	/*CAN_FilterTypeDef MW_RadarCANFilter1 = {
 		0x201<<5, 0,\
 		0xEFE<<5, 0,\
-		CAN_FILTER_FIFO0, 14, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,15};		//0x60B & 0x60A at the same time
+		CAN_FILTER_FIFO0, 2, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14};
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter1);*/
 	
 	HAL_CAN_Start(hcan);
@@ -194,8 +194,8 @@ uint8_t ARS_ConfigFilter(CAN_HandleTypeDef *hcan)
   FilterContent.FilterCfg_Max_Size = (uint16_t)((102.375 - 0) / 0.025);
   FilterContent.FilterCfg_Min_ProbExists = 0x4;//99%~100%, 0x0: 0%, 0x1: 25%, 0x2: 50%
   FilterContent.FilterCfg_Max_ProbExists = 0x7;//0x3: 75%, 0x4: 90%, 0x5: 99%, 0x6: 99.9%, 0x7: 100%
-  FilterContent.FilterCfg_Min_Y = (uint16_t)((-3.5 + 409.5) / 0.2);     //-3.5~3.5m, offset -409.5, Res 0.2
-  FilterContent.FilterCfg_Max_Y = (uint16_t)((3.5 + 409.5) / 0.2);
+  FilterContent.FilterCfg_Min_Y = (uint16_t)((-1.5 + 409.5) / 0.2);     //-3.5~3.5m, offset -409.5, Res 0.2
+  FilterContent.FilterCfg_Max_Y = (uint16_t)((1.5 + 409.5) / 0.2);
   FilterContent.FilterCfg_Min_X = (uint16_t)((0 + 500) / 0.2);          //0~200m, offset -500, Res 0.2
   FilterContent.FilterCfg_Max_X = (uint16_t)((200 + 500) / 0.2);
   FilterContent.FilterCfg_Min_VYRightLeft = (uint16_t)((0 - 0) / 0.0315);//0.1~100m/s, offset 0, Res 0.0315

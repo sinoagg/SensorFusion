@@ -241,15 +241,23 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 				if(BENZ_VEHICLE_SPEED_ADDR == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
 				{
 					VehicleSpeed_g = VehicleCANRxBuf[7]; 		//vehicle speed in hex,km/h
-					#if RADAR_TYPE==ARS408
-						ARS_SendVehicleSpeed(&hcan3, vehicle.speed);	//send VehicleSpeed to Radar
-					#elif RADAR_TYPE==EMRR
+					#if RADAR_TYPE == ARS408
+					ARS_SendVehicleSpeed(&hcan3, vehicle.speed);	//send VehicleSpeed to Radar
+					#elif RADAR_TYPE == EMRR
 					#endif
 				}
 			#elif VEHICLE_MODEL == BYD
 			#elif VEHICLE_MODEL == YUTONG
+				if(0xD1 == VehicleCANRxBuf[0] && 0xD1 == VehicleCANRxBuf[2])
+				{
+					vehicle.speed = VehicleCANRxBuf[1];			//vehicle speed in hex,km/h
+					#if RADAR_TYPE == ARS408
+					ARS_SendVehicleSpeed(&hcan3, vehicle.speed);	//send VehicleSpeed to Radar
+					#elif RADAR_TYPE == EMRR
+					#endif
+				}
 		  #elif VEHICLE_MODEL == KINGLONG
-				if(KINGLONG_VEHICLE_SPEED_ADDR == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
+				if(VEHICLE_SPEED_ADDR == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
 				{
 					vehicle.speed = VehicleCANRxBuf[7]; 		//vehicle speed in hex,km/h
 					#if RADAR_TYPE == ARS408
@@ -281,15 +289,13 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 					vehicle.latAcc  = ((float)(LatAcc))/2048 - 15.687f;
 					
 					vehicle.longAcc = (float)(VehicleCANRxBuf[7])*0.1f - 12.5f;
-          //vehicle.tw_angle = (vehicle.tw_angle > YAWRATE_LIMIT) ? YAWRATE_LIMIT : vehicle.tw_angle;
-          //vehicle.tw_angle = (vehicle.tw_angle < -YAWRATE_LIMIT) ? -YAWRATE_LIMIT : vehicle.tw_angle;
 					
 					#if RADAR_TYPE == ARS408
 					ARS_SendVehicleYaw(&hcan3, vehicle.yawRate);	//send vehicle yawRate to Radar
 					#endif
 					
-          #if RADAR_TYPE == ARS408
-          /*if(vehicle.tw_angle > 5 || vehicle.tw_angle < -5)
+          /*#if RADAR_TYPE == ARS408
+          if(vehicle.tw_angle > 5 || vehicle.tw_angle < -5)
           {
             Turning_Flag = TURNING;
             Turning_Collision = ARS_CalcTurn(RadarGeneral, vehicle.tw_angle, vehicle.speed);
@@ -310,8 +316,9 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
           {
             Turning_Flag = STRAIGHT;
             Turning_Collision = TURNING_COLLISION_NONE;
-          }*/
+          }
           #endif
+					*/
     
 				}
 			#endif

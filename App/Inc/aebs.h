@@ -12,7 +12,7 @@
 
 #define LOW_WARNING_TIME 4.4f
 #define MID_WARNING_TIME 3.8f
-#define HIGH_WARNING_TIME 3.0f
+#define HIGH_WARNING_TIME 3.5f
 
 #define ADAS_COMM 1
 
@@ -22,12 +22,6 @@
 #define ARS408 1
 #define EMRR 0
 #define RADAR_TYPE ARS408
-
-#if RADAR_TYPE == ARS408
-	#define RADAR_OFFSET 0.4f
-#elif RADAR_TYPE == EMRR
-	#define RADAR_OFFSET 0.0f
-#endif
 
 #define LANEWIDTH 1.5f
 #define MAX_DECELARATION 0.4 * 9.8f
