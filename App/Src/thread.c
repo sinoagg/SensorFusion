@@ -264,7 +264,6 @@ void StartRadarCalcTask(void const *argument)
 					if(RadarObject.VrelLat != 0)
 						Lane_Time = - RadarObject.MinRangeLat / RadarObject.VrelLat;
 					
-					
 					if(RadarObject.MinRangeLat < LANEWIDTH && RadarObject.MinRangeLat > -LANEWIDTH)
 						AEBS_Lane = 1;
 					else
@@ -272,74 +271,50 @@ void StartRadarCalcTask(void const *argument)
 					//在本车道内 或 在旁边车道且在靠近本车道
 					if(AEBS_Lane || (!AEBS_Lane && (Lane_Time < LANE_TIME_THRESHOLD) && (Lane_Time > 0)))
 					{
-						if ((0.2 * MinRangeLong - 500) < LIMIT_RANGE && MinRangeLong != 0) //calculate when dist is near enough
+						RadarObject.MinRangeLong = 0.2 * MinRangeLong - 500; 		//get real range(longitude)
+						if ((RadarObject.MinRangeLong) < LIMIT_RANGE && (RadarObject.MinRangeLong > 0) && MinRangeLong != 0) //calculate when dist is near enough
 						{
 							RadarObject.VrelLong = 0.25 * relSpeedLong - 128; //get real relative longitude speed
-							
 							if (RadarObject.VrelLong < 0)
 							{
-								RadarObject.MinRangeLong = 0.2 * MinRangeLong - 500; 		//get real range(longitude)
-
-								if (RadarObject.MinRangeLong > 0)
+								AEBS_Deal = 1; //处理了报警
+								TimetoCrash_g = -(float)RadarObject.MinRangeLong / RadarObject.VrelLong; //relative Velocity is minus
+								if (TimetoCrash_g < HIGH_WARNING_TIME)
 								{
-									AEBS_Deal = 1;																													 //处理了报警
-									TimetoCrash_g = -(float)RadarObject.MinRangeLong / RadarObject.VrelLong; //relative Velocity is minus
-									if (TimetoCrash_g < HIGH_WARNING_TIME)
+									CrashWarningLv = WARNING_HIGH;
+									#if ADAS_COMM
+									if (ADAS_dev.crash_level > 0)
+									#endif
 									{
-										CrashWarningLv = WARNING_HIGH;
-										#if ADAS_COMM
-										if (ADAS_dev.crash_level > 0)
-										#endif
-										{
-											StartBuzzer(WARNING_HIGH);
-											EnableAEBS(TimetoCrash_g, WARNING_HIGH);
-										}
-									}
-									else if (TimetoCrash_g < MID_WARNING_TIME)
-									{
-										CrashWarningLv = WARNING_MID;
-										#if ADAS_COMM
-										if (ADAS_dev.crash_level > 0)
-										#endif
-										{
-											StartBuzzer(WARNING_MID);
-											EnableAEBS(TimetoCrash_g, WARNING_MID);
-										}
-									}
-									else if (TimetoCrash_g < LOW_WARNING_TIME)
-									{
-										CrashWarningLv = WARNING_LOW;
-										#if ADAS_COMM
-										if (ADAS_dev.crash_level > 0)
-										#endif
-										{
-											StartBuzzer(WARNING_LOW);
-											DisableAEBS(&vAEBS_Status);
-										}
-									}
-									else
-									{
-										AEBS_Deal = 0;
+										StartBuzzer(WARNING_HIGH);
+										EnableAEBS(TimetoCrash_g, WARNING_HIGH);
 									}
 								}
-								else
-									AEBS_Deal = 0;
+								else if (TimetoCrash_g < MID_WARNING_TIME)
+								{
+									CrashWarningLv = WARNING_MID;
+									#if ADAS_COMM
+									if (ADAS_dev.crash_level > 0)
+									#endif
+									{
+										StartBuzzer(WARNING_MID);
+										EnableAEBS(TimetoCrash_g, WARNING_MID);
+									}
+								}
+								else if (TimetoCrash_g < LOW_WARNING_TIME)
+								{
+									CrashWarningLv = WARNING_LOW;
+									#if ADAS_COMM
+									if (ADAS_dev.crash_level > 0)
+									#endif
+									{
+										StartBuzzer(WARNING_LOW);
+										DisableAEBS(&vAEBS_Status);
+									}
+								}
 							}
-							else
-								AEBS_Deal = 0;
 						}
-					else
-						AEBS_Deal = 0;
 					}
-				}
-				if (AEBS_Deal == 0) //没有处理报警
-				{
-					CrashWarningLv = WARNING_NONE;
-					TimetoCrash_g = 20;							//适配CAN线
-					RadarObject.MinRangeLong = 255; //适配CAN线
-					RadarObject.VrelLong = 0;
-					StopBuzzer(&vAEBS_Status);
-					DisableAEBS(&vAEBS_Status);
 				}
 			}
 			if (AEBS_Deal == 0) //没有处理报警
