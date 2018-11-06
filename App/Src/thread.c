@@ -33,7 +33,7 @@
 #define LANE_TIME_THRESHOLD 5.0f
 
 osThreadId defaultTaskHandle;
-osThreadId soundWarningHandle;
+osThreadId PrepareCANDataHandle;
 osThreadId radarCalcHandle;
 #ifdef ADAS_COMM
 osThreadId ADAS_CommTaskHandle;
@@ -49,7 +49,9 @@ extern uint8_t Turning_Flag;
 
 /* Function prototypes -------------------------------------------------------*/
 void StartDefaultTask(void const *argument);	 //always running
+#ifdef ADAS_COMM
 void StartADAS_CommTask(void const *argument); //always running
+#endif
 void StartPrepareCANDataTask(void const *argument);
 void StartRadarCalcTask(void const *argument);
 
@@ -104,7 +106,7 @@ void MX_FREERTOS_Init(void)
 #endif
 	/* definition and creation of PrepareCANData */
 	osThreadDef(PrepareCANData, StartPrepareCANDataTask, osPriorityNormal, 0, 128);
-	soundWarningHandle = osThreadCreate(osThread(PrepareCANData), NULL);
+	PrepareCANDataHandle = osThreadCreate(osThread(PrepareCANData), NULL);
 
 	/* definition and creation of RadarCalc */
 	osThreadDef(RadarCalc, StartRadarCalcTask, osPriorityNormal, 0, 128);
@@ -161,7 +163,7 @@ void StartADAS_CommTask(void const *argument)
 		if (ADASRxComplete == 1)
 		{
 			ADASRxComplete = 0;
-			//DispADASData(ADASRxBuf, ADASDispBuf, MinRangeLong_g, VrelLong_g, TimetoCrash_g);//发送给显示器
+			//DispADASData(ADASRxBuf, ADASDispBuf, RadarObject.MinRangeLong, RadarObject.VrelLong, TimetoCrash_g);//发送给显示器
 			//HAL_UART_Transmit(&huart2, ADASDispBuf, 32, 100);//transmit ADAS data to screen
 			CalADASData(&ADAS_dev, ADASRxBuf);
 			LED_ADAS_TOGGLE();
@@ -212,12 +214,12 @@ void StartRadarCalcTask(void const *argument)
 	/* Infinite loop */
 	for (;;)
 	{
-		uint8_t AEBS_Deal = 0;
-		uint8_t AEBS_Lane = 0;
 		osSemaphoreWait(bSemRadarCalcSigHandle, osWaitForever);
 
-		MW_RadarObjStatus RadarObjStatus;
 #if RADAR_TYPE == ARS408
+		uint8_t AEBS_Deal = 0;
+		uint8_t AEBS_Lane = 0;
+		MW_RadarObjStatus RadarObjStatus;
 		if (RadarCAN_RxHeader.StdId == 0x60A) //read all messages before 60B, start calculate
 		{
 			minRadarDistFlag = 1; //下一个60B传回是距离最近的目标
@@ -327,15 +329,16 @@ void StartRadarCalcTask(void const *argument)
 				DisableAEBS(&vAEBS_Status);
 			}
 			osSemaphoreRelease(bSemPrepareCANDataSigHandle); //发送雷达准备数据信号量
+		}
 #elif RADAR_TYPE == EMRR
 		LED_RADAR_TOGGLE();
-		MinRangeLong_g = EMRRGeneral_Closet.trackRange; // - VehicleSpeed_g / 6;
-		VrelLong_g = EMRRGeneral_Closet.trackSpeed;
+		RadarObject.MinRangeLong = EMRRGeneral_Closet.trackRange; 
+		RadarObject.VrelLong = EMRRGeneral_Closet.trackSpeed;
 		//if (!Turning_Flag || (Turning_Flag && Turning_Collision))
 		{
-			if (MinRangeLong_g < LIMIT_RANGE && MinRangeLong_g > 0 && VrelLong_g < 0)
+			if (RadarObject.MinRangeLong < LIMIT_RANGE && RadarObject.MinRangeLong > 0 && RadarObject.VrelLong < 0)
 			{
-				TimetoCrash_g = -MinRangeLong_g / VrelLong_g;
+				TimetoCrash_g = -RadarObject.MinRangeLong / RadarObject.VrelLong;
 				if (TimetoCrash_g < HIGH_WARNING_TIME)
 				{
 					CrashWarningLv = WARNING_HIGH;
@@ -351,7 +354,7 @@ void StartRadarCalcTask(void const *argument)
 			}
 		}
 #endif
-		}
+
 		osDelay(10);
 	}
 	/* USER CODE END StartRadarCalcTask */

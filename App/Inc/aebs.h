@@ -21,6 +21,7 @@
 
 #define ARS408 1
 #define EMRR 0
+/*------Radar type------*/
 #define RADAR_TYPE ARS408
 
 #define LANEWIDTH 1.5f

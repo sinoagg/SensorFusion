@@ -24,6 +24,7 @@
  * EMRR_CalcGyro(...): using gyro data to optimize collision warning
  */
 #include "EMRR.h"
+#include "user_radar.h"
 
 #define VEHICLE_CENTRE_LEN 9.5f
 #define VEHICLE_HALF_WIDTH 1.4f
@@ -58,15 +59,16 @@ uint8_t EMRR_Init(CAN_HandleTypeDef *hcan)
 /** 
  * @brief  Get Radar Obj & calculate(uint8_t array to float)
  * @note   data from CANRxBuf[] to RadarGeneral[]
+ * @param  *pCAN_RxHeader: 
  * @param  pCANRxBuf: CANRxBuf[8]
  * @param  *pRadarGeneral: RadarGeneral[64]
  * @retval None
  */
-void EMRR_GetRadarObjData(CAN_TxHeaderTypeDef *pDBC_CAN_TxHeader, uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral)
+void EMRR_GetRadarObjData(CAN_RxHeaderTypeDef *pCAN_RxHeader, uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral)
 {
 	uint16_t tempData;
 	//id
-	pRadarGeneral->trackId = pDBC_CAN_TxHeader->StdId - 0x4ff;
+	pRadarGeneral->trackId = pCAN_RxHeader->StdId - 0x4ff;
 	//range
 	pRadarGeneral->trackRange = (float)(*pCANRxBuf | ((*(pCANRxBuf + 1) & 0x7F) << 8)) * 0.01f;
 	//speed

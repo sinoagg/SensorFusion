@@ -16,8 +16,6 @@ typedef struct
 	#include "ARS408.h"
   extern MW_RadarObjStatus RadarObjStatus;
 	extern MW_RadarGeneral RadarGeneral[];
-	extern uint8_t MW_RadarRxComplete;
-	extern uint8_t CmdRxComplete;
 #elif RADAR_TYPE == EMRR
 	#include "EMRR.h"
   extern EMRR_RadarGeneral aEMRRGeneral[];

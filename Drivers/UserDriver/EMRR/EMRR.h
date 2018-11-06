@@ -35,7 +35,7 @@ typedef struct
 } EMRR_RadarGeneral;
 
 uint8_t EMRR_Init(CAN_HandleTypeDef *hcan);
-void EMRR_GetRadarObjData(CAN_TxHeaderTypeDef *pDBC_CAN_TxHeader, uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral);
+void EMRR_GetRadarObjData(CAN_RxHeaderTypeDef *pCAN_RxHeader, uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral);
 void EMRR_CalcRaderObjCloset(uint8_t *pCANRxBuf, EMRR_RadarGeneral *pRadarGeneral, EMRR_RadarGeneral *pRadarGeneral_closet);
 uint8_t EMRR_CalcTurn(EMRR_RadarGeneral *pRadargGeneral_Closet, float YawRate, float VehicleSpeed);
 
