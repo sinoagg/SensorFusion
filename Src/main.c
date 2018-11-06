@@ -264,7 +264,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			#if VEHICLE_MODEL == DONGFENG
 				if(VEHICLE_SPEED_ADDR == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
 				{
-					vehicle.speed = VehicleCANRxBuf[0]; 		//vehicle speed in hex,km/h
+					vehicle.speed = VehicleCANRxBuf[2]; 		//vehicle speed in hex,km/h
 					#if RADAR_TYPE == ARS408
 					ARS_SendVehicleSpeed(&hcan3, vehicle.speed);	//send VehicleSpeed to Radar
 					#elif RADAR_TYPE == EMRR

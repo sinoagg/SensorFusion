@@ -9,7 +9,7 @@
 #define BENZ 3
 #define DONGFENG 4
 
-#define DONGFENG_VEHICLE_SPEED_ADDR		0x18FEBF0B	//3.1.4 EBC2, wheel speed(from EBS)
+#define DONGFENG_VEHICLE_SPEED_ADDR		0x18FEF127	//3.1.11 CCVS1, wheel based vehicle speed, 00engine controller;17instument cluster;27management computer
 #define DONGFENG_VEHICLE_ANGLE_ADDR		0x18F0090B	//from EBS, or 0x18F0093E from dynamic stability controller
 #define DONGFENG_VEHICLE_SWITHC_ADDR	0x0CFDCC00	//00 = xx, 3.1.17 OEL Operators External Light, 3.1.18 front Operator Wiper and Washer
 
