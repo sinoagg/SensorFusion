@@ -272,8 +272,8 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 				}
 				if(VEHICLE_SWITCH_ADDR == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
 				{
-					vehicleSwitch.right_turn = ((VehicleCANRxBuf[1] & 0x0F) == 0x02) ? 1 : 0;
-					vehicleSwitch.left_turn  = ((VehicleCANRxBuf[1] & 0x0F) == 0x01) ? 1 : 0;
+					vehicleSwitch.right_turn = ((VehicleCANRxBuf[1] & 0x0F) == 0x02);
+					vehicleSwitch.left_turn  = ((VehicleCANRxBuf[1] & 0x0F) == 0x01);
 				}
 				if(VEHICLE_ANGLE_ADDR == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
 				{

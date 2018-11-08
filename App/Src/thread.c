@@ -149,7 +149,9 @@ void StartDefaultTask(void const *argument)
 		if (AEB_CAN_TxReady == 1)
 		{
 			AEB_CAN_TxReady = 0;
+			#if VEHICLE_MODEL == KINGLONG
 			HAL_CAN_AddTxMessage(&hcan2, &AEB_CAN_TxHeader, AEB_CAN_TxBuf, &AEB_CAN_TxMailBox);
+			#endif
 		}
 		osDelay(20);
 	}

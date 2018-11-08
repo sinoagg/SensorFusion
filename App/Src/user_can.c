@@ -11,7 +11,9 @@ uint32_t AEB_CAN_TxMailBox = CAN_TX_MAILBOX0;
 uint32_t DBC_CAN_TxMailBox = CAN_TX_MAILBOX0;
 CAN_RxHeaderTypeDef VehicleCANRxHeader;
 CAN_RxHeaderTypeDef RadarCAN_RxHeader;
+#if VEHICLE_MODEL == KINGLONG
 CAN_TxHeaderTypeDef AEB_CAN_TxHeader = {0, VEHICLE_AEBS_ADDR, CAN_ID_EXT, CAN_RTR_DATA, 8, DISABLE};
+#endif
 CAN_TxHeaderTypeDef DBC_CAN_TxHeader = {DBC_ADDR, 0, CAN_ID_EXT, CAN_RTR_DATA, 8, DISABLE};
 
 uint8_t Gyro_CAN_Init(CAN_HandleTypeDef *hcan)

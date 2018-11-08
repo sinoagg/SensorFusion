@@ -57,11 +57,12 @@ typedef struct
 extern float TimetoCrash_g;
 extern uint8_t CrashWarningLv;
 extern AEBS_Status vAEBS_Status;
+extern CAN_HandleTypeDef hcan2;
 
 void StopBuzzer(AEBS_Status *pAEBS_Status);
 void StartBuzzer(uint8_t warningLv);
 void DisableAEBS(AEBS_Status *pAEBS_Status);
 void EnableAEBS(float ttc, uint8_t warningLv);
 uint8_t ValveCalc(DAC_HandleTypeDef *hdac, float ttc);
-
+uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc);
 #endif
