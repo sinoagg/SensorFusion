@@ -30,7 +30,6 @@
 /* Variables -----------------------------------------------------------------*/
 
 /* USER CODE BEGIN Variables */
-#define LANE_TIME_THRESHOLD 5.0f
 
 osThreadId defaultTaskHandle;
 osThreadId PrepareCANDataHandle;
@@ -38,13 +37,12 @@ osThreadId radarCalcHandle;
 #ifdef ADAS_COMM
 osThreadId ADAS_CommTaskHandle;
 #endif
+osThreadId CAN_XBR_TaskHandle;
+//osThreadId CAN_AEBS1_TaskHandle;
 
 osSemaphoreId bSemPrepareCANDataSigHandle;
 osSemaphoreId bSemRadarCalcSigHandle;
 
-
-extern uint8_t Turning_Collision;
-extern uint8_t Turning_Flag;
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
@@ -54,6 +52,8 @@ void StartADAS_CommTask(void const *argument); //always running
 #endif
 void StartPrepareCANDataTask(void const *argument);
 void StartRadarCalcTask(void const *argument);
+void StartCAN_XBR_TX_Task(void const *argument);
+//void StartCAN_AEBS1_TX_Task(void const *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -111,6 +111,12 @@ void MX_FREERTOS_Init(void)
 	/* definition and creation of RadarCalc */
 	osThreadDef(RadarCalc, StartRadarCalcTask, osPriorityNormal, 0, 128);
 	radarCalcHandle = osThreadCreate(osThread(RadarCalc), NULL);
+	
+	osThreadDef(CAN_XBR_TX, StartCAN_XBR_TX_Task, osPriorityNormal, 0, 128);
+	osThreadId CAN_XBR_TaskHandle = osThreadCreate(osThread(CAN_XBR_TX), NULL);
+	
+	//osThreadDef(CAN_AEBS1_TX, StartCAN_AEBS1_TX_Task, osPriorityNormal, 0, 128);
+	//osThreadId CAN_AEBS1_TaskHandle = osThreadCreate(osThread(CAN_AEBS1_TX), NULL);
 
 	/* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
@@ -143,6 +149,7 @@ void MX_FREERTOS_Init(void)
 void StartDefaultTask(void const *argument)
 {
 	/* USER CODE BEGIN StartDefaultTask */
+	
 	/* Infinite loop */
 	for (;;)
 	{
@@ -152,8 +159,19 @@ void StartDefaultTask(void const *argument)
 			#if VEHICLE_MODEL == KINGLONG
 			HAL_CAN_AddTxMessage(&hcan2, &AEB_CAN_TxHeader, AEB_CAN_TxBuf, &AEB_CAN_TxMailBox);
 			#endif
-		}
-		osDelay(20);
+//			if(XBR_Flag == 0)
+//			{
+//				XBR_Flag = 1;
+//				XBRCalc(&hcan2, 0.5f);
+//			}
+//			else
+//			{
+//				XBR_Flag = 0;
+//				XBRCalc(&hcan2, 3.5f);
+//			}
+				
+		}			
+		osDelay(50);
 	}
 	/* USER CODE END StartDefaultTask */
 }
@@ -190,7 +208,7 @@ void StartPrepareCANDataTask(void const *argument)
 	{
 		osSemaphoreWait(bSemPrepareCANDataSigHandle, osWaitForever);
 		//Step3.向整车CAN发AEBS报警数据准备
-		AEB_CAN_TxBuf[0] = CrashWarningLv; //5, 6, 7对应金龙车三个等级
+		AEB_CAN_TxBuf[0] = crashWarningLv; //5, 6, 7对应金龙车三个等级
 		if (TimetoCrash_g < 0)
 			tempTTC = 0;
 		else if (TimetoCrash_g > 9.9f)
@@ -209,6 +227,59 @@ void StartPrepareCANDataTask(void const *argument)
 	/* USER CODE END StartPrepareCANDataTask */
 }
 
+void StartCAN_XBR_TX_Task(void const *argument)
+{
+	for (;;)
+	{
+		#if ADAS_COMM
+		if (ADAS_dev.crash_level > 0)
+		#endif
+		{
+			if(crashWarningLv==WARNING_NONE || crashWarningLv==WARNING_LOW)
+			{
+				osDelay(200);
+				XBRCalc(&hcan2, HIGH_WARNING_TIME, 0);
+			}
+			else
+			{
+				osDelay(20);
+				XBRCalc(&hcan2, TimetoCrash_g, 1);
+			}
+		}
+		#if ADAS_COMM
+		else
+		{
+			osDelay(200);
+			XBRCalc(&hcan2, HIGH_WARNING_TIME, 0);
+		}
+		#endif
+	}
+}
+
+//void StartCAN_AEBS1_TX_Task(void const *argument)
+//{
+//	for (;;)
+//	{
+//		if(crashWarningLv==WARNING_NONE)
+//		{
+//			PrePareAEBS1Data(&hcan2, BRAKE_SYS_RDY, WARNING_NONE, OBJECT_NOT_DETECTED);
+//		}
+//		else if(crashWarningLv==WARNING_LOW)
+//		{
+//			PrePareAEBS1Data(&hcan2, COLLISION_WARNING_ACTIVE, WARNING_LOW, OBJECT_DETECTED);
+//		}
+//		else if(crashWarningLv==WARNING_MID)
+//		{
+//			PrePareAEBS1Data(&hcan2, BRAKE_SYS_ON, WARNING_MID, OBJECT_DETECTED);
+//		}
+//		else if(crashWarningLv==WARNING_HIGH)
+//		{
+//			PrePareAEBS1Data(&hcan2, BRAKE_SYS_EMER, WARNING_HIGH, OBJECT_DETECTED);
+//		}
+//		osDelay(50);
+//	}
+//}
+
 /* StartRadarCalcTask function */
 void StartRadarCalcTask(void const *argument)
 {
@@ -220,7 +291,7 @@ void StartRadarCalcTask(void const *argument)
 
 #if RADAR_TYPE == ARS408
 		uint8_t AEBS_Deal = 0;
-		uint8_t AEBS_Lane = 0;
+		uint8_t objectInLane = 0;
 		MW_RadarObjStatus RadarObjStatus;
 		if (RadarCAN_RxHeader.StdId == 0x60A) //read all messages before 60B, start calculate
 		{
@@ -228,7 +299,7 @@ void StartRadarCalcTask(void const *argument)
 			ARS_GetRadarObjStatus(RadarCANRxBuf, &RadarObjStatus);
 			if (RadarObjStatus.Obj_NofObjects == 0) //目标数量为0
 			{
-				CrashWarningLv = WARNING_NONE;
+				crashWarningLv = WARNING_NONE;
 				TimetoCrash_g = 20;							//适配CAN线
 				RadarObject.MinRangeLong = 255; //适配CAN线
 				StopBuzzer(&vAEBS_Status);
@@ -238,10 +309,8 @@ void StartRadarCalcTask(void const *argument)
 		else if (RadarCAN_RxHeader.StdId == 0x60B)
 		{
 			AEBS_Deal = 0;
-			if (vehicle.speed >= VEHICLE_SPEED_THRESHOLD) //车速报警阈值,如果此值太大，制动后期低速时不再制动
+			if (vehicle.speed >= VEHICLE_SPEED_THRESHOLD && minRadarDistFlag!=0) //车速报警阈值,如果此值太大，制动后期低速时不再制动 并且是最近目标
 			{
-				if (minRadarDistFlag) //如果是最近目标
-				{
 					minRadarDistFlag = 0; //最近目标状态位清零
 					//step1.发送到CAN1分析
 					uint16_t dist = 0;
@@ -261,19 +330,19 @@ void StartRadarCalcTask(void const *argument)
 					uint16_t MinRangeLat  = RadarGeneral[0].Obj_DistLat;
 					uint32_t relSpeedLong = RadarGeneral[0].Obj_VrelLong;
 					uint32_t relSpeedLat  = RadarGeneral[0].Obj_VrelLat;
-					float Lane_Time = 0.0;
+					float invadeLaneTime = 0.0;
 
 					RadarObject.MinRangeLat  = 0.2 * MinRangeLat  - 204.6;	//get real range(latitude)
-					RadarObject.VrelLat = 0.25 * relSpeedLat - 64;		//get real relative latitude  speed
+					RadarObject.VrelLat = 0.25 * relSpeedLat - 64;					//get real relative latitude  speed
 					if(RadarObject.VrelLat != 0)
-						Lane_Time = - RadarObject.MinRangeLat / RadarObject.VrelLat;
+						invadeLaneTime = - RadarObject.MinRangeLat / RadarObject.VrelLat;
 					
 					if(RadarObject.MinRangeLat < LANEWIDTH && RadarObject.MinRangeLat > -LANEWIDTH)
-						AEBS_Lane = 1;
+						objectInLane = 1;
 					else
-						AEBS_Lane = 0;
+						objectInLane = 0;
 					//在本车道内 或 在旁边车道且在靠近本车道
-					if(AEBS_Lane || (!AEBS_Lane && (Lane_Time < LANE_TIME_THRESHOLD) && (Lane_Time > 0)))
+					if(objectInLane || (!objectInLane && (invadeLaneTime < INVADE_LANE_TIME_THRESHOLD) && (invadeLaneTime > 0)))
 					{
 						RadarObject.MinRangeLong = 0.2 * MinRangeLong - 500; 		//get real range(longitude)
 						if ((RadarObject.MinRangeLong) < LIMIT_RANGE && (RadarObject.MinRangeLong > 0) && MinRangeLong != 0) //calculate when dist is near enough
@@ -281,49 +350,50 @@ void StartRadarCalcTask(void const *argument)
 							RadarObject.VrelLong = 0.25 * relSpeedLong - 128; //get real relative longitude speed
 							if (RadarObject.VrelLong < 0)
 							{
-								AEBS_Deal = 1; //处理了报警
 								TimetoCrash_g = -(float)RadarObject.MinRangeLong / RadarObject.VrelLong; //relative Velocity is minus
 								if (TimetoCrash_g < HIGH_WARNING_TIME)
 								{
-									CrashWarningLv = WARNING_HIGH;
+									AEBS_Deal = 1; //处理了报警
+									crashWarningLv = WARNING_HIGH;
 									#if ADAS_COMM
 									if (ADAS_dev.crash_level > 0)
 									#endif
 									{
-										StartBuzzer(WARNING_HIGH);
+										StartBuzzer(&vAEBS_Status, WARNING_HIGH);
 										EnableAEBS(TimetoCrash_g, WARNING_HIGH);
 									}
 								}
 								else if (TimetoCrash_g < MID_WARNING_TIME)
 								{
-									CrashWarningLv = WARNING_MID;
+									AEBS_Deal = 1; //处理了报警
+									crashWarningLv = WARNING_MID;
 									#if ADAS_COMM
 									if (ADAS_dev.crash_level > 0)
 									#endif
 									{
-										StartBuzzer(WARNING_MID);
+										StartBuzzer(&vAEBS_Status, WARNING_MID);
 										EnableAEBS(TimetoCrash_g, WARNING_MID);
 									}
 								}
 								else if (TimetoCrash_g < LOW_WARNING_TIME)
 								{
-									CrashWarningLv = WARNING_LOW;
+									AEBS_Deal = 1; //处理了报警
+									crashWarningLv = WARNING_LOW;
 									#if ADAS_COMM
 									if (ADAS_dev.crash_level > 0)
 									#endif
 									{
-										StartBuzzer(WARNING_LOW);
+										StartBuzzer(&vAEBS_Status, WARNING_LOW);
 										DisableAEBS(&vAEBS_Status);
 									}
 								}
 							}
 						}
 					}
-				}
 			}
 			if (AEBS_Deal == 0) //没有处理报警
 			{
-				CrashWarningLv = WARNING_NONE;
+				crashWarningLv = WARNING_NONE;
 				TimetoCrash_g = 20;							//适配CAN线
 				RadarObject.MinRangeLong = 255; //适配CAN线
 				RadarObject.VrelLong = 0;
@@ -343,16 +413,16 @@ void StartRadarCalcTask(void const *argument)
 				TimetoCrash_g = -RadarObject.MinRangeLong / RadarObject.VrelLong;
 				if (TimetoCrash_g < HIGH_WARNING_TIME)
 				{
-					CrashWarningLv = WARNING_HIGH;
+					crashWarningLv = WARNING_HIGH;
 					osSemaphoreRelease(bSemPrepareCANDataSigHandle);
 				}
 				else if (TimetoCrash_g < LOW_WARNING_TIME)
 				{
-					CrashWarningLv = WARNING_LOW;
+					crashWarningLv = WARNING_LOW;
 					//osSemaphoreRelease(bSemPrepareCANDataSigHandle);
 				}
 				else
-					CrashWarningLv = WARNING_NONE;
+					crashWarningLv = WARNING_NONE;
 			}
 		}
 #endif

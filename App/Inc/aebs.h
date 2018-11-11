@@ -8,7 +8,7 @@
 #define LOW_WARNING_TIM_PERIOD 200 //ms
 #define HIGH_WARNING_TIM_PERIOD 50 //ms
 
-#define VEHICLE_SPEED_THRESHOLD 5
+#define VEHICLE_SPEED_THRESHOLD 0
 
 #define LOW_WARNING_TIME 4.4f
 #define MID_WARNING_TIME 3.8f
@@ -32,10 +32,20 @@
 #define CAN_READ_VEHICLE 1 //Vehicle Speed & Switch
 #define AEB_CAN_TX_TIME 50 //CAN Bus 50ms interval
 
-#define WARNING_NONE 3
-#define WARNING_LOW 5
-#define WARNING_MID 6
-#define WARNING_HIGH 7
+#define WARNING_NONE 0	//3
+#define WARNING_LOW 1		//5 
+#define WARNING_MID 4		//6
+#define WARNING_HIGH 7	//7
+
+#define BRAKE_SYS_RDY		0x03
+#define COLLISION_WARNING_ACTIVE  0x05
+#define BRAKE_SYS_ON	0x06
+#define BRAKE_SYS_EMER	0x07
+
+#define OBJECT_NOT_DETECTED 0
+#define OBJECT_DETECTED 1
+
+#define INVADE_LANE_TIME_THRESHOLD 5.0f
 
 #define ON 1
 #define OFF 0
@@ -55,14 +65,16 @@ typedef struct
 } AEBS_Status;
 
 extern float TimetoCrash_g;
-extern uint8_t CrashWarningLv;
+extern uint8_t crashWarningLv;
 extern AEBS_Status vAEBS_Status;
 extern CAN_HandleTypeDef hcan2;
 
 void StopBuzzer(AEBS_Status *pAEBS_Status);
-void StartBuzzer(uint8_t warningLv);
+void StartBuzzer(AEBS_Status *pAEBS_Status, uint8_t warningLv);
 void DisableAEBS(AEBS_Status *pAEBS_Status);
 void EnableAEBS(float ttc, uint8_t warningLv);
 uint8_t ValveCalc(DAC_HandleTypeDef *hdac, float ttc);
-uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc);
+uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl);
+uint8_t PrePareAEBS1Data(CAN_HandleTypeDef *hcan, uint8_t brakeSysState, uint8_t warningLv, uint8_t objectDetected);
+
 #endif

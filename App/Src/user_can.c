@@ -62,7 +62,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 		MASK_HIGH,\
 		MASK_LOW,\
 		FIFO 0/1, filter_bank(0-13/14-27), filter_mode(LIST/MASK), filter_scale, EN/DISABLE filter, SlaveStartFilterBank
-#if VEHICLE_MODEL == KINGLONG
+
 	CAN_FilterTypeDef VehicleSwitchCANFilter = {
 		VEHICLE_SWITCH_ADDR>>13 & 0xFFFF,\
 		((VEHICLE_SWITCH_ADDR & 0xFFFF) <<3) | 0x4,\
@@ -85,7 +85,7 @@ uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan)
 		CAN_FILTER_FIFO1, 16, CAN_FILTERMODE_IDMASK,CAN_FILTERSCALE_32BIT,ENABLE,14
 	};
 	HAL_CAN_ConfigFilter(hcan, &VehicleAngleCANFilter);
-#endif
+
 
 	HAL_CAN_Start(hcan);
 	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);

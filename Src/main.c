@@ -265,6 +265,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 				if(VEHICLE_SPEED_ADDR == VehicleCANRxHeader.ExtId) //VehicleSpeed ID
 				{
 					vehicle.speed = VehicleCANRxBuf[2]; 		//vehicle speed in hex,km/h
+					vehicleSwitch.brake = (VehicleCANRxBuf[3] >> 4) & 0x01;
 					#if RADAR_TYPE == ARS408
 					ARS_SendVehicleSpeed(&hcan3, vehicle.speed);	//send VehicleSpeed to Radar
 					#elif RADAR_TYPE == EMRR
@@ -287,7 +288,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 					YawRate = ((uint16_t)VehicleCANRxBuf[4])<<8 | VehicleCANRxBuf[3];
 					vehicle.yawRate = ((float)(YawRate))/8192 - 3.92f;
 					
-					LatAcc = ((uint16_t)VehicleCANRxBuf[5])<<8 | VehicleCANRxBuf[6];
+					LatAcc = ((uint16_t)VehicleCANRxBuf[6])<<8 | VehicleCANRxBuf[5];
 					vehicle.latAcc  = ((float)(LatAcc))/2048 - 15.687f;
 					
 					vehicle.longAcc = (float)(VehicleCANRxBuf[7])*0.1f - 12.5f;
@@ -344,7 +345,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 					YawRate = ((uint16_t)VehicleCANRxBuf[4])<<8 | VehicleCANRxBuf[3];
 					vehicle.yawRate = ((float)(YawRate))/8192 - 3.92f;
 					
-					LatAcc = ((uint16_t)VehicleCANRxBuf[5])<<8 | VehicleCANRxBuf[6];
+					LatAcc = ((uint16_t)VehicleCANRxBuf[6])<<8 | VehicleCANRxBuf[5];
 					vehicle.latAcc  = ((float)(LatAcc))/2048 - 15.687f;
 					
 					vehicle.longAcc = (float)(VehicleCANRxBuf[7])*0.1f - 12.5f;

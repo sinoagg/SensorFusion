@@ -87,13 +87,13 @@ extern "C"
 
 #define VALVE_EN()  HAL_GPIO_WritePin(VALVE_ENABLE_GPIO_Port, VALVE_ENABLE_Pin, GPIO_PIN_SET)
 #define VALVE_DIS() HAL_GPIO_WritePin(VALVE_ENABLE_GPIO_Port, VALVE_ENABLE_Pin, GPIO_PIN_RESET)
-  /* USER CODE END Private defines */
+/* USER CODE END Private defines */
 
-  void MX_GPIO_Init(void);
+void MX_GPIO_Init(void);
 
-  /* USER CODE BEGIN Prototypes */
+/* USER CODE BEGIN Prototypes */
 
-  /* USER CODE END Prototypes */
+/* USER CODE END Prototypes */
 
 #ifdef __cplusplus
 }
