@@ -10,9 +10,9 @@
 
 #define VEHICLE_SPEED_THRESHOLD 0
 
-#define LOW_WARNING_TIME 4.4f
-#define MID_WARNING_TIME 3.8f
-#define HIGH_WARNING_TIME 3.5f
+#define LOW_WARNING_TIME 5.4f
+#define MID_WARNING_TIME 4.8f
+#define HIGH_WARNING_TIME 4.5f
 
 #define ADAS_COMM 1
 

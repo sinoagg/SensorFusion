@@ -110,13 +110,13 @@ uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl)
 	static uint8_t message_counter = 0;
 	message_counter += 1;
 	message_counter %= 16;
-	if (ttc > HIGH_WARNING_TIME)
+	if (ttc >= HIGH_WARNING_TIME)
 		XAcc = 0.0f;
 	else
 	{
-		XAcc = (ttc - HIGH_WARNING_TIME) / HIGH_WARNING_TIME * 10.0f;
-		if(XAcc < -10.0f)
-			XAcc = -10.0f;
+		XAcc = 0.01f * (ttc - HIGH_WARNING_TIME) / HIGH_WARNING_TIME * 10.0f;
+		if(XAcc < -0.1f)
+			XAcc = -0.1f;
 	}
 	XAcc_int = (uint16_t)((XAcc + 15.687f)*2048);			//Acc Demand, Res1/2048, offset -15.687m/s2
 	CANTxBuf[0] = (XAcc_int >> 8) & 0xFF;

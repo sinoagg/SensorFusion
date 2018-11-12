@@ -330,10 +330,10 @@ void StartRadarCalcTask(void const *argument)
 					uint16_t MinRangeLat  = RadarGeneral[0].Obj_DistLat;
 					uint32_t relSpeedLong = RadarGeneral[0].Obj_VrelLong;
 					uint32_t relSpeedLat  = RadarGeneral[0].Obj_VrelLat;
-					float invadeLaneTime = 0.0;
+					float invadeLaneTime = 0.0f;
 
-					RadarObject.MinRangeLat  = 0.2 * MinRangeLat  - 204.6;	//get real range(latitude)
-					RadarObject.VrelLat = 0.25 * relSpeedLat - 64;					//get real relative latitude  speed
+					RadarObject.MinRangeLat  = 0.2f * (float)MinRangeLat  - 204.6f;	//get real range(latitude)
+					RadarObject.VrelLat = 0.25f * (float)relSpeedLat - 64;					//get real relative latitude  speed
 					if(RadarObject.VrelLat != 0)
 						invadeLaneTime = - RadarObject.MinRangeLat / RadarObject.VrelLat;
 					
@@ -344,10 +344,10 @@ void StartRadarCalcTask(void const *argument)
 					//在本车道内 或 在旁边车道且在靠近本车道
 					if(objectInLane || (!objectInLane && (invadeLaneTime < INVADE_LANE_TIME_THRESHOLD) && (invadeLaneTime > 0)))
 					{
-						RadarObject.MinRangeLong = 0.2 * MinRangeLong - 500; 		//get real range(longitude)
+						RadarObject.MinRangeLong = 0.2f * (float)MinRangeLong - 500; 		//get real range(longitude)
 						if ((RadarObject.MinRangeLong) < LIMIT_RANGE && (RadarObject.MinRangeLong > 0) && MinRangeLong != 0) //calculate when dist is near enough
 						{
-							RadarObject.VrelLong = 0.25 * relSpeedLong - 128; //get real relative longitude speed
+							RadarObject.VrelLong = 0.25f * (float)relSpeedLong - 128; //get real relative longitude speed
 							if (RadarObject.VrelLong < 0)
 							{
 								TimetoCrash_g = -(float)RadarObject.MinRangeLong / RadarObject.VrelLong; //relative Velocity is minus
