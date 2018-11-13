@@ -4,15 +4,16 @@
 #include "stm32f4xx_hal.h"
 #include "tim.h"
 #include "gpio.h"
+#include "user_radar.h"
 
 #define LOW_WARNING_TIM_PERIOD 200 //ms
 #define HIGH_WARNING_TIM_PERIOD 50 //ms
 
 #define VEHICLE_SPEED_THRESHOLD 0
 
-#define LOW_WARNING_TIME 5.4f
-#define MID_WARNING_TIME 4.8f
-#define HIGH_WARNING_TIME 4.5f
+#define LOW_WARNING_TIME 4.4f
+#define MID_WARNING_TIME 3.8f
+#define HIGH_WARNING_TIME 3.5f
 
 #define ADAS_COMM 1
 
@@ -74,7 +75,7 @@ void StartBuzzer(AEBS_Status *pAEBS_Status, uint8_t warningLv);
 void DisableAEBS(AEBS_Status *pAEBS_Status);
 void EnableAEBS(float ttc, uint8_t warningLv);
 uint8_t ValveCalc(DAC_HandleTypeDef *hdac, float ttc);
-uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl);
-uint8_t PrePareAEBS1Data(CAN_HandleTypeDef *hcan, uint8_t brakeSysState, uint8_t warningLv, uint8_t objectDetected);
+uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl, float relSpeed, float range);
+uint8_t PrePareAEBS1Data(CAN_HandleTypeDef *hcan, uint8_t brakeSysState, uint8_t warningLv, uint8_t objectDetected, float ttc, ObjectTypeDef *object);
 
 #endif

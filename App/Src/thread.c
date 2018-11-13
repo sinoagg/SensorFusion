@@ -38,7 +38,7 @@ osThreadId radarCalcHandle;
 osThreadId ADAS_CommTaskHandle;
 #endif
 osThreadId CAN_XBR_TaskHandle;
-//osThreadId CAN_AEBS1_TaskHandle;
+osThreadId CAN_AEBS1_TaskHandle;
 
 osSemaphoreId bSemPrepareCANDataSigHandle;
 osSemaphoreId bSemRadarCalcSigHandle;
@@ -53,7 +53,7 @@ void StartADAS_CommTask(void const *argument); //always running
 void StartPrepareCANDataTask(void const *argument);
 void StartRadarCalcTask(void const *argument);
 void StartCAN_XBR_TX_Task(void const *argument);
-//void StartCAN_AEBS1_TX_Task(void const *argument);
+void StartCAN_AEBS1_TX_Task(void const *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -115,8 +115,8 @@ void MX_FREERTOS_Init(void)
 	osThreadDef(CAN_XBR_TX, StartCAN_XBR_TX_Task, osPriorityNormal, 0, 128);
 	osThreadId CAN_XBR_TaskHandle = osThreadCreate(osThread(CAN_XBR_TX), NULL);
 	
-	//osThreadDef(CAN_AEBS1_TX, StartCAN_AEBS1_TX_Task, osPriorityNormal, 0, 128);
-	//osThreadId CAN_AEBS1_TaskHandle = osThreadCreate(osThread(CAN_AEBS1_TX), NULL);
+	osThreadDef(CAN_AEBS1_TX, StartCAN_AEBS1_TX_Task, osPriorityNormal, 0, 128);
+	osThreadId CAN_AEBS1_TaskHandle = osThreadCreate(osThread(CAN_AEBS1_TX), NULL);
 
 	/* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
@@ -162,12 +162,12 @@ void StartDefaultTask(void const *argument)
 //			if(XBR_Flag == 0)
 //			{
 //				XBR_Flag = 1;
-//				XBRCalc(&hcan2, 0.5f);
+//				XBRCalc(&hcan2, 0.5f, RadarObject.VrelLong, RadarObject.MinRangeLong);
 //			}
 //			else
 //			{
 //				XBR_Flag = 0;
-//				XBRCalc(&hcan2, 3.5f);
+//				XBRCalc(&hcan2, 3.5f, RadarObject.VrelLong, RadarObject.MinRangeLong);
 //			}
 				
 		}			
@@ -237,48 +237,48 @@ void StartCAN_XBR_TX_Task(void const *argument)
 		{
 			if(crashWarningLv==WARNING_NONE || crashWarningLv==WARNING_LOW)
 			{
-				osDelay(200);
-				XBRCalc(&hcan2, HIGH_WARNING_TIME, 0);
+				osDelay(50);
+				XBRCalc(&hcan2, HIGH_WARNING_TIME, 0, RadarObject.VrelLong, RadarObject.MinRangeLong);
 			}
 			else
 			{
-				osDelay(20);
-				XBRCalc(&hcan2, TimetoCrash_g, 1);
+				osDelay(50);
+				XBRCalc(&hcan2, TimetoCrash_g, 1, RadarObject.VrelLong, RadarObject.MinRangeLong);
 			}
 		}
 		#if ADAS_COMM
 		else
 		{
-			osDelay(200);
-			XBRCalc(&hcan2, HIGH_WARNING_TIME, 0);
+			osDelay(50);
+			XBRCalc(&hcan2, HIGH_WARNING_TIME, 0, RadarObject.VrelLong, RadarObject.MinRangeLong);
 		}
 		#endif
 	}
 }
 
-//void StartCAN_AEBS1_TX_Task(void const *argument)
-//{
-//	for (;;)
-//	{
-//		if(crashWarningLv==WARNING_NONE)
-//		{
-//			PrePareAEBS1Data(&hcan2, BRAKE_SYS_RDY, WARNING_NONE, OBJECT_NOT_DETECTED);
-//		}
-//		else if(crashWarningLv==WARNING_LOW)
-//		{
-//			PrePareAEBS1Data(&hcan2, COLLISION_WARNING_ACTIVE, WARNING_LOW, OBJECT_DETECTED);
-//		}
-//		else if(crashWarningLv==WARNING_MID)
-//		{
-//			PrePareAEBS1Data(&hcan2, BRAKE_SYS_ON, WARNING_MID, OBJECT_DETECTED);
-//		}
-//		else if(crashWarningLv==WARNING_HIGH)
-//		{
-//			PrePareAEBS1Data(&hcan2, BRAKE_SYS_EMER, WARNING_HIGH, OBJECT_DETECTED);
-//		}
-//		osDelay(50);
-//	}
-//}
+void StartCAN_AEBS1_TX_Task(void const *argument)
+{
+	for (;;)
+	{
+		if(crashWarningLv==WARNING_NONE)
+		{
+			PrePareAEBS1Data(&hcan2, BRAKE_SYS_RDY, WARNING_NONE, OBJECT_NOT_DETECTED, 20, &RadarObject);
+		}
+		else if(crashWarningLv==WARNING_LOW)
+		{
+			PrePareAEBS1Data(&hcan2, COLLISION_WARNING_ACTIVE, WARNING_LOW, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
+		}
+		else if(crashWarningLv==WARNING_MID)
+		{
+			PrePareAEBS1Data(&hcan2, BRAKE_SYS_ON, WARNING_MID, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
+		}
+		else if(crashWarningLv==WARNING_HIGH)
+		{
+			PrePareAEBS1Data(&hcan2, BRAKE_SYS_EMER, WARNING_HIGH, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
+		}
+		osDelay(50);
+	}
+}
 
 /* StartRadarCalcTask function */
 void StartRadarCalcTask(void const *argument)
