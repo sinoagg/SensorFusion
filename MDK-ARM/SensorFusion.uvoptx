@@ -148,18 +148,18 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>134</LineNumber>
+          <LineNumber>257</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134237042</Address>
+          <Address>134233426</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\App\Src\aebs.c</Filename>
+          <Filename>..\App\Src\thread.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\SensorFusion\../App/Src/aebs.c\134</Expression>
+          <Expression>\\SensorFusion\../App/Src/thread.c\257</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -1003,7 +1003,7 @@
       <GroupNumber>7</GroupNumber>
       <FileNumber>55</FileNumber>
       <FileType>1</FileType>
-      <tvExp>0</tvExp>
+      <tvExp>1</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\App\Src\vehicle.c</PathWithFileName>

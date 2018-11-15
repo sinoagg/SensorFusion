@@ -185,7 +185,7 @@ void StartADAS_CommTask(void const *argument)
 			ADASRxComplete = 0;
 			//DispADASData(ADASRxBuf, ADASDispBuf, RadarObject.MinRangeLong, RadarObject.VrelLong, TimetoCrash_g);//·¢ËÍ¸øÏÔÊ¾Æ÷
 			//HAL_UART_Transmit(&huart2, ADASDispBuf, 32, 100);//transmit ADAS data to screen
-			CalADASData(&ADAS_dev, ADASRxBuf);
+			CalADASData(&ADAS_dev, ADASHexBuf);
 			LED_ADAS_TOGGLE();
 			#ifdef LDW
 			if (ADAS_dev.LDW_warning == 0x01 || ADAS_dev.LDW_warning == 0x02) //Lane departure warning(left/right)
@@ -238,11 +238,11 @@ void StartCAN_XBR_TX_Task(void const *argument)
 			if(crashWarningLv==WARNING_NONE || crashWarningLv==WARNING_LOW)
 			{
 				osDelay(50);
-				XBRCalc(&hcan2, HIGH_WARNING_TIME, 0, RadarObject.VrelLong, RadarObject.MinRangeLong);
+				XBRCalc(&hcan2, TimetoCrash_g, 0, RadarObject.VrelLong, RadarObject.MinRangeLong);
 			}
 			else
 			{
-				osDelay(50);
+				osDelay(20);
 				XBRCalc(&hcan2, TimetoCrash_g, 1, RadarObject.VrelLong, RadarObject.MinRangeLong);
 			}
 		}
@@ -250,9 +250,10 @@ void StartCAN_XBR_TX_Task(void const *argument)
 		else
 		{
 			osDelay(50);
-			XBRCalc(&hcan2, HIGH_WARNING_TIME, 0, RadarObject.VrelLong, RadarObject.MinRangeLong);
+			XBRCalc(&hcan2, TimetoCrash_g, 0, RadarObject.VrelLong, RadarObject.MinRangeLong);
 		}
 		#endif
+
 	}
 }
 

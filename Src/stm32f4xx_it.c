@@ -37,6 +37,7 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN 0 */
+#include "aebs.h"
 #include "usart.h"
 #include "user_adas.h"
 /* USER CODE END 0 */
@@ -361,7 +362,12 @@ void USART3_IRQHandler(void)
 		temp  = hdma_usart3_rx.Instance->NDTR;			//获得剩余字节数量位置             
 		//rx_len =  BUFFER_SIZE - temp;                            
 		ADASRxComplete=1;
-		HAL_UART_Receive_DMA(&huart3, ADASRxBuf, 32);//receive ADAS warning 
+		#if ADAS_TYPE == KSHINE
+			HAL_UART_Receive_DMA(&huart3, ADASRxBuf, UART3BUFSIZE);//receive ADAS warning
+			Ascii2Hex(UART3BUFSIZE*2, ADASRxBuf, ADASHexBuf);
+		#else
+			HAL_UART_Receive_DMA(&huart3, ADASHexBuf, UART3BUFSIZE);//receive ADAS warning
+		#endif
 	}
   /* USER CODE END USART3_IRQn 0 */
   //HAL_UART_IRQHandler(&huart3);

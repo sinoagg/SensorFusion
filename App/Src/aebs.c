@@ -112,33 +112,32 @@ uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl, float relS
 	message_counter += 1;
 	message_counter %= 16;
 	
-	if(relSpeed > 0)
-	{
-		XAcc = 0; 
-	}
-	else
-	{
-		if(range == 0)
-			range = 0.1f;
-		XAcc = 0.007f * 1.1f * 0.5f * relSpeed * relSpeed / range;
-	}
-//	if(XAcc < -0.05f)
-//		XAcc = -0.05f;
-		
-//	if (ttc >= HIGH_WARNING_TIME)
-//	{	
-//		XAcc += 0.05 * (ttc - HIGH_WARNING_TIME) / HIGH_WARNING_TIME * 10.0f;
-//		if(XAcc>0) XAcc = 0; 
+//	if(relSpeed > 0)
+//	{
+//		XAcc = 0; 
 //	}
 //	else
 //	{
-//		XAcc =  (ttc - HIGH_WARNING_TIME) / HIGH_WARNING_TIME * 10.0f;
-//		if(XAcc < -0.05f)
-//			XAcc = -0.05f;
+//		if(range == 0)
+//			range = 0.1f;
+//		XAcc = -1.3f * 0.5f * relSpeed * relSpeed / range;
 //	}
+//	if(XAcc < -0.05f)
+//		XAcc = -0.05f;
+		
+	if (ttc >= HIGH_WARNING_TIME)
+	{	
+		XAcc += 0.01f*(ttc - HIGH_WARNING_TIME) / HIGH_WARNING_TIME;
+		if(XAcc>0) XAcc = 0; 
+	}
+	else
+	{
+		XAcc =  7 * (ttc - HIGH_WARNING_TIME) / HIGH_WARNING_TIME;
+		//if(XAcc < -1.5f) XAcc = -1.5f;
+	}
 	XAcc_int = (uint16_t)((XAcc + 15.687f)*2048);			//Acc Demand, Res1/2048, offset -15.687m/s2
-	CANTxBuf[0] = (XAcc_int >> 8) & 0xFF;
-	CANTxBuf[1] = XAcc_int & 0xFF;
+	CANTxBuf[0] = XAcc_int & 0xFF;
+	CANTxBuf[1] = (XAcc_int >> 8) & 0xFF;
 	if(XBR_Ctrl==1)
 		CANTxBuf[2] = 0xD0;	//XBR mode, if XBR EBI mode is 00, XBR urgency not using
 	else
@@ -168,9 +167,9 @@ uint8_t PrePareAEBS1Data(CAN_HandleTypeDef *hcan, uint8_t brakeSysState, uint8_t
 	CANTxBuf[0]=(warningLv<<4)|brakeSysState;
 	CANTxBuf[1]&=0xF8;
 	CANTxBuf[1]|=objectDetected&0x07;
-	CANTxBuf[2] = (uint8_t)(-object->VrelLong / 0.1f);
-	CANTxBuf[3] = (XAcc_int >> 8) & 0xFF;
-	CANTxBuf[4] = XAcc_int & 0xFF;
+	CANTxBuf[2] = (int8_t)(-object->VrelLong / 0.25f);
+	CANTxBuf[3] = XAcc_int & 0xFF;
+	CANTxBuf[4] = (XAcc_int >> 8) & 0xFF;
 	CANTxBuf[5] = (uint8_t)(ttc / 0.05f);
 	CANTxBuf[6] = (uint8_t)(object->MinRangeLong / 0.2f);
 	
