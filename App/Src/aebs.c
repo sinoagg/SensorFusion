@@ -1,5 +1,6 @@
 #include "aebs.h"
 #include "vehicle.h"
+#include "user_adas.h"
 
 extern DAC_HandleTypeDef hdac;
 uint8_t crashWarningLv = WARNING_NONE;
@@ -127,7 +128,7 @@ uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl, float relS
 		
 	if (ttc >= HIGH_WARNING_TIME)
 	{	
-		XAcc += 0.01f*(ttc - HIGH_WARNING_TIME) / HIGH_WARNING_TIME;
+		XAcc += 0.1f*(ttc - HIGH_WARNING_TIME) / HIGH_WARNING_TIME;
 		if(XAcc>0) XAcc = 0; 
 	}
 	else
@@ -165,8 +166,9 @@ uint8_t PrePareAEBS1Data(CAN_HandleTypeDef *hcan, uint8_t brakeSysState, uint8_t
 	uint8_t CANTxBuf[8] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 	uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
 	CANTxBuf[0]=(warningLv<<4)|brakeSysState;
-	CANTxBuf[1]&=0xF8;
-	CANTxBuf[1]|=objectDetected&0x07;
+	CANTxBuf[1] &= 0xF8;
+	CANTxBuf[1] |= objectDetected&0x07;
+	CANTxBuf[1] |= (ADAS_dev.crash_level << 4) & 0x30;
 	CANTxBuf[2] = (int8_t)(-object->VrelLong / 0.25f);
 	CANTxBuf[3] = XAcc_int & 0xFF;
 	CANTxBuf[4] = (XAcc_int >> 8) & 0xFF;

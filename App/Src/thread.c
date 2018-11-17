@@ -233,7 +233,6 @@ void StartCAN_XBR_TX_Task(void const *argument)
 	{
 		#if ADAS_COMM
 		if (ADAS_dev.crash_level > 0)
-		#endif
 		{
 			if(crashWarningLv==WARNING_NONE || crashWarningLv==WARNING_LOW)
 			{
@@ -246,6 +245,31 @@ void StartCAN_XBR_TX_Task(void const *argument)
 				XBRCalc(&hcan2, TimetoCrash_g, 1, RadarObject.VrelLong, RadarObject.MinRangeLong);
 			}
 		}
+		else if(vAEBS_Status.AEBStimes >3 && RadarObject.MinRangeLong < 4)
+		{
+			if(crashWarningLv==WARNING_NONE || crashWarningLv==WARNING_LOW)
+			{
+				osDelay(50);
+				XBRCalc(&hcan2, TimetoCrash_g, 0, RadarObject.VrelLong, RadarObject.MinRangeLong);
+			}
+			else
+			{
+				osDelay(20);
+				XBRCalc(&hcan2, TimetoCrash_g, 1, RadarObject.VrelLong, RadarObject.MinRangeLong);
+			}
+		}
+		#else
+		if(crashWarningLv==WARNING_NONE || crashWarningLv==WARNING_LOW)
+		{
+			osDelay(50);
+			XBRCalc(&hcan2, TimetoCrash_g, 0, RadarObject.VrelLong, RadarObject.MinRangeLong);
+		}
+		else
+		{
+			osDelay(20);
+			XBRCalc(&hcan2, TimetoCrash_g, 1, RadarObject.VrelLong, RadarObject.MinRangeLong);
+		}
+		#endif
 		#if ADAS_COMM
 		else
 		{
@@ -358,11 +382,20 @@ void StartRadarCalcTask(void const *argument)
 									crashWarningLv = WARNING_HIGH;
 									#if ADAS_COMM
 									if (ADAS_dev.crash_level > 0)
-									#endif
+									{
+										StartBuzzer(&vAEBS_Status, WARNING_HIGH);
+										EnableAEBS(TimetoCrash_g, WARNING_HIGH);
+										vAEBS_Status.AEBStimes += 1;
+									}
+									else if(vAEBS_Status.AEBStimes >3 && RadarObject.MinRangeLong < 4)
 									{
 										StartBuzzer(&vAEBS_Status, WARNING_HIGH);
 										EnableAEBS(TimetoCrash_g, WARNING_HIGH);
 									}
+									#else
+										StartBuzzer(&vAEBS_Status, WARNING_HIGH);
+										EnableAEBS(TimetoCrash_g, WARNING_HIGH);
+									#endif
 								}
 								else if (TimetoCrash_g < MID_WARNING_TIME)
 								{
@@ -370,11 +403,21 @@ void StartRadarCalcTask(void const *argument)
 									crashWarningLv = WARNING_MID;
 									#if ADAS_COMM
 									if (ADAS_dev.crash_level > 0)
-									#endif
+									{
+										StartBuzzer(&vAEBS_Status, WARNING_MID);
+										EnableAEBS(TimetoCrash_g, WARNING_MID);
+										vAEBS_Status.AEBStimes += 1;
+									}
+									else if(vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
 									{
 										StartBuzzer(&vAEBS_Status, WARNING_MID);
 										EnableAEBS(TimetoCrash_g, WARNING_MID);
 									}
+									#else
+										StartBuzzer(&vAEBS_Status, WARNING_MID);
+										EnableAEBS(TimetoCrash_g, WARNING_MID);
+									#endif
+									
 								}
 								else if (TimetoCrash_g < LOW_WARNING_TIME)
 								{
@@ -382,11 +425,19 @@ void StartRadarCalcTask(void const *argument)
 									crashWarningLv = WARNING_LOW;
 									#if ADAS_COMM
 									if (ADAS_dev.crash_level > 0)
-									#endif
 									{
 										StartBuzzer(&vAEBS_Status, WARNING_LOW);
 										DisableAEBS(&vAEBS_Status);
 									}
+									else if(vAEBS_Status.AEBStimes >3 && RadarObject.MinRangeLong < 4)
+									{
+										StartBuzzer(&vAEBS_Status, WARNING_LOW);
+										DisableAEBS(&vAEBS_Status);
+									}
+									#else
+										StartBuzzer(&vAEBS_Status, WARNING_LOW);
+										DisableAEBS(&vAEBS_Status);
+									#endif
 								}
 							}
 						}
@@ -394,12 +445,17 @@ void StartRadarCalcTask(void const *argument)
 			}
 			if (AEBS_Deal == 0) //没有处理报警
 			{
-				crashWarningLv = WARNING_NONE;
-				TimetoCrash_g = 20;							//适配CAN线
-				RadarObject.MinRangeLong = 255; //适配CAN线
-				RadarObject.VrelLong = 0;
-				StopBuzzer(&vAEBS_Status);
-				DisableAEBS(&vAEBS_Status);
+				if(vAEBS_Status.AEBStimes > 3)
+					vAEBS_Status.AEBStimes -= 3;
+				if(vAEBS_Status.AEBStimes <= 3)
+				{
+					crashWarningLv = WARNING_NONE;
+					TimetoCrash_g = 20;							//适配CAN线
+					RadarObject.MinRangeLong = 255; //适配CAN线
+					RadarObject.VrelLong = 0;
+					StopBuzzer(&vAEBS_Status);
+					DisableAEBS(&vAEBS_Status);
+				}
 			}
 			osSemaphoreRelease(bSemPrepareCANDataSigHandle); //发送雷达准备数据信号量
 		}
