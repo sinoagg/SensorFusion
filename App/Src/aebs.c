@@ -173,7 +173,7 @@ uint8_t PrePareAEBS1Data(CAN_HandleTypeDef *hcan, uint8_t brakeSysState, uint8_t
 	CANTxBuf[3] = XAcc_int & 0xFF;
 	CANTxBuf[4] = (XAcc_int >> 8) & 0xFF;
 	CANTxBuf[5] = (uint8_t)(ttc / 0.05f);
-	CANTxBuf[6] = (uint8_t)(object->MinRangeLong / 0.2f);
+	CANTxBuf[6] = (uint8_t)object->MinRangeLong;
 	
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxAEBS1Header, CANTxBuf, &CAN_TxMailBox);
 	return 0;

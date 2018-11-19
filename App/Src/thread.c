@@ -169,7 +169,7 @@ void StartDefaultTask(void const *argument)
 //				XBR_Flag = 0;
 //				XBRCalc(&hcan2, 3.5f, RadarObject.VrelLong, RadarObject.MinRangeLong);
 //			}
-				
+
 		}			
 		osDelay(50);
 	}
@@ -467,7 +467,7 @@ void StartRadarCalcTask(void const *argument)
 			if (AEBS_Deal == 0) //没有处理报警
 			{
 				if(vAEBS_Status.AEBStimes > 3)
-					vAEBS_Status.AEBStimes -= 3;
+					vAEBS_Status.AEBStimes -= 10;
 				if(vAEBS_Status.AEBStimes <= 3)
 				{
 					crashWarningLv = WARNING_NONE;
