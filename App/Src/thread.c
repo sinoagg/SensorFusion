@@ -291,15 +291,36 @@ void StartCAN_AEBS1_TX_Task(void const *argument)
 		}
 		else if(crashWarningLv==WARNING_LOW)
 		{
-			PrePareAEBS1Data(&hcan2, COLLISION_WARNING_ACTIVE, WARNING_LOW, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
+			#if ADAS_COMM
+			if(ADAS_dev.crash_level > 0)
+				PrePareAEBS1Data(&hcan2, COLLISION_WARNING_ACTIVE, WARNING_LOW, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
+			else
+				PrePareAEBS1Data(&hcan2, BRAKE_SYS_RDY, WARNING_LOW, OBJECT_NOT_DETECTED, TimetoCrash_g, &RadarObject);
+			#else
+				PrePareAEBS1Data(&hcan2, COLLISION_WARNING_ACTIVE, WARNING_LOW, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
+			#endif
 		}
 		else if(crashWarningLv==WARNING_MID)
 		{
-			PrePareAEBS1Data(&hcan2, BRAKE_SYS_ON, WARNING_MID, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
+			#if ADAS_COMM
+			if(ADAS_dev.crash_level > 0)
+				PrePareAEBS1Data(&hcan2, BRAKE_SYS_ON, WARNING_MID, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
+			else
+				PrePareAEBS1Data(&hcan2, BRAKE_SYS_RDY, WARNING_MID, OBJECT_NOT_DETECTED, TimetoCrash_g, &RadarObject);
+			#else
+				PrePareAEBS1Data(&hcan2, BRAKE_SYS_ON, WARNING_MID, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
+			#endif
 		}
 		else if(crashWarningLv==WARNING_HIGH)
 		{
-			PrePareAEBS1Data(&hcan2, BRAKE_SYS_EMER, WARNING_HIGH, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
+			#if ADAS_COMM
+			if(ADAS_dev.crash_level > 0)
+				PrePareAEBS1Data(&hcan2, BRAKE_SYS_EMER, WARNING_HIGH, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
+			else
+				PrePareAEBS1Data(&hcan2, BRAKE_SYS_RDY, WARNING_HIGH, OBJECT_NOT_DETECTED, TimetoCrash_g, &RadarObject);
+			#else
+				PrePareAEBS1Data(&hcan2, BRAKE_SYS_EMER, WARNING_HIGH, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
+			#endif
 		}
 		osDelay(50);
 	}

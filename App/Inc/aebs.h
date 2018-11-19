@@ -20,7 +20,7 @@
 #define KSHINE 1
 #define KY 0
 /*------ADAS type------*/
-#define ADAS_TYPE KSHINE
+#define ADAS_TYPE KY
 
 #define LIGHT_TIME 3.8f
 #define SOUND_TIME 4.4f
