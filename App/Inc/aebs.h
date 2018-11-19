@@ -69,6 +69,7 @@ typedef struct
 	uint8_t BuzzerStatus;
 	uint8_t valveStatus;
 	uint8_t AEBStimes;
+	uint16_t onlyRadarTimes;
 } AEBS_Status;
 
 extern float TimetoCrash_g;

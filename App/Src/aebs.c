@@ -5,7 +5,7 @@
 extern DAC_HandleTypeDef hdac;
 uint8_t crashWarningLv = WARNING_NONE;
 float TimetoCrash_g;
-AEBS_Status vAEBS_Status = {OFF, OFF};
+AEBS_Status vAEBS_Status = {OFF, OFF, 0, 0};
 #if VEHICLE_MODEL == DONGFENG
 CAN_TxHeaderTypeDef CAN_TxXBRHeader={0,VEHICLE_BRAKE_ADDR, CAN_ID_EXT,CAN_RTR_DATA,8,DISABLE};
 CAN_TxHeaderTypeDef CAN_TxAEBS1Header={0,VEHICLE_AEBS1_ADDR, CAN_ID_EXT,CAN_RTR_DATA,8,DISABLE};
@@ -151,10 +151,10 @@ uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl, float relS
 	for(i = 0;i < 7; i++)
 		temp_checksum += CANTxBuf[i];
 	temp_checksum += message_counter & 0x0F;
-	temp_checksum += 0x2A;//VEHICLE_BRAKE_ADDR & 0x000F;
-	temp_checksum += 0x0B;//(VEHICLE_BRAKE_ADDR & 0xF0) >> 8;
-	temp_checksum += 0x04;//(VEHICLE_BRAKE_ADDR & 0xF00) >> 16;
-	temp_checksum += 0x0C;//(VEHICLE_BRAKE_ADDR & 0xF000) >> 24;
+	temp_checksum += 0x2A;//VEHICLE_BRAKE_ADDR & 0x00FF;
+	temp_checksum += 0x0B;//(VEHICLE_BRAKE_ADDR & 0xFF00) >> 16;
+	temp_checksum += 0x04;//(VEHICLE_BRAKE_ADDR & 0xFF0000) >> 32;
+	temp_checksum += 0x0C;//(VEHICLE_BRAKE_ADDR & 0xFF000000) >> 48;
 	CANTxBuf[7] = ((((temp_checksum >> 4) + temp_checksum) & 0x0F) << 4) | (message_counter & 0x0F);
 	
 	HAL_CAN_AddTxMessage(hcan, &CAN_TxXBRHeader, CANTxBuf, &CAN_TxMailBox);

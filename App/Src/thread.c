@@ -407,8 +407,14 @@ void StartRadarCalcTask(void const *argument)
 										StartBuzzer(&vAEBS_Status, WARNING_HIGH);
 										EnableAEBS(TimetoCrash_g, WARNING_HIGH);
 										vAEBS_Status.AEBStimes += 1;
+										vAEBS_Status.onlyRadarTimes += 20;
 									}
-									else if(vAEBS_Status.AEBStimes >3 && RadarObject.MinRangeLong < 4)
+									else if(vAEBS_Status.onlyRadarTimes > 0)
+									{
+										StartBuzzer(&vAEBS_Status, WARNING_HIGH);
+										EnableAEBS(TimetoCrash_g, WARNING_HIGH);
+									}
+									else if(vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
 									{
 										StartBuzzer(&vAEBS_Status, WARNING_HIGH);
 										EnableAEBS(TimetoCrash_g, WARNING_HIGH);
@@ -428,6 +434,12 @@ void StartRadarCalcTask(void const *argument)
 										StartBuzzer(&vAEBS_Status, WARNING_MID);
 										EnableAEBS(TimetoCrash_g, WARNING_MID);
 										vAEBS_Status.AEBStimes += 1;
+										vAEBS_Status.onlyRadarTimes += 20;
+									}
+									else if(vAEBS_Status.onlyRadarTimes > 0)
+									{
+										StartBuzzer(&vAEBS_Status, WARNING_MID);
+										EnableAEBS(TimetoCrash_g, WARNING_MID);
 									}
 									else if(vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
 									{
@@ -450,7 +462,7 @@ void StartRadarCalcTask(void const *argument)
 										StartBuzzer(&vAEBS_Status, WARNING_LOW);
 										DisableAEBS(&vAEBS_Status);
 									}
-									else if(vAEBS_Status.AEBStimes >3 && RadarObject.MinRangeLong < 4)
+									else if(vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
 									{
 										StartBuzzer(&vAEBS_Status, WARNING_LOW);
 										DisableAEBS(&vAEBS_Status);

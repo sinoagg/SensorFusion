@@ -413,6 +413,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	else if (htim->Instance == TIM3)
 	{
 		AEB_CAN_TxReady = 1;
+		if(vAEBS_Status.onlyRadarTimes > 0)
+			vAEBS_Status.onlyRadarTimes -=1;
 	}
 		
   /* USER CODE BEGIN Callback 1 */
