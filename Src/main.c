@@ -415,6 +415,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		AEB_CAN_TxReady = 1;
 		if(vAEBS_Status.onlyRadarTimes > 0)
 			vAEBS_Status.onlyRadarTimes -=1;
+		if(vAEBS_Status.onlyRadarTimes % 10 == 8)
+			LED_GYRO_TOGGLE();
 	}
 		
   /* USER CODE BEGIN Callback 1 */

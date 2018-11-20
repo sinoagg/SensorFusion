@@ -291,36 +291,15 @@ void StartCAN_AEBS1_TX_Task(void const *argument)
 		}
 		else if(crashWarningLv==WARNING_LOW)
 		{
-			#if ADAS_COMM
-			if(ADAS_dev.crash_level > 0)
-				PrePareAEBS1Data(&hcan2, COLLISION_WARNING_ACTIVE, WARNING_LOW, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
-			else
-				PrePareAEBS1Data(&hcan2, BRAKE_SYS_RDY, WARNING_LOW, OBJECT_NOT_DETECTED, TimetoCrash_g, &RadarObject);
-			#else
-				PrePareAEBS1Data(&hcan2, COLLISION_WARNING_ACTIVE, WARNING_LOW, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
-			#endif
+			PrePareAEBS1Data(&hcan2, COLLISION_WARNING_ACTIVE, WARNING_LOW, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
 		}
 		else if(crashWarningLv==WARNING_MID)
 		{
-			#if ADAS_COMM
-			if(ADAS_dev.crash_level > 0)
-				PrePareAEBS1Data(&hcan2, BRAKE_SYS_ON, WARNING_MID, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
-			else
-				PrePareAEBS1Data(&hcan2, BRAKE_SYS_RDY, WARNING_MID, OBJECT_NOT_DETECTED, TimetoCrash_g, &RadarObject);
-			#else
-				PrePareAEBS1Data(&hcan2, BRAKE_SYS_ON, WARNING_MID, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
-			#endif
+			PrePareAEBS1Data(&hcan2, BRAKE_SYS_ON, WARNING_MID, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
 		}
 		else if(crashWarningLv==WARNING_HIGH)
 		{
-			#if ADAS_COMM
-			if(ADAS_dev.crash_level > 0)
-				PrePareAEBS1Data(&hcan2, BRAKE_SYS_EMER, WARNING_HIGH, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
-			else
-				PrePareAEBS1Data(&hcan2, BRAKE_SYS_RDY, WARNING_HIGH, OBJECT_NOT_DETECTED, TimetoCrash_g, &RadarObject);
-			#else
-				PrePareAEBS1Data(&hcan2, BRAKE_SYS_EMER, WARNING_HIGH, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
-			#endif
+			PrePareAEBS1Data(&hcan2, BRAKE_SYS_EMER, WARNING_HIGH, OBJECT_DETECTED, TimetoCrash_g, &RadarObject);
 		}
 		osDelay(50);
 	}
@@ -407,7 +386,7 @@ void StartRadarCalcTask(void const *argument)
 										StartBuzzer(&vAEBS_Status, WARNING_HIGH);
 										EnableAEBS(TimetoCrash_g, WARNING_HIGH);
 										vAEBS_Status.AEBStimes += 1;
-										vAEBS_Status.onlyRadarTimes += 20;
+										vAEBS_Status.onlyRadarTimes = 20;
 									}
 									else if(vAEBS_Status.onlyRadarTimes > 0)
 									{
@@ -434,7 +413,7 @@ void StartRadarCalcTask(void const *argument)
 										StartBuzzer(&vAEBS_Status, WARNING_MID);
 										EnableAEBS(TimetoCrash_g, WARNING_MID);
 										vAEBS_Status.AEBStimes += 1;
-										vAEBS_Status.onlyRadarTimes += 20;
+										vAEBS_Status.onlyRadarTimes = 20;
 									}
 									else if(vAEBS_Status.onlyRadarTimes > 0)
 									{
@@ -461,6 +440,7 @@ void StartRadarCalcTask(void const *argument)
 									{
 										StartBuzzer(&vAEBS_Status, WARNING_LOW);
 										DisableAEBS(&vAEBS_Status);
+										vAEBS_Status.onlyRadarTimes = 20;
 									}
 									else if(vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
 									{

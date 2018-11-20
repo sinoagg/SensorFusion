@@ -11,11 +11,11 @@
 
 #define VEHICLE_SPEED_THRESHOLD 0
 
-#define LOW_WARNING_TIME 4.4f
-#define MID_WARNING_TIME 4.3f
+#define LOW_WARNING_TIME 4.8f
+#define MID_WARNING_TIME 4.5f
 #define HIGH_WARNING_TIME 4.2f
 /*------ADAS switch----*/
-#define ADAS_COMM 1
+#define ADAS_COMM 0
 
 #define KSHINE 1
 #define KY 0

@@ -32,7 +32,7 @@
 #include "ARS408.h"
 #include "math.h"
 
-#define CONFIG_ARS408_RADAR 0
+#define CONFIG_ARS408_RADAR  0
 #define CONFIG_ARS408_FILTER 0
 
 #define VEHICLE_CENTRE_LEN	10.0f
