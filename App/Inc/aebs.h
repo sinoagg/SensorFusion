@@ -15,7 +15,7 @@
 #define MID_WARNING_TIME 4.5f
 #define HIGH_WARNING_TIME 4.2f
 /*------ADAS switch----*/
-#define ADAS_COMM 0
+#define ADAS_COMM 1
 
 #define KSHINE 1
 #define KY 0
@@ -24,11 +24,6 @@
 
 #define LIGHT_TIME 3.8f
 #define SOUND_TIME 4.4f
-
-#define ARS408 1
-#define EMRR 0
-/*------Radar type------*/
-#define RADAR_TYPE ARS408
 
 #define LANEWIDTH 1.5f
 #define MAX_DECELARATION 0.4 * 9.8f

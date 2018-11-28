@@ -143,6 +143,9 @@ void MX_FREERTOS_Init(void)
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
 	HAL_TIM_Base_Start_IT(&htim3);
+	
+	//StartBuzzer(&vAEBS_Status, WARNING_LOW);
+
 }
 
 /* StartDefaultTask function */
@@ -183,8 +186,8 @@ void StartADAS_CommTask(void const *argument)
 		if (ADASRxComplete == 1)
 		{
 			ADASRxComplete = 0;
-			//DispADASData(ADASRxBuf, ADASDispBuf, RadarObject.MinRangeLong, RadarObject.VrelLong, TimetoCrash_g);//发送给显示器
-			//HAL_UART_Transmit(&huart2, ADASDispBuf, 32, 100);//transmit ADAS data to screen
+			DispADASData(ADASHexBuf, ADASDispBuf, RadarObject.MinRangeLong, RadarObject.VrelLong, TimetoCrash_g);//发送给显示器
+			HAL_UART_Transmit(&huart2, ADASDispBuf, 32, 100);//transmit ADAS data to screen
 			CalADASData(&ADAS_dev, ADASHexBuf);
 			LED_ADAS_TOGGLE();
 			#ifdef LDW

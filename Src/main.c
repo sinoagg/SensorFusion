@@ -92,6 +92,7 @@ int main(void)
   MX_CAN2_Init();
   MX_CAN3_Init();
 	MX_TIM3_Init(AEB_CAN_TX_TIME);
+	MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_DAC_Init();
   /* USER CODE BEGIN 2 */

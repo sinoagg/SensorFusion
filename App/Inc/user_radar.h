@@ -3,6 +3,10 @@
 
 #include "stm32f4xx_hal.h"
 
+#define ARS408 1
+#define EMRR 0
+/*------Radar type------*/
+#define RADAR_TYPE ARS408
 
 typedef struct 
 {
