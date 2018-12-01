@@ -158,11 +158,11 @@ void StartDefaultTask(void const *argument)
 	{
 		if(HAL_GPIO_ReadPin(DIALING1_GPIO_Port, DIALING1_Pin))
 			LED_GYRO_TOGGLE();
-		if(HAL_GPIO_ReadPin(DIALING1_GPIO_Port, DIALING1_Pin))
+		if(HAL_GPIO_ReadPin(DIALING2_GPIO_Port, DIALING2_Pin))
 			HAL_GPIO_TogglePin(LED5_GPIO_Port, LED5_Pin);
-		if(HAL_GPIO_ReadPin(DIALING1_GPIO_Port, DIALING1_Pin))
+		if(HAL_GPIO_ReadPin(DIALING3_GPIO_Port, DIALING3_Pin))
 			LED_VEHICLE_TOGGLE();
-		if(HAL_GPIO_ReadPin(DIALING1_GPIO_Port, DIALING1_Pin))
+		if(HAL_GPIO_ReadPin(DIALING4_GPIO_Port, DIALING4_Pin))
 			HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
 		
 		if (AEB_CAN_TxReady == 1)
