@@ -9,4 +9,5 @@
 *.dep
 *.Bak
 *.lst
+*.TMP
 JLinkLog.txt

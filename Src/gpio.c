@@ -100,6 +100,13 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, VALVE_FRONT_Pin|VALVE_REAR_Pin, GPIO_PIN_SET);
 
+	/*Configure GPIO pins : PDPin * 4 */
+  GPIO_InitStruct.Pin = DIALING1_Pin|DIALING2_Pin|DIALING3_Pin|DIALING4_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PEPin PEPin PEPin PEPin 
                            PEPin */
   GPIO_InitStruct.Pin = BUZZER_Pin|LED3_Pin|LED4_Pin|LED5_Pin 

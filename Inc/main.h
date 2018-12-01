@@ -58,6 +58,14 @@
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
+#define DIALING1_Pin GPIO_PIN_4
+#define DIALING1_GPIO_Port GPIOD
+#define DIALING2_Pin GPIO_PIN_5
+#define DIALING2_GPIO_Port GPIOD
+#define DIALING3_Pin GPIO_PIN_6
+#define DIALING3_GPIO_Port GPIOD
+#define DIALING4_Pin GPIO_PIN_7
+#define DIALING4_GPIO_Port GPIOD
 
 #define BUZZER_Pin GPIO_PIN_2
 #define BUZZER_GPIO_Port GPIOE

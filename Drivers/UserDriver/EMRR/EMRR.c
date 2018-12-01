@@ -36,7 +36,7 @@ uint8_t EMRR_RadarRxComplete;
 /** 
  * @brief  Init of EMRR
  * @note   config can & filter(mask mode)
- * @param  *hcan: using can2
+ * @param  *hcan: using can3
  * @retval 0 for ok
  */
 uint8_t EMRR_Init(CAN_HandleTypeDef *hcan)
@@ -48,10 +48,10 @@ uint8_t EMRR_Init(CAN_HandleTypeDef *hcan)
 	CAN_FilterTypeDef MW_RadarCANFilter = {
 			EMRR_OBJ_ADDR << 5, 0,
 			0xFFC0 << 5, 0,
-			CAN_FILTER_FIFO1, 14, CAN_FILTERMODE_IDMASK, CAN_FILTERSCALE_32BIT, ENABLE, 14};
+			CAN_FILTER_FIFO0, 1, CAN_FILTERMODE_IDMASK, CAN_FILTERSCALE_32BIT, ENABLE, 14};
 	HAL_CAN_ConfigFilter(hcan, &MW_RadarCANFilter);
 	HAL_CAN_Start(hcan);
-	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
+	HAL_CAN_ActivateNotification(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
 
 	return 0;
 }
