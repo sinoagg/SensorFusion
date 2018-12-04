@@ -3,7 +3,7 @@
 <title>Static Call Graph - [SensorFusion\SensorFusion.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image SensorFusion\SensorFusion.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Sat Dec 01 17:01:33 2018
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Tue Dec 04 11:04:32 2018
 <BR><P>
 <H3>Maximum Stack Usage =        312 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -937,7 +937,6 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PeriodElapsedCallback
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_RxFifo1MsgPendingCallback
 <LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_RxFifo0MsgPendingCallback
-<LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartDefaultTask
 <LI><a href="#[74]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartADAS_CommTask
 </UL>
 
@@ -1312,7 +1311,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[6a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[eb]"></a>MX_FREERTOS_Init</STRONG> (Thumb, 264 bytes, Stack size 144 bytes, thread.o(i.MX_FREERTOS_Init))
+<P><STRONG><a name="[eb]"></a>MX_FREERTOS_Init</STRONG> (Thumb, 272 bytes, Stack size 144 bytes, thread.o(i.MX_FREERTOS_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 312<LI>Call Chain = MX_FREERTOS_Init &rArr; osThreadCreate &rArr; xTaskCreate &rArr; pvPortMalloc &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ARS_Init
@@ -1392,7 +1391,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[78]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartCAN_AEBS1_TX_Task
 </UL>
 
-<P><STRONG><a name="[74]"></a>StartADAS_CommTask</STRONG> (Thumb, 84 bytes, Stack size 0 bytes, thread.o(i.StartADAS_CommTask))
+<P><STRONG><a name="[74]"></a>StartADAS_CommTask</STRONG> (Thumb, 92 bytes, Stack size 0 bytes, thread.o(i.StartADAS_CommTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = StartADAS_CommTask &rArr; CalADASData &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DispADASData
@@ -1421,7 +1420,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> thread.o(.constdata)
 </UL>
-<P><STRONG><a name="[77]"></a>StartCAN_XBR_TX_Task</STRONG> (Thumb, 266 bytes, Stack size 0 bytes, thread.o(i.StartCAN_XBR_TX_Task))
+<P><STRONG><a name="[77]"></a>StartCAN_XBR_TX_Task</STRONG> (Thumb, 370 bytes, Stack size 0 bytes, thread.o(i.StartCAN_XBR_TX_Task))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = StartCAN_XBR_TX_Task &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
@@ -1429,11 +1428,10 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> thread.o(.constdata)
 </UL>
-<P><STRONG><a name="[73]"></a>StartDefaultTask</STRONG> (Thumb, 102 bytes, Stack size 0 bytes, thread.o(i.StartDefaultTask))
+<P><STRONG><a name="[73]"></a>StartDefaultTask</STRONG> (Thumb, 48 bytes, Stack size 0 bytes, thread.o(i.StartDefaultTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = StartDefaultTask &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
-<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_TogglePin
 <LI><a href="#[fb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> thread.o(.constdata)
@@ -1446,7 +1444,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> thread.o(.constdata)
 </UL>
-<P><STRONG><a name="[76]"></a>StartRadarCalcTask</STRONG> (Thumb, 1174 bytes, Stack size 64 bytes, thread.o(i.StartRadarCalcTask))
+<P><STRONG><a name="[76]"></a>StartRadarCalcTask</STRONG> (Thumb, 1258 bytes, Stack size 64 bytes, thread.o(i.StartRadarCalcTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = StartRadarCalcTask &rArr; osSemaphoreWait &rArr; xQueueGenericReceive &rArr; vTaskPlaceOnEventList &rArr; prvAddCurrentTaskToDelayedList &rArr; vListInsert
 </UL>
 <BR>[Calls]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dsub

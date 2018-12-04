@@ -2,6 +2,8 @@
 #include "vehicle.h"
 #include "user_adas.h"
 
+uint8_t adas_switch = OFF;
+
 extern DAC_HandleTypeDef hdac;
 uint8_t crashWarningLv = WARNING_NONE;
 float TimetoCrash_g;
