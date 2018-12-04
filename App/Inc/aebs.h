@@ -14,8 +14,6 @@
 #define LOW_WARNING_TIME 4.8f
 #define MID_WARNING_TIME 4.5f
 #define HIGH_WARNING_TIME 4.2f
-/*------ADAS switch----*/
-#define ADAS_COMM 1
 
 #define KSHINE 1
 #define KY 0
@@ -57,6 +55,9 @@
 /* ---Turning_Collision flag values---*/
 #define TURNING_COLLISION_WARNING 1
 #define TURNING_COLLISION_NONE 0
+
+/*------ADAS switch----*/
+extern uint8_t adas_switch;
 
 
 typedef struct
