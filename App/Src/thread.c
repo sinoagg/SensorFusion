@@ -159,10 +159,25 @@ void StartDefaultTask(void const *argument)
 //			LED_VEHICLE_TOGGLE();
 //		if(HAL_GPIO_ReadPin(DIALING1_GPIO_Port, DIALING1_Pin))
 //			HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
+		
+		
+		/*---adas_switch read---*/
 		if(HAL_GPIO_ReadPin(DIALING1_GPIO_Port, DIALING1_Pin))
 			adas_switch = ON;
 		else
 			adas_switch = OFF;
+		/*---aebs_switch read---*/
+		if(HAL_GPIO_ReadPin(DIALING2_GPIO_Port, DIALING2_Pin))
+			adas_switch = ON;
+		else
+			adas_switch = OFF;
+		
+		
+		if(HAL_GPIO_ReadPin(DIALING1_GPIO_Port, DIALING1_Pin))
+		{
+			
+		}
+
 		
 		if (AEB_CAN_TxReady == 1)
 		{

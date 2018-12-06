@@ -58,6 +58,8 @@
 
 /*------ADAS switch----*/
 extern uint8_t adas_switch;
+/*------AEBS switch----*/
+extern uint8_t aebs_switch;
 
 
 typedef struct

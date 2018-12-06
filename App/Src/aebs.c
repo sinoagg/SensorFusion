@@ -3,6 +3,7 @@
 #include "user_adas.h"
 
 uint8_t adas_switch = OFF;
+uint8_t aebs_switch = OFF;
 
 extern DAC_HandleTypeDef hdac;
 uint8_t crashWarningLv = WARNING_NONE;
@@ -65,15 +66,18 @@ void DisableAEBS(AEBS_Status *pAEBS_Status)
 
 void EnableAEBS(float ttc, uint8_t warningLv)
 {
-	if (vAEBS_Status.valveStatus == OFF)
-		vAEBS_Status.valveStatus = ON;
-	#if VEHICLE_MODEL != DONGFENG
-	ValveCalc(&hdac, ttc); //计算刹车强度
-	if (HAL_GPIO_ReadPin(VALVE_ENABLE_GPIO_Port, VALVE_ENABLE_Pin) != GPIO_PIN_SET)
-		VALVE_EN(); //使能刹车电源
-	#else
+	if(aebs_switch == ON)
+	{
+		if (vAEBS_Status.valveStatus == OFF)
+			vAEBS_Status.valveStatus = ON;
+		#if VEHICLE_MODEL != DONGFENG
+		ValveCalc(&hdac, ttc); //计算刹车强度
+		if (HAL_GPIO_ReadPin(VALVE_ENABLE_GPIO_Port, VALVE_ENABLE_Pin) != GPIO_PIN_SET)
+			VALVE_EN(); //使能刹车电源
+		#else
 
-	#endif
+		#endif
+	}
 }
 
 /** 
