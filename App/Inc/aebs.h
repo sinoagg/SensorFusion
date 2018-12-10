@@ -26,7 +26,7 @@
 #define LANEWIDTH 1.5f
 #define MAX_DECELARATION 0.4 * 9.8f
 #define DELAY_TIME 0.4f
-#define LIMIT_RANGE 200 //À×´ïÌ½²â·¶Î§
+#define LIMIT_RANGE 200 
 
 #define CAN_READ_VEHICLE 1 //Vehicle Speed & Switch
 #define AEB_CAN_TX_TIME 50 //CAN Bus 50ms interval
@@ -44,7 +44,7 @@
 #define OBJECT_NOT_DETECTED 0
 #define OBJECT_DETECTED 1
 
-#define INVADE_LANE_TIME_THRESHOLD 5.0f
+#define ENTER_LANE_TIME_THRESHOLD 5.0f
 
 #define ON 1
 #define OFF 0
@@ -56,11 +56,14 @@
 #define TURNING_COLLISION_WARNING 1
 #define TURNING_COLLISION_NONE 0
 
+#define TURNING_WHEEL_TH 0.5f
+
 /*------ADAS switch----*/
 extern uint8_t adas_switch;
 /*------AEBS switch----*/
 extern uint8_t aebs_switch;
-
+/*------AEBS quit switch----*/
+extern uint8_t aebs_quit;
 
 typedef struct
 {
@@ -75,12 +78,16 @@ extern uint8_t crashWarningLv;
 extern AEBS_Status vAEBS_Status;
 extern CAN_HandleTypeDef hcan2;
 
+void ClearAEBSStatus(void);
 void StopBuzzer(AEBS_Status *pAEBS_Status);
 void StartBuzzer(AEBS_Status *pAEBS_Status, uint8_t warningLv);
 void DisableAEBS(AEBS_Status *pAEBS_Status);
 void EnableAEBS(float ttc, uint8_t warningLv);
+void CorrectDistance(float speed, uint16_t *RadarRxBuf);
 uint8_t ValveCalc(DAC_HandleTypeDef *hdac, float ttc);
 uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl, float relSpeed, float range);
+uint8_t EnterLaneCalc(ObjectTypeDef obj, float *enterLaneTime);
+void ExecuteAEBS(AEBS_Status *pAEBS_Status, float ttc, uint8_t warningLv, uint8_t ADAS_Status);
 uint8_t PrePareAEBS1Data(CAN_HandleTypeDef *hcan, uint8_t brakeSysState, uint8_t warningLv, uint8_t objectDetected, float ttc, ObjectTypeDef *object);
 
 #endif

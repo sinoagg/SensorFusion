@@ -33,10 +33,11 @@
 
 osThreadId defaultTaskHandle;
 osThreadId PrepareCANDataHandle;
-osThreadId radarCalcHandle;
+osThreadId RadarCalcHandle;
 osThreadId ADAS_CommTaskHandle;
 osThreadId CAN_XBR_TaskHandle;
 osThreadId CAN_AEBS1_TaskHandle;
+osThreadId Quit_AEBS_TaskHandle;
 
 osSemaphoreId bSemPrepareCANDataSigHandle;
 osSemaphoreId bSemRadarCalcSigHandle;
@@ -50,6 +51,7 @@ void StartPrepareCANDataTask(void const *argument);
 void StartRadarCalcTask(void const *argument);
 void StartCAN_XBR_TX_Task(void const *argument);
 void StartCAN_AEBS1_TX_Task(void const *argument);
+void StartQuit_AEBS_Task(void const *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -106,13 +108,16 @@ void MX_FREERTOS_Init(void)
 
 	/* definition and creation of RadarCalc */
 	osThreadDef(RadarCalc, StartRadarCalcTask, osPriorityNormal, 0, 128);
-	radarCalcHandle = osThreadCreate(osThread(RadarCalc), NULL);
+	RadarCalcHandle = osThreadCreate(osThread(RadarCalc), NULL);
 	
 	osThreadDef(CAN_XBR_TX, StartCAN_XBR_TX_Task, osPriorityNormal, 0, 128);
 	osThreadId CAN_XBR_TaskHandle = osThreadCreate(osThread(CAN_XBR_TX), NULL);
-	
+		
 	osThreadDef(CAN_AEBS1_TX, StartCAN_AEBS1_TX_Task, osPriorityNormal, 0, 128);
 	osThreadId CAN_AEBS1_TaskHandle = osThreadCreate(osThread(CAN_AEBS1_TX), NULL);
+
+	osThreadDef(Quit_AEBS, StartQuit_AEBS_Task, osPriorityNormal, 0, 128);
+	osThreadId Quit_AEBS_TaskHandle = osThreadCreate(osThread(Quit_AEBS), NULL);
 
 	/* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
@@ -121,7 +126,6 @@ void MX_FREERTOS_Init(void)
 	/* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
 	/* USER CODE END RTOS_QUEUES */
-if(adas_switch == ON)
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE); //ADAS
 
 #if RADAR_TYPE == ARS408
@@ -131,7 +135,7 @@ if(adas_switch == ON)
 #endif
 
 #if CAN_READ_VEHICLE
-	CAN1_Init(&hcan2);
+	CAN1_Init(&hcan1);
 	Vehicle_CAN_Init(&hcan2);
 #endif
 	DisableAEBS(&vAEBS_Status);
@@ -168,16 +172,10 @@ void StartDefaultTask(void const *argument)
 			adas_switch = OFF;
 		/*---aebs_switch read---*/
 		if(HAL_GPIO_ReadPin(DIALING2_GPIO_Port, DIALING2_Pin))
-			adas_switch = ON;
+			aebs_switch = ON;
 		else
-			adas_switch = OFF;
-		
-		
-		if(HAL_GPIO_ReadPin(DIALING1_GPIO_Port, DIALING1_Pin))
-		{
-			
-		}
-
+			aebs_switch = OFF;
+	
 		
 		if (AEB_CAN_TxReady == 1)
 		{
@@ -334,6 +332,20 @@ void StartCAN_AEBS1_TX_Task(void const *argument)
 	}
 }
 
+void StartQuit_AEBS_Task(void const *argument)
+{
+	for (;;)
+	{
+		if(vehicle.speed == 0 || vehicleSwitch.gas || vehicleSwitch.brake || vehicleSwitch.left_turn || vehicleSwitch.right_turn)
+			aebs_quit = ON;
+		else if((vehicle.tw_angle > TURNING_WHEEL_TH) || (vehicle.tw_angle < -TURNING_WHEEL_TH))
+			aebs_quit = ON;
+		else
+			aebs_quit = OFF;
+		osDelay(50);
+	}
+}
+
 /* StartRadarCalcTask function */
 void StartRadarCalcTask(void const *argument)
 {
@@ -345,7 +357,6 @@ void StartRadarCalcTask(void const *argument)
 
 #if RADAR_TYPE == ARS408
 		uint8_t AEBS_Deal = 0;
-		uint8_t objectInLane = 0;
 		MW_RadarObjStatus RadarObjStatus;
 		if (RadarCAN_RxHeader.StdId == 0x60A) //read all messages before 60B, start calculate
 		{
@@ -353,9 +364,7 @@ void StartRadarCalcTask(void const *argument)
 			ARS_GetRadarObjStatus(RadarCANRxBuf, &RadarObjStatus);
 			if (RadarObjStatus.Obj_NofObjects == 0) //目标数量为0
 			{
-				crashWarningLv = WARNING_NONE;
-				TimetoCrash_g = 20;							//适配CAN线
-				RadarObject.MinRangeLong = 255; //适配CAN线
+				ClearAEBSStatus();
 				StopBuzzer(&vAEBS_Status);
 				DisableAEBS(&vAEBS_Status);
 			}
@@ -363,146 +372,118 @@ void StartRadarCalcTask(void const *argument)
 		else if (RadarCAN_RxHeader.StdId == 0x60B)
 		{
 			AEBS_Deal = 0;
-			if (vehicle.speed >= VEHICLE_SPEED_THRESHOLD && minRadarDistFlag!=0) //车速报警阈值,如果此值太大，制动后期低速时不再制动 并且是最近目标
+			if (vehicle.speed >= VEHICLE_SPEED_THRESHOLD && minRadarDistFlag != 0) //车速报警阈值,如果此值太大，制动后期低速时不再制动 并且是最近目标
 			{
-					minRadarDistFlag = 0; //最近目标状态位清零
-					//step1.发送到CAN1分析
-					uint16_t dist = 0;
-					uint8_t temp;
-					dist = (uint16_t)(((*(RadarCANRxBuf + 1)) << 5) | ((*(RadarCANRxBuf + 2)) >> 3));
-					dist -= ((vehicle.speed / 22) - 0.0) * 5;
-					*(RadarCANRxBuf + 1) = (dist >> 5);
-					temp = ((dist << 3) & 0xF8);
-					*(RadarCANRxBuf + 2) &= 0x07;
-					*(RadarCANRxBuf + 2) |= temp;
-					//暂时不用往DBC发数据
-					//HAL_CAN_AddTxMessage(&hcan1, &DBC_CAN_TxHeader, RadarCANRxBuf, &DBC_CAN_TxMailBox);
+				minRadarDistFlag = 0; //最近目标状态位清零
+				//step1.用车速修正目标距离
+				CorrectDistance(vehicle.speed, (uint16_t *)RadarCANRxBuf);
+				//暂时不用往DBC发数据
+				//HAL_CAN_AddTxMessage(&hcan1, &DBC_CAN_TxHeader, RadarCANRxBuf, &DBC_CAN_TxMailBox);
 
-					//step2.解析大陆雷达数据
-					ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral); //get closet obj data
-					uint16_t MinRangeLong = RadarGeneral[0].Obj_DistLong;
-					uint16_t MinRangeLat  = RadarGeneral[0].Obj_DistLat;
-					uint32_t relSpeedLong = RadarGeneral[0].Obj_VrelLong;
-					uint32_t relSpeedLat  = RadarGeneral[0].Obj_VrelLat;
-					float invadeLaneTime = 0.0f;
+				//step2.解析大陆雷达数据
+				ARS_GetRadarObjGeneral(RadarCANRxBuf, RadarGeneral); //get closet obj data
 
-					RadarObject.MinRangeLat  = 0.2f * (float)MinRangeLat  - 204.6f;	//get real range(latitude)
-					RadarObject.VrelLat = 0.25f * (float)relSpeedLat - 64;					//get real relative latitude  speed
-					if(RadarObject.VrelLat != 0)
-						invadeLaneTime = - RadarObject.MinRangeLat / RadarObject.VrelLat;
-					
-					if(RadarObject.MinRangeLat < LANEWIDTH && RadarObject.MinRangeLat > -LANEWIDTH)
-						objectInLane = 1;
-					else
-						objectInLane = 0;
-					//在本车道内 或 在旁边车道且在靠近本车道
-					if(objectInLane || (!objectInLane && (invadeLaneTime < INVADE_LANE_TIME_THRESHOLD) && (invadeLaneTime > 0)))
+				uint16_t MinRangeLong = RadarGeneral[0].Obj_DistLong;
+				uint16_t MinRangeLat = RadarGeneral[0].Obj_DistLat;
+				uint32_t relSpeedLong = RadarGeneral[0].Obj_VrelLong;
+				uint32_t relSpeedLat = RadarGeneral[0].Obj_VrelLat;
+				float enterLaneTime = 0.0f;
+				uint8_t objectInLane = 0;	//object in lane or entering lane
+
+				RadarObject.MinRangeLat = 0.2f * (float)MinRangeLat - 204.6f; //get real range(latitude)
+				RadarObject.VrelLat = 0.25f * (float)relSpeedLat - 64;				//get real relative latitude  speed
+
+				objectInLane = EnterLaneCalc(RadarObject, &enterLaneTime);
+
+				//在本车道内 或 在旁边车道且在靠近本车道
+				if (objectInLane)
+				{
+					RadarObject.MinRangeLong = 0.2f * (float)MinRangeLong - 500;																				 //get real range(longitude)
+					if (MinRangeLong != 0 && (RadarObject.MinRangeLong > 0) && (RadarObject.MinRangeLong) < LIMIT_RANGE) //calculate when dist is near enough
 					{
-						RadarObject.MinRangeLong = 0.2f * (float)MinRangeLong - 500; 		//get real range(longitude)
-						if ((RadarObject.MinRangeLong) < LIMIT_RANGE && (RadarObject.MinRangeLong > 0) && MinRangeLong != 0) //calculate when dist is near enough
+						RadarObject.VrelLong = 0.25f * (float)relSpeedLong - 128; //get real relative longitude speed
+						if (RadarObject.VrelLong < 0)
 						{
-							RadarObject.VrelLong = 0.25f * (float)relSpeedLong - 128; //get real relative longitude speed
-							if (RadarObject.VrelLong < 0)
+							TimetoCrash_g = -(float)RadarObject.MinRangeLong / RadarObject.VrelLong; //relative Velocity is minus
+							if (TimetoCrash_g < HIGH_WARNING_TIME)
 							{
-								TimetoCrash_g = -(float)RadarObject.MinRangeLong / RadarObject.VrelLong; //relative Velocity is minus
-								if (TimetoCrash_g < HIGH_WARNING_TIME)
+								AEBS_Deal = 1; //处理了报警
+								crashWarningLv = WARNING_HIGH;
+								if (adas_switch == ON)
 								{
-									AEBS_Deal = 1; //处理了报警
-									crashWarningLv = WARNING_HIGH;
-									if(adas_switch == ON)
+									if (ADAS_dev.crash_level > 0)
 									{
-										if (ADAS_dev.crash_level > 0)
-										{
-											StartBuzzer(&vAEBS_Status, WARNING_HIGH);
-											EnableAEBS(TimetoCrash_g, WARNING_HIGH);
-											vAEBS_Status.AEBStimes += 1;
-											vAEBS_Status.onlyRadarTimes = 20;
-										}//--normal crash
-										else if(vAEBS_Status.onlyRadarTimes > 0)
-										{
-											StartBuzzer(&vAEBS_Status, WARNING_HIGH);
-											EnableAEBS(TimetoCrash_g, WARNING_HIGH);
-										}//--adas.crash once, then Radar only 20 times
-										else if(vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
-										{
-											StartBuzzer(&vAEBS_Status, WARNING_HIGH);
-											EnableAEBS(TimetoCrash_g, WARNING_HIGH);
-										}//--range < 4 & adas.crashed, only Radar
-									}//--adas_switch == ON
-									else
+										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 1);
+									} //--normal crash
+									else if (vAEBS_Status.onlyRadarTimes > 0)
 									{
-										StartBuzzer(&vAEBS_Status, WARNING_HIGH);
-										EnableAEBS(TimetoCrash_g, WARNING_HIGH);
-									}//--adas_switch == OFF
-								}//--High_Warning
-								else if (TimetoCrash_g < MID_WARNING_TIME)
+										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
+									} //--adas.crash once, then Radar only 20 times
+									else if (vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
+									{
+										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
+									} //--range < 4 & adas.crashed, only Radar
+								}		//--adas_switch == ON
+								else
 								{
-									AEBS_Deal = 1; //处理了报警
-									crashWarningLv = WARNING_MID;
-									if(adas_switch == ON)
-									{
-										if (ADAS_dev.crash_level > 0)
-										{
-											StartBuzzer(&vAEBS_Status, WARNING_MID);
-											EnableAEBS(TimetoCrash_g, WARNING_MID);
-											vAEBS_Status.AEBStimes += 1;
-											vAEBS_Status.onlyRadarTimes = 20;
-										}//--normal crash
-										else if(vAEBS_Status.onlyRadarTimes > 0)
-										{
-											StartBuzzer(&vAEBS_Status, WARNING_MID);
-											EnableAEBS(TimetoCrash_g, WARNING_MID);
-										}//adas.crash once, then Radar only 20 times
-										else if(vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
-										{
-											StartBuzzer(&vAEBS_Status, WARNING_MID);
-											EnableAEBS(TimetoCrash_g, WARNING_MID);
-										}//--range < 4 & adas.crashed, only Radar
-									}//--adas_switch == ON
-									else
-									{
-										StartBuzzer(&vAEBS_Status, WARNING_MID);
-										EnableAEBS(TimetoCrash_g, WARNING_MID);
-									}//--adas_switch == OFF
-								}//--Mid_Warning
-								else if (TimetoCrash_g < LOW_WARNING_TIME)
+									ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
+								} //--adas_switch == OFF
+							}		//--High_Warning
+							else if (TimetoCrash_g < MID_WARNING_TIME)
+							{
+								AEBS_Deal = 1; //处理了报警
+								crashWarningLv = WARNING_MID;
+								if (adas_switch == ON)
 								{
-									AEBS_Deal = 1; //处理了报警
-									crashWarningLv = WARNING_LOW;
-									if(adas_switch == ON)
+									if (ADAS_dev.crash_level > 0)
 									{
-										if (ADAS_dev.crash_level > 0)
-										{
-											StartBuzzer(&vAEBS_Status, WARNING_LOW);
-											DisableAEBS(&vAEBS_Status);
-											vAEBS_Status.onlyRadarTimes = 20;
-										}//--normal crash
-										else if(vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
-										{
-											StartBuzzer(&vAEBS_Status, WARNING_LOW);
-											DisableAEBS(&vAEBS_Status);
-										}//--Range < 4, & adas.crashed, only Radar
-									}//--adas_switch == ON
-									else
+										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 1);
+									} //--normal crash
+									else if (vAEBS_Status.onlyRadarTimes > 0)
 									{
-										StartBuzzer(&vAEBS_Status, WARNING_LOW);
-										DisableAEBS(&vAEBS_Status);
-									}//--adas_switch == OFF
-								}//--Low_Warning
-							}
+										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
+									} //adas.crash once, then Radar only 20 times
+									else if (vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
+									{
+										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
+									} //--range < 4 & adas.crashed, only Radar
+								}		//--adas_switch == ON
+								else
+								{
+									ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
+								} //--adas_switch == OFF
+							}		//--Mid_Warning
+							else if (TimetoCrash_g < LOW_WARNING_TIME)
+							{
+								AEBS_Deal = 1; //处理了报警
+								crashWarningLv = WARNING_LOW;
+								if (adas_switch == ON)
+								{
+									if (ADAS_dev.crash_level > 0)
+									{
+										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 1);
+									} //--normal crash
+									else if (vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
+									{
+										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
+									} //--Range < 4, & adas.crashed, only Radar
+								}		//--adas_switch == ON
+								else
+								{
+									ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
+								} //--adas_switch == OFF
+							}		//--Low_Warning
 						}
 					}
+				}
 			}
 			if (AEBS_Deal == 0) //没有处理报警
 			{
-				if(vAEBS_Status.AEBStimes > 3)
+				if (vAEBS_Status.AEBStimes > 3)
 					vAEBS_Status.AEBStimes -= 10;
-				if(vAEBS_Status.AEBStimes <= 3)
+				if (vAEBS_Status.AEBStimes <= 3)
 				{
-					crashWarningLv = WARNING_NONE;
-					TimetoCrash_g = 20;							//适配CAN线
-					RadarObject.MinRangeLong = 255; //适配CAN线
-					RadarObject.VrelLong = 0;
+					ClearAEBSStatus();
 					StopBuzzer(&vAEBS_Status);
 					DisableAEBS(&vAEBS_Status);
 				}

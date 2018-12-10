@@ -52,25 +52,26 @@
 #define GYRO_VEHICLE 0
 #define GYRO_MPU6050 1
 /*-------- define Gryoscope type ---------*/
-#define GYRO_TYPE GYRO_VEHICLE
+#define GYRO_TYPE GYRO_MPU6050
 
 typedef struct
 {
   uint8_t brake;
+	uint8_t gas;
   uint8_t right_turn;
   uint8_t left_turn;
 }VehicleSwitchTypeDef;
 
 typedef struct
 {
-	float tw_angle;	//turn wheel
-	uint8_t  tw_circle;	
-	uint8_t  tw_type;
+	float tw_angle; //turn wheel
+	uint8_t tw_circle;
+	uint8_t tw_type;
 	float yawRate;
 	float latAcc;	//latitude
-	float longAcc;//longitude
+	float longAcc; //longitude
 	uint8_t speed;
-}VehicleTypeDef;
+} VehicleTypeDef;
 
 extern VehicleSwitchTypeDef vehicleSwitch;
 extern VehicleTypeDef vehicle;

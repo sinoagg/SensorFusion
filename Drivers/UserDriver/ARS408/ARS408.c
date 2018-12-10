@@ -252,7 +252,7 @@ void ARS_GetRadarObjGeneral(uint8_t* pCANRxBuf, MW_RadarGeneral *pRadarGeneral)
 /** 
  * @brief  send VehicleSpeed to ARS408
  * @note   correction Radar in turning corners
- * @param  *hcan: can2(500kbps)
+ * @param  *hcan: can3(500kbps)
  * @param  VehicleSpeed: (km/h)
  * @retval None
  */
@@ -283,7 +283,7 @@ void ARS_SendVehicleSpeed(CAN_HandleTypeDef *hcan, uint16_t VehicleSpeed)
 /** 
  * @brief  send YawRate to ARS408
  * @note   correction Radar in turning corners
- * @param  *hcan: can2(500kbps)
+ * @param  *hcan: can3(500kbps)
  * @param  YawRate: (rad/s)
  * @retval None
  */
