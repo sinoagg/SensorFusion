@@ -19,6 +19,7 @@ extern CAN_RxHeaderTypeDef RadarCAN_RxHeader;
 extern CAN_TxHeaderTypeDef DBC_CAN_TxHeader;
 extern CAN_TxHeaderTypeDef AEB_CAN_TxHeader;
 
+uint8_t Gyro_CAN_Init(CAN_HandleTypeDef *hcan);
 uint8_t Vehicle_CAN_Init(CAN_HandleTypeDef *hcan);
 uint8_t CAN1_Init(CAN_HandleTypeDef *hcan);
 

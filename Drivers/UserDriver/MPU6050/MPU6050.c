@@ -56,3 +56,10 @@ float MPU_GetXAcc(uint8_t *pRxBuf)
 	
 	return XAcc;
 }
+
+float MPU_GetY(uint8_t *pRxBuf)
+{
+	float Y = 0.0;
+	Y = ((*(pRxBuf + 6))<<8 | (*(pRxBuf + 5))) /32768.0f * 180;
+	return Y;
+}

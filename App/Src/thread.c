@@ -121,7 +121,6 @@ void MX_FREERTOS_Init(void)
 	/* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
 	/* USER CODE END RTOS_QUEUES */
-if(adas_switch == ON)
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE); //ADAS
 
 #if RADAR_TYPE == ARS408
@@ -131,7 +130,7 @@ if(adas_switch == ON)
 #endif
 
 #if CAN_READ_VEHICLE
-	CAN1_Init(&hcan2);
+	Gyro_CAN_Init(&hcan1);
 	Vehicle_CAN_Init(&hcan2);
 #endif
 	DisableAEBS(&vAEBS_Status);
@@ -167,17 +166,18 @@ void StartDefaultTask(void const *argument)
 		else
 			adas_switch = OFF;
 		/*---aebs_switch read---*/
-		if(HAL_GPIO_ReadPin(DIALING2_GPIO_Port, DIALING2_Pin))
-			adas_switch = ON;
+		if(HAL_GPIO_ReadPin(DIALING4_GPIO_Port, DIALING4_Pin))
+			aebs_switch = ON;
 		else
-			adas_switch = OFF;
+			aebs_switch = OFF;
 		
 		
 		if(HAL_GPIO_ReadPin(DIALING1_GPIO_Port, DIALING1_Pin))
 		{
 			
 		}
-
+		
+		EnableAEBS(2.5f, WARNING_HIGH);
 		
 		if (AEB_CAN_TxReady == 1)
 		{
