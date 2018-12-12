@@ -3,6 +3,7 @@
 
 ## platform
  * FreeRTOS on STM32F413
+
 ## version
  * 20181212: added **dialing switch**
  * 20180920: Radar using CAN filter1, EMRR getting RadarData faster, Gyroscope in HighSensitivity
@@ -20,6 +21,7 @@
  * 20180522: ADAS, USART3
  * 20180521: CAN3
  * 20180514: test in ChongQing
+
 ## peripherals
 * CAN
     * CAN1 to send distance received from Radar(**DBC**)
