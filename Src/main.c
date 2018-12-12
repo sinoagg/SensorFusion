@@ -205,7 +205,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			static uint8_t i = 0;
 			//gyro read
 			#if GYRO_TYPE == GYRO_MPU6050
-      vehicle.yawRate = MPU_GetYawRate(YawCANRxBuf);
+      vehicle.yawRate = 3.14f/180.0f * MPU_GetYawRate(YawCANRxBuf);
 			vehicle.longAcc = MPU_GetXAcc(YawCANRxBuf);
 			vehicle.yawY = MPU_GetY(YawCANRxBuf);
 			if(i++>10)
