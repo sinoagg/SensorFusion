@@ -32,8 +32,8 @@
 #include "ARS408.h"
 #include "math.h"
 
-#define CONFIG_ARS408_RADAR  1
-#define CONFIG_ARS408_FILTER 1
+#define CONFIG_ARS408_RADAR  0
+#define CONFIG_ARS408_FILTER 0
 
 #define VEHICLE_CENTRE_LEN	10.0f
 #define VEHICLE_HALF_WIDTH	1.4f
@@ -291,7 +291,8 @@ void ARS_SendVehicleYaw(CAN_HandleTypeDef *hcan, float YawRate)
 {
 	uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
 	uint8_t CANTxBuf[2] = {0};
-	YawRate = YawRate /3.14f * 180;
+	
+	YawRate = YawRate /3.14f * 180.0f;
 	YawRate = (YawRate > 327.68f) ? 327.68f : YawRate;
 	YawRate = (YawRate < -327.68f) ? -327.68f : YawRate;
   uint16_t YawRate_int = ((YawRate + 327.68f) / 0.01f);     //offset -327.68, Res 0.01
