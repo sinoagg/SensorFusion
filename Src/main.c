@@ -202,11 +202,17 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		//Gyroscope
     if(GYRO_ADDR == VehicleCANRxHeader.ExtId)      //gyroscope ID
 		{
-			//start gyro semaphore
+			static uint8_t i = 0;
+			//gyro read
 			#if GYRO_TYPE == GYRO_MPU6050
       vehicle.yawRate = MPU_GetYawRate(YawCANRxBuf);
 			vehicle.longAcc = MPU_GetXAcc(YawCANRxBuf);
-			LED_GYRO_TOGGLE();
+			vehicle.yawY = MPU_GetY(YawCANRxBuf);
+			if(i++>10)
+			{
+				i = 0;
+				LED_GYRO_TOGGLE();
+			}
 			
 				#if RADAR_TYPE == ARS408
 				ARS_SendVehicleYaw(&hcan3, vehicle.yawRate);	//send vehicle yawRate to Radar

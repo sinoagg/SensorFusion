@@ -27,7 +27,25 @@ Project File Date:  12/06/2018
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 4 (build 422)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'SensorFusion'
-"SensorFusion\SensorFusion.axf" - 0 Error(s), 0 Warning(s).
+compiling user_can.c...
+compiling MPU6050.c...
+compiling vehicle.c...
+compiling ARS408.c...
+compiling aebs.c...
+..\App\Src\aebs.c(193): warning:  #177-D: variable "CAN_TxMailBox"  was declared but never referenced
+  	uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
+..\App\Src\aebs.c(286): warning:  #177-D: variable "CAN_TxMailBox"  was declared but never referenced
+  	uint32_t CAN_TxMailBox = CAN_TX_MAILBOX0;
+..\App\Src\aebs.c: 2 warnings, 0 errors
+compiling thread.c...
+..\App\Src\thread.c(374): warning:  #186-D: pointless comparison of unsigned integer with zero
+  			if (vehicle.speed >= 
+EHICLE_SPEED_THRESHOLD && minRadarDistFlag != 0) //车速报警阈值,如果此值太大，制动后期低速时不再制动 并且是最近目标
+..\App\Src\thread.c: 1 warning, 0 errors
+compiling main.c...
+linking...
+Program Size: Code=28928 RO-data=972 RW-data=392 ZI-data=18320  
+"SensorFusion\SensorFusion.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -45,7 +63,7 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.0
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:14
 </pre>
 </body>
 </html>

@@ -28,7 +28,7 @@
 #define GYRO_ADDR 0x18FEE0D8
 
 /*-------- define vehicle model ---------*/
-#define VEHICLE_MODEL DONGFENG
+#define VEHICLE_MODEL KINGLONG
 
 #if VEHICLE_MODEL == DONGFENG
 	#define VEHICLE_SPEED_ADDR	DONGFENG_VEHICLE_SPEED_ADDR
@@ -69,7 +69,8 @@ typedef struct
 	uint8_t tw_type;
 	float yawRate;
 	float latAcc;	//latitude
-	float longAcc; //longitude
+	float longAcc;//longitude
+	float yawY;
 	uint8_t speed;
 } VehicleTypeDef;
 

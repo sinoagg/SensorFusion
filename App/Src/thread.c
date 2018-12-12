@@ -135,7 +135,7 @@ void MX_FREERTOS_Init(void)
 #endif
 
 #if CAN_READ_VEHICLE
-	CAN1_Init(&hcan1);
+	Gyro_CAN_Init(&hcan1);
 	Vehicle_CAN_Init(&hcan2);
 #endif
 	DisableAEBS(&vAEBS_Status);
@@ -171,11 +171,10 @@ void StartDefaultTask(void const *argument)
 		else
 			adas_switch = OFF;
 		/*---aebs_switch read---*/
-		if(HAL_GPIO_ReadPin(DIALING2_GPIO_Port, DIALING2_Pin))
+		if(HAL_GPIO_ReadPin(DIALING4_GPIO_Port, DIALING4_Pin))
 			aebs_switch = ON;
 		else
 			aebs_switch = OFF;
-	
 		
 		if (AEB_CAN_TxReady == 1)
 		{

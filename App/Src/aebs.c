@@ -241,7 +241,7 @@ uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl, float relS
 	temp_checksum += 0x0C;//(VEHICLE_BRAKE_ADDR & 0xFF000000) >> 48;
 	CANTxBuf[7] = ((((temp_checksum >> 4) + temp_checksum) & 0x0F) << 4) | (message_counter & 0x0F);
 	
-	HAL_CAN_AddTxMessage(hcan, &CAN_TxXBRHeader, CANTxBuf, &CAN_TxMailBox);
+	//HAL_CAN_AddTxMessage(hcan, &CAN_TxXBRHeader, CANTxBuf, &CAN_TxMailBox);
 	return 0;
 }
 
@@ -294,6 +294,6 @@ uint8_t PrePareAEBS1Data(CAN_HandleTypeDef *hcan, uint8_t brakeSysState, uint8_t
 	CANTxBuf[5] = (uint8_t)(ttc / 0.05f);
 	CANTxBuf[6] = (uint8_t)object->MinRangeLong;
 	
-	HAL_CAN_AddTxMessage(hcan, &CAN_TxAEBS1Header, CANTxBuf, &CAN_TxMailBox);
+	//HAL_CAN_AddTxMessage(hcan, &CAN_TxAEBS1Header, CANTxBuf, &CAN_TxMailBox);
 	return 0;
 }

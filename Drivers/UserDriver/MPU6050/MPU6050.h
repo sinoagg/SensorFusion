@@ -13,6 +13,6 @@
 
 float MPU_GetYawRate(uint8_t *pRxBuf);
 float MPU_GetXAcc(uint8_t *pRxBuf);
-
+float MPU_GetY(uint8_t *pRxBuf);
 
 #endif
