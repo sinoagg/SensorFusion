@@ -85,9 +85,11 @@ void DisableAEBS(AEBS_Status *pAEBS_Status);
 void EnableAEBS(float ttc, uint8_t warningLv);
 void CorrectDistance(float speed, uint16_t *RadarRxBuf);
 uint8_t ValveCalc(DAC_HandleTypeDef *hdac, float ttc);
-uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl, float relSpeed, float range);
 uint8_t EnterLaneCalc(ObjectTypeDef obj, float *enterLaneTime);
-void ExecuteAEBS(AEBS_Status *pAEBS_Status, float ttc, uint8_t warningLv, uint8_t ADAS_Status);
+uint8_t ExecuteAEBS(uint8_t adas_crash_level, AEBS_Status *pAEBS_Status, float minRangeLong, float ttc, uint8_t warningLv);
+#if VEHICLE_MODEL == DONGFENG
+uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl, float relSpeed, float range);
 uint8_t PrePareAEBS1Data(CAN_HandleTypeDef *hcan, uint8_t brakeSysState, uint8_t warningLv, uint8_t objectDetected, float ttc, ObjectTypeDef *object);
+#endif
 
 #endif

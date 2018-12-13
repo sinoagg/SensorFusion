@@ -119,6 +119,19 @@ void EnableAEBS(float ttc, uint8_t warningLv)
 	}
 }
 
+uint8_t AEBS_Func(AEBS_Status *pAEBS_Status, float ttc, uint8_t warningLv, uint8_t ADAS_Status)
+{
+	StartBuzzer(pAEBS_Status, warningLv);
+	EnableAEBS(ttc, warningLv);
+	if(ADAS_Status == ON)
+	{
+		if(warningLv == WARNING_HIGH || warningLv == WARNING_MID)
+			pAEBS_Status->AEBStimes += 1;
+		pAEBS_Status->onlyRadarTimes = 20;
+	}
+	return 1;
+}
+
 /**
  * @brief  Execute AEBS
  * @note   
@@ -128,16 +141,29 @@ void EnableAEBS(float ttc, uint8_t warningLv)
  * @param  ADAS_Status: 1 for adas warning
  * @retval None
  */
-void ExecuteAEBS(AEBS_Status *pAEBS_Status, float ttc, uint8_t warningLv, uint8_t ADAS_Status)
+uint8_t ExecuteAEBS(uint8_t adas_crash_level, AEBS_Status *pAEBS_Status, float minRangeLong, float ttc, uint8_t warningLv)
 {
-	StartBuzzer(pAEBS_Status, warningLv);
-	EnableAEBS(ttc, warningLv);
-	if(ADAS_Status == 1)
+	uint8_t status = 0;
+	if (adas_switch == ON)
 	{
-		if(warningLv == WARNING_HIGH || warningLv == WARNING_MID)
-			pAEBS_Status->AEBStimes += 1;
-		pAEBS_Status->onlyRadarTimes = 20;
-	}
+		if (adas_crash_level > 0)
+		{
+			status = AEBS_Func(pAEBS_Status, ttc, warningLv, ON);
+		} //--normal crash
+		else if (pAEBS_Status->onlyRadarTimes > 0)
+		{
+			status = AEBS_Func(pAEBS_Status, ttc, warningLv, OFF);
+		} //adas.crash once, then Radar only 20 times
+		else if (pAEBS_Status->AEBStimes > 3 && minRangeLong < 4)
+		{
+			status = AEBS_Func(pAEBS_Status, ttc, warningLv, OFF);
+		} //--range < 4 & adas.crashed, only Radar
+	}		//--adas_switch == ON
+	else
+	{
+		status = AEBS_Func(pAEBS_Status, ttc, warningLv, OFF);
+	} //--adas_switch == OFF
+	return status;
 }
 
 /**
@@ -186,6 +212,7 @@ uint8_t ValveCalc(DAC_HandleTypeDef *hdac, float ttc)
  * @param  *hcan: 
  * @retval 0 for ok
  */
+#if VEHICLE_MODEL == DONGFENG
 uint16_t XAcc_int = 0;
 uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl, float relSpeed, float range)
 {
@@ -241,9 +268,10 @@ uint8_t XBRCalc(CAN_HandleTypeDef *hcan, float ttc, uint8_t XBR_Ctrl, float relS
 	temp_checksum += 0x0C;//(VEHICLE_BRAKE_ADDR & 0xFF000000) >> 48;
 	CANTxBuf[7] = ((((temp_checksum >> 4) + temp_checksum) & 0x0F) << 4) | (message_counter & 0x0F);
 	
-	//HAL_CAN_AddTxMessage(hcan, &CAN_TxXBRHeader, CANTxBuf, &CAN_TxMailBox);
+	HAL_CAN_AddTxMessage(hcan, &CAN_TxXBRHeader, CANTxBuf, &CAN_TxMailBox);
 	return 0;
 }
+#endif
 
 /**
  * @brief  Enter Lane Calculate
@@ -280,6 +308,7 @@ uint8_t EnterLaneCalc(ObjectTypeDef obj, float *pEnterLaneTime)
  * @param  *object: RadarObject
  * @retval 0 for OK
  */
+#if VEHICLE_MODEL == DONGFENG
 uint8_t PrePareAEBS1Data(CAN_HandleTypeDef *hcan, uint8_t brakeSysState, uint8_t warningLv, uint8_t objectDetected, float ttc, ObjectTypeDef *object)
 {
 	uint8_t CANTxBuf[8] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
@@ -294,6 +323,7 @@ uint8_t PrePareAEBS1Data(CAN_HandleTypeDef *hcan, uint8_t brakeSysState, uint8_t
 	CANTxBuf[5] = (uint8_t)(ttc / 0.05f);
 	CANTxBuf[6] = (uint8_t)object->MinRangeLong;
 	
-	//HAL_CAN_AddTxMessage(hcan, &CAN_TxAEBS1Header, CANTxBuf, &CAN_TxMailBox);
+	HAL_CAN_AddTxMessage(hcan, &CAN_TxAEBS1Header, CANTxBuf, &CAN_TxMailBox);
 	return 0;
 }
+#endif

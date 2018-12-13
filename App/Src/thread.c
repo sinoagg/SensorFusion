@@ -35,8 +35,10 @@ osThreadId defaultTaskHandle;
 osThreadId PrepareCANDataHandle;
 osThreadId RadarCalcHandle;
 osThreadId ADAS_CommTaskHandle;
+#if VEHICLE_MODEL == DONGFENG
 osThreadId CAN_XBR_TaskHandle;
 osThreadId CAN_AEBS1_TaskHandle;
+#endif
 osThreadId Quit_AEBS_TaskHandle;
 
 osSemaphoreId bSemPrepareCANDataSigHandle;
@@ -49,8 +51,10 @@ void StartDefaultTask(void const *argument);	 //always running
 void StartADAS_CommTask(void const *argument); //always running
 void StartPrepareCANDataTask(void const *argument);
 void StartRadarCalcTask(void const *argument);
+#if VEHICLE_MODEL == DONGFENG
 void StartCAN_XBR_TX_Task(void const *argument);
 void StartCAN_AEBS1_TX_Task(void const *argument);
+#endif
 void StartQuit_AEBS_Task(void const *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -110,11 +114,13 @@ void MX_FREERTOS_Init(void)
 	osThreadDef(RadarCalc, StartRadarCalcTask, osPriorityNormal, 0, 128);
 	RadarCalcHandle = osThreadCreate(osThread(RadarCalc), NULL);
 	
+	#if VEHICLE_MODEL == DONGFENG
 	osThreadDef(CAN_XBR_TX, StartCAN_XBR_TX_Task, osPriorityNormal, 0, 128);
 	osThreadId CAN_XBR_TaskHandle = osThreadCreate(osThread(CAN_XBR_TX), NULL);
 		
 	osThreadDef(CAN_AEBS1_TX, StartCAN_AEBS1_TX_Task, osPriorityNormal, 0, 128);
 	osThreadId CAN_AEBS1_TaskHandle = osThreadCreate(osThread(CAN_AEBS1_TX), NULL);
+	#endif
 
 	osThreadDef(Quit_AEBS, StartQuit_AEBS_Task, osPriorityNormal, 0, 128);
 	osThreadId Quit_AEBS_TaskHandle = osThreadCreate(osThread(Quit_AEBS), NULL);
@@ -182,16 +188,7 @@ void StartDefaultTask(void const *argument)
 			#if VEHICLE_MODEL == KINGLONG
 			HAL_CAN_AddTxMessage(&hcan2, &AEB_CAN_TxHeader, AEB_CAN_TxBuf, &AEB_CAN_TxMailBox);
 			#endif
-//			if(XBR_Flag == 0)
-//			{
-//				XBR_Flag = 1;
-//				XBRCalc(&hcan2, 0.5f, RadarObject.VrelLong, RadarObject.MinRangeLong);
-//			}
-//			else
-//			{
-//				XBR_Flag = 0;
-//				XBRCalc(&hcan2, 3.5f, RadarObject.VrelLong, RadarObject.MinRangeLong);
-//			}
+
 
 		}			
 		osDelay(50);
@@ -253,6 +250,7 @@ void StartPrepareCANDataTask(void const *argument)
 	/* USER CODE END StartPrepareCANDataTask */
 }
 
+#if VEHICLE_MODEL == DONGFENG
 void StartCAN_XBR_TX_Task(void const *argument)
 {
 	for (;;)
@@ -330,6 +328,7 @@ void StartCAN_AEBS1_TX_Task(void const *argument)
 		osDelay(50);
 	}
 }
+#endif
 
 void StartQuit_AEBS_Task(void const *argument)
 {
@@ -406,72 +405,19 @@ void StartRadarCalcTask(void const *argument)
 							TimetoCrash_g = -(float)RadarObject.MinRangeLong / RadarObject.VrelLong; //relative Velocity is minus
 							if (TimetoCrash_g < HIGH_WARNING_TIME)
 							{
-								AEBS_Deal = 1; //处理了报警
 								crashWarningLv = WARNING_HIGH;
-								if (adas_switch == ON)
-								{
-									if (ADAS_dev.crash_level > 0)
-									{
-										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 1);
-									} //--normal crash
-									else if (vAEBS_Status.onlyRadarTimes > 0)
-									{
-										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
-									} //--adas.crash once, then Radar only 20 times
-									else if (vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
-									{
-										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
-									} //--range < 4 & adas.crashed, only Radar
-								}		//--adas_switch == ON
-								else
-								{
-									ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
-								} //--adas_switch == OFF
-							}		//--High_Warning
+								AEBS_Deal = ExecuteAEBS(ADAS_dev.crash_level, &vAEBS_Status, RadarObject.MinRangeLong, TimetoCrash_g, crashWarningLv); //处理了报警
+							}//--High_Warning
 							else if (TimetoCrash_g < MID_WARNING_TIME)
 							{
-								AEBS_Deal = 1; //处理了报警
 								crashWarningLv = WARNING_MID;
-								if (adas_switch == ON)
-								{
-									if (ADAS_dev.crash_level > 0)
-									{
-										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 1);
-									} //--normal crash
-									else if (vAEBS_Status.onlyRadarTimes > 0)
-									{
-										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
-									} //adas.crash once, then Radar only 20 times
-									else if (vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
-									{
-										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
-									} //--range < 4 & adas.crashed, only Radar
-								}		//--adas_switch == ON
-								else
-								{
-									ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
-								} //--adas_switch == OFF
-							}		//--Mid_Warning
+								AEBS_Deal = ExecuteAEBS(ADAS_dev.crash_level, &vAEBS_Status, RadarObject.MinRangeLong, TimetoCrash_g, crashWarningLv); //处理了报警
+							}//--Mid_Warning
 							else if (TimetoCrash_g < LOW_WARNING_TIME)
 							{
-								AEBS_Deal = 1; //处理了报警
 								crashWarningLv = WARNING_LOW;
-								if (adas_switch == ON)
-								{
-									if (ADAS_dev.crash_level > 0)
-									{
-										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 1);
-									} //--normal crash
-									else if (vAEBS_Status.AEBStimes > 3 && RadarObject.MinRangeLong < 4)
-									{
-										ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
-									} //--Range < 4, & adas.crashed, only Radar
-								}		//--adas_switch == ON
-								else
-								{
-									ExecuteAEBS(&vAEBS_Status, TimetoCrash_g, crashWarningLv, 0);
-								} //--adas_switch == OFF
-							}		//--Low_Warning
+								AEBS_Deal = ExecuteAEBS(ADAS_dev.crash_level, &vAEBS_Status, RadarObject.MinRangeLong, TimetoCrash_g, crashWarningLv); //处理了报警
+							}//--Low_Warning
 						}
 					}
 				}
