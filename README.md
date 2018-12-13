@@ -5,6 +5,7 @@
  * FreeRTOS on STM32F413
 
 ## version
+ * 20181213: **AEBS** modular enhanced
  * 20181212: added **dialing switch**
  * 20180920: Radar using CAN filter1, EMRR getting RadarData faster, Gyroscope in HighSensitivity
  * 20180910: **gyro** can1/3, **ARS408** config & turning warning
